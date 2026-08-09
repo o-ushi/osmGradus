@@ -1,0 +1,3 @@
+"NSMotionUsageDescription" = "Lắc máy để nhanh chóng mở sổ từ vựng.";
+"NSMicrophoneUsageDescription" = "Dùng để ghi âm khi luyện nói.";
+"NSSpeechRecognitionUsageDescription" = "Nhận dạng giọng nói của Apple chuyển âm thanh đã ghi thành văn bản để luyện tập và chấm điểm. Âm thanh có thể được xử lý trên máy chủ Apple.";

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Nihongo con Teppeiの配信フィードがHTTP（非HTTPS）のみで提供されているため、
+  そのドメインに限定してcleartext通信を許可する。他の通信は既定どおりHTTPS必須。
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">nihongoconteppei.com</domain>
+    </domain-config>
+</network-security-config>

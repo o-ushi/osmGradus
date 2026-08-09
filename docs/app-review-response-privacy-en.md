@@ -1,0 +1,51 @@
+# Draft Reply to App Review (for Build 7 / Submission f0a0d124-caa3-477f-bfdf-071a25764779)
+
+Thank you for your feedback regarding Guidelines 5.1.1(i)/5.1.2(i) and Guideline 2.
+
+**Guidelines 5.1.1(i) / 5.1.2(i)**
+
+This app does send user data to a third-party AI service (Google Search, AI Mode, by Google LLC). An in-app disclosure-and-consent step for this was already present in the build under review.
+
+While investigating this rejection, I found the real gap: the Privacy Policy document linked from the app had not yet been updated to include the section describing this third-party AI data sharing (what is sent, to whom, and why), even though the in-app consent dialog already disclosed it. I have now updated the Privacy Policy document at the link below to include this section. I apologize for the oversight and for the repeated rejections this caused.
+
+No proprietary AI API or developer-run server is involved. Only if the user opts into the Layer V pronunciation check does the app open Google Search (AI Mode) in an external browser.
+
+Data sent to Google:
+- The 10 question texts, their readings, and target pronunciation expressions
+- Transcripts of the user's speech
+- Response-language and evaluation-format instructions
+
+Recorded audio itself is never sent. Transcripts may contain personal information the user spoke.
+
+Before every submission, the app discloses the data, the recipient ("Google LLC"), the purpose, and that the search may remain in browser/Google Account history — sending happens only if the user taps "Agree and send to Google." Canceling sends nothing and does not open the browser.
+
+Separately, transcribing recorded audio may involve the on-device speech-recognition provider's servers (Apple's Speech Recognition on iOS), depending on device/OS/settings. This is disclosed and consented to before first use, and consent can be withdrawn in Settings.
+
+Verify (fastest, no speech needed):
+1. Settings tab → Privacy & Data
+2. The "Pronunciation evaluation by Google AI" card shows the same data/recipient/purpose disclosure, viewable without recording anything
+
+Verify (full flow with the actual consent dialog):
+1. Launch screen → Layer V → tap the dice for a question
+2. Tap the mic; first time shows a consent screen for audio processing
+3. Say anything in Japanese (accuracy doesn't matter — any short sound is enough if ja-JP recognition returns non-empty text)
+4. Repeat for all 10 questions, then tap the send icon
+5. A consent screen listing what's sent to Google LLC appears; data is sent only after tapping "Agree and send to Google"
+
+Privacy Policy (viewable without a Google sign-in — link sharing is "Anyone with the link, Viewer"):
+https://docs.google.com/document/d/1ZFKiECg12-2mOJNLXP26TvfVtcnA_AfvbQJxT3knybo/edit?usp=sharing
+
+Settings > Privacy & Data also links to this policy and to Google's and Apple's privacy policies.
+
+**Guideline 2**
+
+Regarding Guideline 2, I have removed the references to Android from this build. The app's compiled strings no longer name a specific third-party platform; the on-device speech-recognition disclosure text now refers generically to "the device's built-in speech-recognition service" instead.
+
+---
+
+## Operational note (do not send anything below this line to Apple)
+
+- A copy-paste-ready plain-text version (no markdown, no this note) is at `docs/app-review-response-privacy-en-send.txt`. Open that file directly and select-all/copy from it — do not copy from this `.md` file or from chat, to avoid clipboard corruption.
+- Post the text above as-is as the Resolution Center reply to the **current rejection (Submission ID: f0a0d124-caa3-477f-bfdf-071a25764779)**, after Build 7 has finished processing and is selected as the build under review.
+- Also paste the same text into "App Review Information > Notes" (the Notes field may reset per submission, so keeping it in both places means one surviving if the other gets wiped).
+- **Important**: after sending this reply, do not withdraw the submission before hearing back from Apple (approval or another rejection). Withdrawing a submission mid-review has previously caused an in-app explanation to not reach the reviewer — don't repeat that. If a new build turns out to be unavoidable, re-paste this text into Notes again before withdrawing.

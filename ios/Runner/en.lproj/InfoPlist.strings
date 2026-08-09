@@ -1,0 +1,3 @@
+"NSMotionUsageDescription" = "Shake your device to quickly open the vocabulary deck.";
+"NSMicrophoneUsageDescription" = "Used to record your speech during practice.";
+"NSSpeechRecognitionUsageDescription" = "Apple Speech Recognition converts recorded speech into text for practice and scoring. Audio may be processed on Apple servers.";

@@ -1,0 +1,3 @@
+"NSMotionUsageDescription" = "端末をシェイクすると単語帳をすぐに開けます。";
+"NSMicrophoneUsageDescription" = "発話練習の録音に使用します。";
+"NSSpeechRecognitionUsageDescription" = "録音した発話をAppleの音声認識でテキストに変換し、練習・採点に使用します。音声はAppleのサーバーで処理される場合があります。";

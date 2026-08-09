@@ -1,0 +1,242 @@
+import 'dart:convert';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:osm_gradus/models/pronunciation_exercise.dart';
+import 'package:osm_gradus/models/saved_vocabulary_check.dart';
+import 'package:osm_gradus/models/topic_category.dart';
+import 'package:osm_gradus/models/vocabulary_level.dart';
+import 'package:osm_gradus/services/dashboard_advice_storage.dart';
+import 'package:osm_gradus/services/gradus_backup.dart';
+import 'package:osm_gradus/services/long_article_service.dart';
+import 'package:osm_gradus/services/pronunciation_exercise_service.dart';
+import 'package:osm_gradus/services/topic_service.dart';
+import 'package:osm_gradus/services/vocabulary_check_storage.dart';
+import 'package:osm_gradus/services/vocabulary_service.dart';
+
+void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
+  test('buildExportJsonが書き出したpreferencesを、importFromContentが書き戻す', () async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('osmGradus.language', 'en');
+    await prefs.setDouble('osm_gradus.tts.speechRate', 0.6);
+    await prefs.setBool('someFeature.enabled', true);
+    await prefs.setInt('layer4.calibration.sampleCount', 3);
+    await prefs.setStringList('topics.imported.daily', ['お題A', 'お題B']);
+
+    final exported = await GradusBackup.buildExportJson();
+
+    // 別端末への復元を模して、SharedPreferencesを空にしてからインポートする。
+    SharedPreferences.setMockInitialValues({});
+
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await SharedPreferences.getInstance();
+    expect(restored.getString('osmGradus.language'), 'en');
+    expect(restored.getDouble('osm_gradus.tts.speechRate'), 0.6);
+    expect(restored.getBool('someFeature.enabled'), true);
+    expect(restored.getInt('layer4.calibration.sampleCount'), 3);
+    expect(restored.getStringList('topics.imported.daily'), ['お題A', 'お題B']);
+  });
+
+  test('単語帳エントリのlevelを保ったままエクスポート/インポートできる', () async {
+    await VocabularyService().addEntry(
+      '概念',
+      'khái niệm',
+      reading: 'がいねん',
+      level: VocabularyLevel.n1,
+    );
+
+    final exported = await GradusBackup.buildExportJson();
+
+    // 別端末への復元を模して、SharedPreferencesを空にしてからインポートする。
+    SharedPreferences.setMockInitialValues({});
+
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await VocabularyService().loadEntries();
+    expect(restored, hasLength(1));
+    expect(restored.single.level, VocabularyLevel.n1);
+  });
+
+  test('単語帳エントリの例文をエクスポート/インポートできる', () async {
+    await VocabularyService().addEntry(
+      '概念',
+      'khái niệm',
+      reading: 'がいねん',
+      exampleSentence: 'この概念は重要だ。',
+      level: VocabularyLevel.n1,
+    );
+
+    final exported = await GradusBackup.buildExportJson();
+    final decoded = jsonDecode(exported) as Map<String, dynamic>;
+    final vocabulary = decoded['vocabulary'] as List<dynamic>;
+    expect(vocabulary, hasLength(1));
+    expect(vocabulary.single['exampleSentence'], 'この概念は重要だ。');
+
+    SharedPreferences.setMockInitialValues({});
+
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await VocabularyService().loadEntries();
+    expect(restored, hasLength(1));
+    expect(restored.single.exampleSentence, 'この概念は重要だ。');
+  });
+
+  test('インポート時、取り込み元には無いローカル限定の単語帳エントリは消えない'
+      '（差分マージ結果を末尾のpreferences復元が生の値で上書きしていた回帰）', () async {
+    // 別端末側の単語（インポート元にしかない語）だけを含むエクスポートを用意する。
+    await VocabularyService().addEntry('B', 'b');
+    final sourceExport = await GradusBackup.buildExportJson();
+
+    // インポート先はBを含まず、ローカル限定のAだけを持つ状態にする。
+    SharedPreferences.setMockInitialValues({});
+    await VocabularyService().addEntry('A', 'a');
+
+    await GradusBackup.importFromContent(sourceExport);
+
+    final words = (await VocabularyService().loadEntries())
+        .map((e) => e.word)
+        .toSet();
+    expect(words, {'A', 'B'});
+  });
+
+  test('preferencesを含まないバックアップ（旧形式）でも例外を出さずインポートできる', () async {
+    final legacy = jsonEncode({'version': 1, 'scoringResults': <dynamic>[]});
+
+    await expectLater(GradusBackup.importFromContent(legacy), completes);
+  });
+
+  test('単語テスト履歴（レイヤーⅠ）をエクスポート/インポートできる', () async {
+    await VocabularyCheckStorage().save(
+      SavedVocabularyCheck(
+        id: 'check-1',
+        createdAt: DateTime(2026, 1, 1),
+        sessionId: 'session-1',
+        questions: const [],
+      ),
+    );
+
+    final exported = await GradusBackup.buildExportJson();
+    SharedPreferences.setMockInitialValues({});
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await VocabularyCheckStorage().loadAll();
+    expect(restored, hasLength(1));
+    expect(restored.single.id, 'check-1');
+    expect(restored.single.sessionId, 'session-1');
+  });
+
+  test('レイヤーⅡ〜Ⅳの取り込み済みお題をエクスポート/インポートできる', () async {
+    await TopicService().importTopics(TopicCategory.daily, ['お題A', 'お題B']);
+    await TopicService().importTopics(TopicCategory.situational, ['状況A']);
+
+    final exported = await GradusBackup.buildExportJson();
+    SharedPreferences.setMockInitialValues({});
+    await GradusBackup.importFromContent(exported);
+
+    expect(await TopicService().loadImported(TopicCategory.daily), [
+      'お題A',
+      'お題B',
+    ]);
+    expect(await TopicService().loadImported(TopicCategory.situational), [
+      '状況A',
+    ]);
+  });
+
+  test('レイヤーⅤの取り込み済み読上げ文をエクスポート/インポートでき、組み込み25文は含まれない', () async {
+    await PronunciationExerciseService().importExercises([
+      const PronunciationExercise(
+        id: 'ex-1',
+        category: PronunciationCategory.tsu,
+        sentence: '文A',
+        reading: 'ぶんえー',
+        targetExpressions: ['文A'],
+        vietnameseHint: 'hint',
+        evaluationPoint: 'point',
+        source: PronunciationExerciseSource.imported,
+      ),
+    ]);
+
+    final exported = await GradusBackup.buildExportJson();
+    final decoded = jsonDecode(exported) as Map<String, dynamic>;
+    expect(decoded['pronunciationExercises'], hasLength(1));
+
+    SharedPreferences.setMockInitialValues({});
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await PronunciationExerciseService().loadAllImported();
+    expect(restored, hasLength(1));
+    expect(restored.single.id, 'ex-1');
+  });
+
+  test('ダッシュボードの総合アドバイスをエクスポート/インポートできる', () async {
+    await DashboardAdviceStorage().save('次は敬語のバリエーションを増やしましょう。');
+
+    final exported = await GradusBackup.buildExportJson();
+    SharedPreferences.setMockInitialValues({});
+    await GradusBackup.importFromContent(exported);
+
+    expect(await DashboardAdviceStorage().load(), '次は敬語のバリエーションを増やしましょう。');
+  });
+
+  test('インポート先に既にアドバイスがある場合は上書きしない', () async {
+    await DashboardAdviceStorage().save('元の端末のアドバイス');
+    final exported = await GradusBackup.buildExportJson();
+
+    // インポート先には別のアドバイスが既に保存されている状態を模す。
+    SharedPreferences.setMockInitialValues({});
+    await DashboardAdviceStorage().save('インポート先の既存アドバイス');
+
+    await GradusBackup.importFromContent(exported);
+
+    expect(await DashboardAdviceStorage().load(), 'インポート先の既存アドバイス');
+  });
+
+  test('レイヤーⅠの長文一覧（お気に入り・生成メタ込み）をエクスポート/インポートできる', () async {
+    final added = await LongArticleService().addArticle(
+      title: '旅行',
+      body: '週末に旅行に行きました。',
+      generationKeyword: '旅行',
+      generationJlptLevel: 'n2',
+      generationLength: 400,
+    );
+    await LongArticleService().toggleFavorite(added.single.id);
+
+    final exported = await GradusBackup.buildExportJson();
+    final decoded = jsonDecode(exported) as Map<String, dynamic>;
+    final longArticles = decoded['longArticles'] as List<dynamic>;
+    expect(longArticles, hasLength(1));
+
+    SharedPreferences.setMockInitialValues({});
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await LongArticleService().loadArticles();
+    expect(restored, hasLength(1));
+    expect(restored.single.title, '旅行');
+    expect(restored.single.body, '週末に旅行に行きました。');
+    expect(restored.single.isFavorite, isTrue);
+    expect(restored.single.generationKeyword, '旅行');
+    expect(restored.single.generationJlptLevel, 'n2');
+    expect(restored.single.generationLength, 400);
+  });
+
+  test('インポート時、取り込み元には無いローカル限定の長文は消えない', () async {
+    await LongArticleService().addArticle(title: 'B', body: '取り込み元の長文');
+    final sourceExport = await GradusBackup.buildExportJson();
+
+    SharedPreferences.setMockInitialValues({});
+    await LongArticleService().addArticle(title: 'A', body: 'ローカル限定の長文');
+
+    await GradusBackup.importFromContent(sourceExport);
+
+    final titles = (await LongArticleService().loadArticles())
+        .map((e) => e.title)
+        .toSet();
+    expect(titles, {'A', 'B'});
+  });
+}
