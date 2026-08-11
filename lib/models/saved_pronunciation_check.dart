@@ -72,6 +72,8 @@ class SavedPronunciationCheck {
     this.source = 'short',
     this.longArticleId,
     this.longArticleTitle,
+    this.questionPromptId,
+    this.questionPromptBody,
   });
 
   final String id;
@@ -98,7 +100,8 @@ class SavedPronunciationCheck {
   final String? unparsedResponse;
 
   /// レイヤーⅤの出所。`'short'`＝短文10問（既定、旧データも含む）、
-  /// `'long'`＝長文一覧からランダムに選んだ長文の音読（Step 7で追加）。
+  /// `'long'`＝長文一覧からランダムに選んだ長文の音読、
+  /// `'questionPrompt'`＝問題文に関連した単文10問の音読（Step 5・6）。
   final String source;
 
   /// [source]が`'long'`のときに音読した[LongArticle.id]。
@@ -108,6 +111,14 @@ class SavedPronunciationCheck {
 
   /// [source]が`'long'`のときに音読した長文のタイトル（保存時点の複製）。
   final String? longArticleTitle;
+
+  /// [source]が`'questionPrompt'`のときの対象[QuestionPrompt.id]。
+  /// 対象の問題文が後で削除されても記録自体は残るため、[longArticleId]と
+  /// 同じく削除前のIDのまま残り続ける（表示は[questionPromptBody]を優先する）。
+  final String? questionPromptId;
+
+  /// [source]が`'questionPrompt'`のときの対象問題文の本文（保存時点の複製）。
+  final String? questionPromptBody;
 
   /// 新形式（セッション+評価）のデータを持たない旧形式レコードかどうか。
   /// 新形式で解析に失敗した記録（[sessionId]はあるが[evaluation]がnull）は
@@ -172,6 +183,34 @@ class SavedPronunciationCheck {
     );
   }
 
+  /// 問題文一覧から選んだ1件への口頭回答（レイヤーⅤ「問題文一覧から選ぶ」、
+  /// Step 6）から新形式レコードを組み立てる。[questions]は持たない
+  /// （[fromLongReading]と同じく10問の枠組みが当てはまらないため）。
+  /// 解析に失敗した場合は[evaluation]をnullにし、[unparsedResponse]に原文を渡す。
+  factory SavedPronunciationCheck.fromQuestionPrompt({
+    required String id,
+    required String sessionId,
+    required DateTime createdAt,
+    required String questionPromptId,
+    required String questionPromptBody,
+    required String transcript,
+    PronunciationEvaluation? evaluation,
+    String? unparsedResponse,
+  }) {
+    return SavedPronunciationCheck(
+      id: id,
+      createdAt: createdAt,
+      transcript: transcript,
+      sessionId: sessionId,
+      questions: null,
+      evaluation: evaluation,
+      unparsedResponse: unparsedResponse,
+      source: 'questionPrompt',
+      questionPromptId: questionPromptId,
+      questionPromptBody: questionPromptBody,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'createdAt': createdAt.toIso8601String(),
@@ -184,6 +223,8 @@ class SavedPronunciationCheck {
     if (source != 'short') 'source': source,
     if (longArticleId != null) 'longArticleId': longArticleId,
     if (longArticleTitle != null) 'longArticleTitle': longArticleTitle,
+    if (questionPromptId != null) 'questionPromptId': questionPromptId,
+    if (questionPromptBody != null) 'questionPromptBody': questionPromptBody,
   };
 
   factory SavedPronunciationCheck.fromJson(Map<String, dynamic> json) {
@@ -198,6 +239,8 @@ class SavedPronunciationCheck {
       source: json['source'] as String? ?? 'short',
       longArticleId: json['longArticleId'] as String?,
       longArticleTitle: json['longArticleTitle'] as String?,
+      questionPromptId: json['questionPromptId'] as String?,
+      questionPromptBody: json['questionPromptBody'] as String?,
     );
   }
 

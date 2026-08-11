@@ -8,6 +8,18 @@ import 'jsst_scoring_service.dart';
 
 /// レイヤーⅣ（JSST・的中度・PREP）・Ⅴ（発音）・Ⅰ（単語テスト）の直近結果から
 /// ダッシュボード判定を組み立てる（Step 9: 5指標）。
+///
+/// 入力の[scoringResults]・[pronunciationChecks]は、レイヤーⅣ・Ⅴの
+/// 「ランダム」（Ⅳはサイコロ抽選、Ⅴは10問セッション）と「問題文一覧から
+/// 選ぶ」のどちらの結果も
+/// 区別せず等しく含む（両モードとも同じ[ScoringResultStorage]/
+/// [PronunciationCheckStorage]へ保存されるため、ここで両方渡せば自然に
+/// 統合される。Step 8）。[QuestionPrompt]エンティティ側のjsstScore/
+/// hitScore/prepScore/pronunciationScoresは、これら保存済み結果を問題文
+/// 一覧の進捗表示用にミラーしたキャッシュであり、元データそのものは常に
+/// [ScoringResultStorage]/[PronunciationCheckStorage]側にあるため、
+/// [QuestionPromptService]からは別途読み込まない（読み込むと同じ結果を
+/// 二重に平均してしまう）。
 abstract final class DashboardSummaryService {
   static const recentLimit = 3;
 

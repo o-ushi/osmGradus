@@ -24,7 +24,7 @@ abstract final class GradusL10n {
     'Google検索': 'Google検索',
 
     'レイヤーⅠタイトル': 'レイヤー I',
-    'レイヤーⅠ説明': '長文読解・語彙テスト／日本語に耳を慣らそう',
+    'レイヤーⅠ説明': '問題文解析・長文読解・語彙テスト／日本語に耳を慣らそう',
     '日本語に耳を慣らす': '日本語に耳を慣らす',
     '語彙を増やす': '語彙を増やす',
     '長文読解': '長文読解',
@@ -45,8 +45,6 @@ abstract final class GradusL10n {
     '長文読解_開始選択_新規作成_説明': 'キーワードを入力して、新しい長文を生成します',
     '長文を保存しました_V案内': '長文を保存しました。レイヤーⅤの「長文」を開くと、いま保存した文章を選んで音読できます',
     '長文を生成': '長文を生成',
-    '隠す': '隠す',
-    '表示': '表示',
     '長文読解_JLPTレベル': 'JLPTレベル',
     '長文読解_キーワード入力': 'キーワードを入力',
     '長文読解_一覧が空です': '保存された長文はまだありません。',
@@ -114,13 +112,17 @@ abstract final class GradusL10n {
     'レイヤーⅠ_ポッドキャスト_使い方_番組追加': '1️⃣ {{icon}} ボタンで番組を追加',
     'レイヤーⅠ_ポッドキャスト_使い方_エピソード選択': '2️⃣ エピソードを選択',
     'レイヤーⅡ_使い方_分野': '1️⃣ 分野を選択',
-    'レイヤーⅡ_使い方_サイコロ': '2️⃣ {{icon}} ボタンでお題を表示',
-    'レイヤーⅡ_使い方_イメージ': '3️⃣ お題を読んで回答をイメージ',
+    'レイヤーⅡ_使い方_サイコロ': '2️⃣ {{icon}} ボタンで問題文を表示',
+    'レイヤーⅡ_使い方_イメージ': '3️⃣ 問題文を読んで回答をイメージ',
     'レイヤーⅡ_使い方_ノート1': '声に出さなくて良いから、どんな回答をするかを考える',
     'レイヤーⅡ_使い方_ノート2': '🌐ボタンで多彩な題材に触れよう',
+    'レイヤーⅡ_ランダム_使い方_分野': '1️⃣ 分野を選択',
+    'レイヤーⅡ_ランダム_使い方_サイコロ': '2️⃣ {{icon}} ボタンで問題文をランダムに表示',
+    'レイヤーⅡ_ランダム_使い方_イメージ': '3️⃣ 問題文を読んで回答をイメージ',
+    'レイヤーⅡ_ランダム_使い方_ノート': '声に出さなくて良いから、どんな回答をするかを考える',
     'レイヤーⅢ_使い方_タイマー': '1️⃣ タイマーを選択',
     'レイヤーⅢ_使い方_分野': '2️⃣ 分野を選択',
-    'レイヤーⅢ_使い方_サイコロ': '3️⃣ {{icon}} ボタンでお題表示',
+    'レイヤーⅢ_使い方_サイコロ': '3️⃣ {{icon}} ボタンで問題文表示',
     'レイヤーⅢ_使い方_音声回答': '4️⃣ 音声を聴いたら回答',
     'レイヤーⅢ_使い方_結論': '5️⃣ 結論を話したら[結論]ボタンをタップ',
     'レイヤーⅢ_使い方_理由': '6️⃣ 理由を話したら[理由]ボタンをタップ',
@@ -128,7 +130,7 @@ abstract final class GradusL10n {
     'レイヤーⅢ_使い方_ノート': '母語で回答してもOK',
     'レイヤーⅣ_使い方_タイマー': '1️⃣ タイマーを選択',
     'レイヤーⅣ_使い方_分野': '2️⃣ 分野を選択',
-    'レイヤーⅣ_使い方_サイコロ': '3️⃣ {{icon}} ボタンでお題を表示',
+    'レイヤーⅣ_使い方_サイコロ': '3️⃣ {{icon}} ボタンで問題文を表示',
     'レイヤーⅣ_使い方_日本語回答': '4️⃣ 音声を聴いたら日本語で回答',
     'レイヤーⅣ_使い方_PREP的中度': '5️⃣ {{icon}} ボタンでPREP評価・的中度も依頼',
     'レイヤーⅣ_使い方_採点結果': '6️⃣ 採点結果を確認',
@@ -140,13 +142,13 @@ abstract final class GradusL10n {
     'AIの回答を解析できませんでした。回答原文のみ保存されています。': 'AIの回答を解析できませんでした。回答原文のみ保存されています。',
     'PREP評価・的中度は未送信です。': 'PREP評価・的中度は未送信です。',
     'レイヤーⅤ_使い方_録音モード': '1️⃣ {{icon}} ボタンで録音モードを選択',
-    'レイヤーⅤ_使い方_サイコロ': '2️⃣ {{icon}} ボタンでお題を表示',
+    'レイヤーⅤ_使い方_サイコロ': '2️⃣ {{icon}} ボタンで問題文を表示',
     'レイヤーⅤ_使い方_マイク': '3️⃣ {{icon}} ボタンで文章を音読',
     'レイヤーⅤ_使い方_10問': '4️⃣ 10問繰り返し',
     'レイヤーⅤ_使い方_送信': '5️⃣ {{icon}} ボタンでGoogle AI診断',
     'レイヤーⅤ_使い方_貼り付け': '6️⃣ Chromeから戻ると自動取り込み。緑の貼り付けボタンでも保存',
-    'レイヤーⅤ_短文': '短文',
-    'レイヤーⅤ_長文': '長文',
+    'レイヤーⅤ_短文': 'ランダム',
+    'レイヤーⅤ_長文': '長文読み上げ',
     'レイヤーⅤ_長文_一覧なし': '保存された長文がありません。レイヤーⅠの「長文読解」で作成してください。',
     'レイヤーⅤ_長文_最短秒数': '最初の15秒は録音を止められません',
     'レイヤーⅤ_長文_貼付待ち': 'Chromeから戻ったら貼り付けボタンを押して、長文音読の評価を保存しよう',
@@ -161,6 +163,7 @@ abstract final class GradusL10n {
     'レイヤーⅠ_語彙_非表示中': '音声のみで聞き取ってください',
     'レイヤーⅠ_語彙_プール空': 'このレベルの単語がまだありません。「＋」で追加するか、設定で標準語彙をオンにしてください。',
     'レイヤーⅠ_語彙_正解数': '正解 %1 / %2問',
+    'レイヤーⅠ_語彙_問題文の見直し': '問題文の見直し',
     '語彙力評価結果': '語彙力評価結果',
     'まだ語彙力評価結果がありません': 'まだ語彙力評価結果がありません',
     '出題した単語': '出題した単語',
@@ -172,17 +175,24 @@ abstract final class GradusL10n {
     'レイヤーⅣタイトル': 'レイヤー IV',
     'レイヤーⅣ説明': '日本語で話しきろう',
     'レイヤーⅤタイトル': 'レイヤー V',
-    'レイヤーⅤ説明': '短文／長文で発音のクセを確認しよう',
+    'レイヤーⅤ説明': '問題文・ランダム／長文で発音のクセを確認しよう',
     'データ': 'データ',
     'エクスポート': 'エクスポート',
     'インポート': 'インポート',
     'ファイルをインポート': 'ファイルをインポート',
-    'お題_追加_説明_AI': 'Chrome AIでお題を生成して取り込む',
+    'お題_追加_説明_AI': 'Chrome AIで問題文を生成して取り込む',
     'お題_追加_説明_手入力': 'キーボードで1件ずつ追加する',
-    'お題_追加_説明_ファイルインポート': 'お題のみが入ったJSONファイルを読み込む',
-    'お題_追加_説明_エクスポート': '取り込み済みお題だけをJSONで書き出す（標準お題は含まない）',
+    'お題_追加_説明_ファイルインポート': '問題文のみが入ったJSONファイルを読み込む',
+    'お題_追加_説明_エクスポート': '取り込み済み問題文だけをJSONで書き出す（標準問題文は含まない）',
     'エクスポートするデータがありません': 'エクスポートするデータがありません',
-    'エクスポートするお題がありません': '取り込み済みのお題がありません',
+    'エクスポートするお題がありません': '取り込み済みの問題文がありません',
+    'エクスポートする問題文がありません': 'エクスポートする問題文がありません',
+    'エクスポート範囲を選択': 'エクスポート範囲を選択',
+    'インポート範囲を選択': 'インポート範囲を選択',
+    '問題のみ': '問題のみ',
+    '全て': '全て',
+    'バックアップ範囲_説明_問題のみ': '問題文（進捗・記入内容を含む）だけを対象にする',
+    'バックアップ範囲_説明_全て': '単語帳・履歴・設定など、すべてのデータを対象にする',
     'エクスポートに失敗しました': 'エクスポートに失敗しました',
     'データをエクスポートしました': 'データをエクスポートしました',
     'インポート完了': 'インポート完了',
@@ -202,16 +212,16 @@ abstract final class GradusL10n {
     '理由': '理由',
     '例示': '例示',
     '分野': '分野',
-    'お題の取り込み': 'お題の取り込み',
-    'お題を追加': 'お題を追加',
+    'お題の取り込み': '問題文の取り込み',
+    'お題を追加': '問題文を追加',
     'AIで追加': 'AIで追加',
     '自分で追加': '自分で追加',
-    'お題を自分で追加': 'お題を自分で追加',
-    'お題を入力': 'お題を入力',
+    'お題を自分で追加': '問題文を自分で追加',
+    'お題を入力': '問題文を入力',
     '追加': '追加',
-    'お題を追加しました。': 'お題を追加しました。',
-    'このお題はすでに追加されています。': 'このお題はすでに追加されています。',
-    '追加済みのお題': '追加済みのお題',
+    'お題を追加しました。': '問題文を追加しました。',
+    'このお題はすでに追加されています。': 'この問題文はすでに追加されています。',
+    '追加済みのお題': '追加済みの問題文',
     '採点結果': '採点結果',
     '発音チェック結果': '発音チェック結果',
     '発音チェック': '発音チェック',
@@ -222,16 +232,129 @@ abstract final class GradusL10n {
     '一度削除すると元に戻せません。': '一度削除すると元に戻せません。',
     '削除': '削除',
     'キャンセル': 'キャンセル',
+    '保存': '保存',
     '日常の身近な話題': '日常の身近な話題',
     'ビジネスシーン': 'ビジネスシーン',
     'シチュエーション': 'シチュエーション',
     'ランダム': 'ランダム',
-    'ボタンを押してお題を引いてください': 'ボタンを押してお題を引いてください',
+    'ボタンを押してお題を引いてください': 'ボタンを押して問題文を引いてください',
     'なんて回答するかイメージして': 'なんて回答するかイメージして',
+    'どんな回答をするか想像して': 'どんな回答をするか想像して',
     '母語で回答してOK': '母語で回答してOK',
     '日本語で回答しよう': '日本語で回答しよう',
     'はっきり声に出して読んでみよう': 'はっきり声に出して読んでみよう',
     'サイコロをタップして問題を表示': 'サイコロをタップして問題を表示',
+
+    // Step 2: レイヤーⅠ「問題文解析」
+    '問題文解析': '問題文解析',
+    'ポッドキャスト': 'ポッドキャスト',
+    '理解': '理解',
+    '問題作成': '問題作成',
+    '問題文一覧': '問題文一覧',
+    'フィルタ': 'フィルタ',
+    '問題文を追加': '問題文を追加',
+    '標準問題文は削除できません': '標準問題文は削除できません',
+    '録音中は移動できません': '録音中は移動できません',
+    '前の問題文': '前の問題文',
+    '次の問題文': '次の問題文',
+    '問題文一覧_使い方_追加': '1️⃣ {{icon}} で問題文を追加できる',
+    '問題文一覧_使い方_フィルタ': '2️⃣ {{icon}} で入手元・分野・実施状況を絞り込める',
+    '問題文一覧_使い方_詳細': '3️⃣ 行をタップすると詳細が開く',
+    '問題文一覧_使い方_削除': '4️⃣ 行を左スワイプすると削除できる（標準問題文は削除できません）',
+    '問題文横断一覧_使い方_総評': '3️⃣ 総評列の「⭕️」（Ⅰ〜Ⅴのいずれか実施済み）をタップすると総評画面が開く',
+    '問題文横断一覧_使い方_レイヤー': '4️⃣ Ⅰ〜Ⅴのマークをタップすると、その問題文の該当レイヤー詳細が開く（右スワイプでこの一覧に戻れる）',
+    '本文': '本文',
+    '総評実施状況': '総評実施状況',
+    '入手元': '入手元',
+    'すべて': 'すべて',
+    '組み込み': '組み込み',
+    'AI': 'AI',
+    '手入力': '手入力',
+    '語彙テスト実施状況': '語彙テスト実施状況',
+    '済み': '済み',
+    '未実施': '未実施',
+    '問題文がありません': '問題文がありません',
+    '進捗_件数割合': '%1/%2件（%3%）',
+    'レイヤーⅠ_問題文_使い方_問題作成': '1️⃣ 「問題作成」をタップして単語を抽出し、語彙テストする（不正解は単語帳へ）',
+    'レイヤーⅠ_問題文_使い方_単語登録': '2️⃣ 本文を長押し・ドラッグして単語を登録',
+    'レイヤーⅠ_問題文_使い方_訳付': '3️⃣ 「訳付」でChrome AIに訳語を依頼できる',
+    'レイヤーⅠ_問題文_使い方_II': '4️⃣ 「II」でレイヤーⅡへ進む',
+    'レイヤーⅠ_問題作成_Google送信確認_タイトル': '問題文から単語をGoogleで抽出しますか？',
+    'レイヤーⅠ_問題作成_Google送信確認_本文':
+        '文脈理解でつまずきやすい単語を抽出するため、この問題文をGoogle LLCのGoogle検索'
+        '（AIモード）へ送信します。検索内容はブラウザやGoogleアカウントの履歴に残る場合が'
+        'あります。',
+    'レイヤーⅠ_問題作成_抽出件数': '%1語を抽出しました',
+
+    // Step 3: レイヤーⅡ「問題文一覧から選ぶ」
+    '話題を増やす': '話題を増やす',
+    '要約': '要約',
+    '回答の要約': '回答の要約',
+    '要約記入状況': '要約記入状況',
+    '要約を入力': '要約を入力',
+    'レイヤーⅡ_問題文_使い方_要約': '1️⃣ 「要約」をタップして回答の要約を入力する',
+    'レイヤーⅡ_問題文_使い方_III': '2️⃣ 「III」でレイヤーⅢへ進む',
+
+    // Step 4: レイヤーⅢ「問題文一覧から選ぶ」
+    '問題文一覧から選ぶ': '問題文一覧から選ぶ',
+    'PREP記入状況': 'PREP記入状況',
+    'レイヤーⅢ_問題文_使い方_PREP': '1️⃣ 「結論」「理由」「例示」をタップして入力する',
+    'レイヤーⅢ_問題文_使い方_IV': '2️⃣ 「IV」でレイヤーⅣへ進む',
+
+    // Step 5: レイヤーⅣ「問題文一覧から選ぶ」
+    'JSST評点': 'JSST評点',
+    'JSST評点記入状況': 'JSST評点記入状況',
+    '開始': '開始',
+    'レイヤーⅣ_問題文_使い方_開始': '2️⃣ {{icon}} ボタンで開始',
+    'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ 音声を聴いたら日本語で回答',
+    'レイヤーⅣ_問題文_使い方_PREP的中度': '4️⃣ {{icon}} ボタンでPREP評価・的中度も依頼',
+    'レイヤーⅣ_問題文_使い方_採点結果': '5️⃣ 採点結果を確認',
+    'レイヤーⅣ_問題文_使い方_V': '6️⃣ 「V」でレイヤーⅤへ進む',
+
+    // Step 6: レイヤーⅤ「問題文一覧から選ぶ」
+    '発音評点': '発音評点',
+    '発音評点記入状況': '発音評点記入状況',
+    '総評': '総評',
+    '問題文回答': '問題文練習',
+    '回答した問題文': '対象の問題文',
+    'レイヤーⅤ_問題文_使い方_問題作成': '1️⃣ 「問題作成」で問題文に関連した単文を10個作る（つ・ざ行・ラ行・長音・促音）',
+    'レイヤーⅤ_問題文_使い方_マイク': '3️⃣ {{icon}} ボタンで単文を音読',
+    'レイヤーⅤ_問題文_使い方_送信': '5️⃣ {{icon}} ボタンでGoogle AI診断',
+    'レイヤーⅤ_問題文_使い方_貼り付け': '6️⃣ Chromeから戻ると自動取り込み。緑の貼り付けボタンでも保存',
+    'レイヤーⅤ_問題文_使い方_総評': '7️⃣ 診断が届いたら「総評」で結果ページへ進む',
+    'レイヤーⅤ_問題作成_Google送信確認_タイトル': '問題文に関連した発音練習文をGoogleで作成しますか？',
+    'レイヤーⅤ_問題作成_Google送信確認_本文':
+        '問題文に関連した発音練習用の短文を作成するため、この問題文をGoogle LLCの'
+        'Google検索（AIモード）へ送信します。検索内容はブラウザやGoogleアカウントの'
+        '履歴に残る場合があります。',
+    'レイヤーⅤ_問題作成_生成件数': '%1文を作成しました',
+
+    // UXプランStep 7: ダブルタップの機能ヒント
+    'ボタンヒント_タップ': 'タップ：%1',
+    'ボタンヒント_長押し': '長押し：%1',
+    'ボタンヒント_長押しなし': 'なし',
+    'ボタンヒント_訳付_長押し': '自動送信で訳付け',
+
+    // UXプランStep 8: ボタンヒントの設定
+    'ボタンヒント_設定セクション': 'ボタンヒント',
+    'ボタンヒント_次のアクションまで表示': '次のアクションまで表示',
+    'ボタンヒント_次のアクションまで表示_説明':
+        'OFF：表示期間が過ぎると自動的に消えます。ON：時間では消えず、次の操作が入るまで表示し続けます。',
+    'ボタンヒント_表示期間': '表示期間',
+    'ボタンヒント_表示期間_秒': '%1秒',
+
+    // Step 7: 総評画面
+    '分からなかった単語': '分からなかった単語',
+    '正解率': '正解率',
+    '総評_Google送信確認_タイトル': 'この問題文の結果をGoogleに送信しますか？',
+    '総評_Google送信確認_本文':
+        '総合アドバイスを得るため、この問題文についてレイヤーⅠ〜Ⅴで記入・記録した'
+        '内容（単語・要約・PREP・スコア等）をGoogle LLCのGoogle検索（AIモード）へ'
+        '送信します。個人情報が含まれる場合があります。'
+        '検索内容はブラウザやGoogleアカウントの履歴に残る場合があります。',
+    '総評_アドバイス_挑戦': 'レイヤーⅠ〜Ⅴに挑戦すると、ここにアドバイスをもらえます',
+    '問題文が見つかりません': '問題文が見つかりません',
+
     'Chromeから戻ったら貼り付けボタンを押して、発音チェック結果を保存しよう':
         'Chrome AIの回答をコピーして戻ると自動で取り込みます。緑の貼り付けボタンでも保存できます',
     'Chromeから戻ったら貼り付けボタンを押して、語彙力評価結果を保存しよう':
@@ -313,46 +436,53 @@ abstract final class GradusL10n {
     'help.gradus.overview.summary': '起動画面でレイヤーを選び、段階的に練習する。',
     'help.gradus.overview.tip1': 'Ⅰ〜Ⅴはいつでもヘッダーから切り替えられる',
     'help.gradus.overview.tip2': '各画面は右スワイプで閉じる',
-    'help.gradus.overview.tip3': '起動画面下の単語帳・ダッシュボード・「…」から各機能を開く',
+    'help.gradus.overview.tip3': '起動画面下の単語帳・ダッシュボード・問題文一覧・「…」から各機能を開く',
     'help.gradus.overview.tip4': '言語は「…」→設定で日本語・English・Tiếng Việtから選べる',
     'help.gradus.layer1.title': 'レイヤーⅠ：語彙とリスニング',
-    'help.gradus.layer1.summary': '長文読解・語彙テストとPodcastで基礎を育てる',
-    'help.gradus.layer1.tip1': 'はじめに「長文読解」「語彙テスト」「日本語に耳を慣らす」から選ぶ',
+    'help.gradus.layer1.summary': '問題文解析・長文読解・語彙テストとPodcastで基礎を育てる',
+    'help.gradus.layer1.tip1': 'はじめに「問題文解析」「長文読解」「語彙テスト」「日本語に耳を慣らす」から選ぶ',
     'help.gradus.layer1.tip2':
+        '問題文解析：「問題作成」で文脈理解の難語を最大5つ抽出し、語彙テストする。'
+        '不正解は単語帳へ自動登録。Ⅰの完了は語彙テスト実施で判定する',
+    'help.gradus.layer1.tip3':
         '長文読解：保存済みの長文があれば「一覧から選ぶ」か「新規作成」かを選べる。'
         '一覧では削除・並び替え・★も可能。'
-        '「訳を付ける」はタップで選び直し、長押しで自動送信。登録前は「隠す」でハイライト切替。'
+        '「訳を付ける」はタップで選び直し、長押しで自動送信。'
         '保存後はレイヤーⅤで音読できる',
-    'help.gradus.layer1.tip3':
+    'help.gradus.layer1.tip4':
         '語彙：10問テスト。🇻🇳/🇺🇸/🇯🇵で音声またはキーボード回答。過去の回答は✏️から修正。＋でChrome AI取り込み。標準語彙は例文つき',
-    'help.gradus.layer1.tip4': '耳慣れ：URL・検索・おすすめから番組を登録して再生する',
-    'help.gradus.layer1.tip5': 'モード切替はヘッダーのⅠを再タップ',
-    'help.gradus.layer2.title': 'レイヤーⅡ：お題',
-    'help.gradus.layer2.summary': '瞬発力を鍛える',
-    'help.gradus.layer2.tip1': 'サイコロでお題をランダムに引く',
-    'help.gradus.layer2.tip2': '日常・ビジネス・シチュエーションから選べる',
-    'help.gradus.layer2.tip3': '声に出さなくて良いから、どんな回答をするかイメージする',
-    'help.gradus.layer2.tip4': '🌐をタップして、多彩の題材に触れよう',
+    'help.gradus.layer1.tip5': '耳慣れ：URL・検索・おすすめから番組を登録して再生する',
+    'help.gradus.layer1.tip6': 'モード切替はヘッダーのⅠを再タップ',
+    'help.gradus.layer2.title': 'レイヤーⅡ：問題文',
+    'help.gradus.layer2.summary': '回答をイメージして瞬発力を鍛える',
+    'help.gradus.layer2.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」「話題を増やす」から選ぶ',
+    'help.gradus.layer2.tip2': '「問題文一覧から選ぶ」では問題文一覧から選び、要約を記入する',
+    'help.gradus.layer2.tip3': '「ランダム」ではサイコロで問題文を引き、どんな回答をするか想像する',
+    'help.gradus.layer2.tip4': '声に出さなくて良いから、どんな回答をするかイメージする',
+    'help.gradus.layer2.tip5': '「話題を増やす」ではサイコロや🌐で題材を増やせる',
     'help.gradus.layer3.title': 'レイヤーⅢ：PREP',
     'help.gradus.layer3.summary': '話の型を身につける',
-    'help.gradus.layer3.tip1': 'PREP（結論→理由→例示）のガイド点灯に沿って話す（評点ではない。評点はレイヤーⅣ）',
-    'help.gradus.layer3.tip2': '45秒・60秒・15+60秒のタイマーが選べる',
-    'help.gradus.layer3.tip3': 'お題はスピーカーボタンで読み上げる',
+    'help.gradus.layer3.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」から選ぶ',
+    'help.gradus.layer3.tip2': '一覧：結論・理由・具体例を記入する（評点ではない。評点はレイヤーⅣ）',
+    'help.gradus.layer3.tip3': 'ランダム：PREPガイド点灯に沿って話す。タイマーは45・60・15+60秒',
     'help.gradus.layer3.tip4': '母語で回答してOK',
     'help.gradus.layer4.title': 'レイヤーⅣ：採点',
     'help.gradus.layer4.summary': '日本語で話し切る',
-    'help.gradus.layer4.tip1': 'タイマー終了後、自動で録音→JSST参考レベルを採点する',
-    'help.gradus.layer4.tip2': '採点結果を確認・保存する',
+    'help.gradus.layer4.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」から選ぶ',
+    'help.gradus.layer4.tip2': 'タイマー終了後、自動で録音→JSST参考レベルを採点する',
     'help.gradus.layer4.tip3': '紙飛行機でPREP評価・的中度も依頼する（評点。レイヤーⅢのPREPガイドとは別）',
     'help.gradus.layer5.title': 'レイヤーⅤ：発音',
     'help.gradus.layer5.summary': '発音を整える',
     'help.gradus.layer5.tip1':
-        'はじめに「短文」「長文」から選ぶ。長文は直近保存を優先し、なければ★付き優先のランダム音読（一覧が空だと選べない）。録音は最短15秒',
-    'help.gradus.layer5.tip2': '短文：「つ」「ざ行」「ラ行」「長音」「促音」の10問を声に出して読む',
+        'はじめに「問題文一覧から選ぶ」「ランダム」「長文読み上げ」から選ぶ。'
+        '長文は一覧が空だと選べない。録音は最短15秒',
+    'help.gradus.layer5.tip2':
+        'ランダム／問題文：「つ」「ざ行」「ラ行」「長音」「促音」がバランスよく入った単文10問を声に出して読む。'
+        '問題文経路では「問題作成」で問題文に関連した単文を作る',
     'help.gradus.layer5.tip3':
         '同意して送信すると、文字起こしをもとにGoogle AIが参考評価を行う（録音音声はGoogleへ送信しない）',
     'help.gradus.layer5.tip4': 'Chromeから戻ると自動取り込み。緑の貼り付けボタンで★評価を保存',
-    'help.gradus.layer5.tip5': '短文のみ：画面左上のボタンで断続・半連続・連続モードを切り替えられる',
+    'help.gradus.layer5.tip5': 'ランダム／問題文のみ：画面左上のボタンで断続・半連続・連続モードを切り替えられる',
     'help.gradus.vocabulary.title': '単語帳',
     'help.gradus.vocabulary.summary': 'フラッシュカードで単語を復習する',
     'help.gradus.vocabulary.tip1': '起動画面のアイコンから開く',
@@ -374,24 +504,27 @@ abstract final class GradusL10n {
     'help.gradus.backup.title': 'エクスポート・インポート',
     'help.gradus.backup.summary': 'データをバックアップする',
     'help.gradus.backup.tip1': '起動画面の「…」から開く',
-    'help.gradus.backup.tip2': 'エクスポートでアプリ全体のJSONを書き出す（語彙・履歴・長文・お題など）',
+    'help.gradus.backup.tip2': 'エクスポートでアプリ全体のJSONを書き出す（語彙・履歴・長文・問題文など）',
     'help.gradus.backup.tip3': 'インポートでフルバックアップを読み込む',
     'help.gradus.backup.tip4':
-        'お題だけのJSONはレイヤーⅡ〜Ⅳの「＋」→「ファイルをインポート／エクスポート」'
-        '（取り込み済みのみ。標準お題は含まない。フルバックアップとは別）',
+        '問題文だけのJSONはレイヤーⅡ〜Ⅳの「＋」→「ファイルをインポート／エクスポート」'
+        '（取り込み済みのみ。標準問題文は含まない。フルバックアップとは別）',
     'help.gradus.settings.title': '設定',
-    'help.gradus.settings.summary': '言語・読み上げ・初期化を管理する',
+    'help.gradus.settings.summary': '言語・読み上げ・ボタンヒント・初期化を管理する',
     'help.gradus.settings.tip1': '起動画面の「…」→設定から開く',
     'help.gradus.settings.tip2': '読み上げ・言語・語彙テストの入力方式（音声/キーボード）を変更',
     'help.gradus.settings.tip3': '初期化ですべてのデータを削除する',
+    'help.gradus.settings.tip4':
+        'ボタンヒント（アイコンをダブルタップするとタップ／長押しの機能が出る）の表示期間と「次のアクションまで表示」を変えられる',
     'help.gradus.gesture.title': '操作の基本',
     'help.gradus.gesture.summary': '戻るボタンはない',
     'help.gradus.gesture.tip1': '右スワイプで前の画面へ戻る',
     'help.gradus.gesture.tip2': 'ヘッダーのⅠ〜Ⅴでレイヤーを即切り替える',
+    'help.gradus.gesture.tip3': 'アイコンボタンをダブルタップすると、タップと長押しの機能が表示される',
     'help.gradus.sections.layers': '5つのレイヤー',
     'help.gradus.sections.more': 'その他',
     'バージョン %@ (%@)': 'バージョン %@ (%@)',
-    'お題のカテゴリ': 'お題のカテゴリ',
+    'お題のカテゴリ': '問題文のカテゴリ',
     '単語（日本語）': '単語（日本語）',
     'ベトナム語訳': 'ベトナム語訳',
     '番組の読み込みに失敗しました': '番組の読み込みに失敗しました',
@@ -415,7 +548,7 @@ abstract final class GradusL10n {
     '取り込む': '取り込む',
     'Chrome AIの解析結果を読み取れませんでした': 'Chrome AIの解析結果を読み取れませんでした',
     '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
-        '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。',
+        '日常・ビジネス・シチュエーションすべての取り込み済み問題文を削除します。この操作は取り消せません。',
     '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。':
         '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。',
     'Chromeから戻るとクリップボードから自動で読み込みます。空のときは「クリップボードから読み込む」を使ってください。内容を確認・編集してから「取り込む」を押してください。':
@@ -427,18 +560,18 @@ abstract final class GradusL10n {
     '同意してGoogleへ送信': '同意してGoogleへ送信',
     '音声認識同意_タイトル': '録音音声の処理について',
     '音声認識同意_本文':
-        '発音練習と採点では、録音音声を文字起こしするため、端末に搭載された音声認識サービス（iOSではApple Inc.のSpeech Recognitionなど）へ音声を渡します。端末・OS・設定によっては、音声がその提供元のサーバーで処理される場合があります。文字起こしと評価結果は端末内に保存され、設定から削除できます。同意しなくても、Podcastやお題など音声認識を使わない機能は利用できます。',
+        '発音練習と採点では、録音音声を文字起こしするため、端末に搭載された音声認識サービス（iOSではApple Inc.のSpeech Recognitionなど）へ音声を渡します。端末・OS・設定によっては、音声がその提供元のサーバーで処理される場合があります。文字起こしと評価結果は端末内に保存され、設定から削除できます。同意しなくても、Podcastや問題文など音声認識を使わない機能は利用できます。',
     '音声認識同意_本文_iOS':
-        '発音練習と採点では、録音音声を文字起こしするため、端末に搭載された音声認識サービス（Apple Inc.のSpeech Recognition）へ音声を渡します。Appleのサーバーで処理される場合があります。文字起こしと評価結果は端末内に保存され、設定から削除できます。同意しなくても、Podcastやお題など音声認識を使わない機能は利用できます。Appleの規約・プライバシーポリシーが適用されます。',
+        '発音練習と採点では、録音音声を文字起こしするため、端末に搭載された音声認識サービス（Apple Inc.のSpeech Recognition）へ音声を渡します。Appleのサーバーで処理される場合があります。文字起こしと評価結果は端末内に保存され、設定から削除できます。同意しなくても、Podcastや問題文など音声認識を使わない機能は利用できます。Appleの規約・プライバシーポリシーが適用されます。',
     '音声認識同意_本文_Android':
-        '発音練習と採点では、録音音声を文字起こしするため、端末のOS音声認識サービスへ音声を渡します。認識に失敗した場合のみ、端末内のVoskモデル（オフライン）で処理し、外部へは送信しません。文字起こしと評価結果は端末内に保存され、設定から削除できます。同意しなくても、Podcastやお題など音声認識を使わない機能は利用できます。',
+        '発音練習と採点では、録音音声を文字起こしするため、端末のOS音声認識サービスへ音声を渡します。認識に失敗した場合のみ、端末内のVoskモデル（オフライン）で処理し、外部へは送信しません。文字起こしと評価結果は端末内に保存され、設定から削除できます。同意しなくても、Podcastや問題文など音声認識を使わない機能は利用できます。',
     '同意しない': '同意しない',
     '同意して続ける': '同意して続ける',
     'プライバシー': 'プライバシー',
     'プライバシーとデータ': 'プライバシーとデータ',
     '音声認識': '音声認識',
     'Google AIによる発音評価': 'Google AIによる発音評価',
-    'お題・練習課題の生成': 'お題・練習課題の生成',
+    'お題・練習課題の生成': '問題文・練習課題の生成',
     'Podcast検索・再生': 'Podcast検索・再生',
     'プライバシーポリシー': 'プライバシーポリシー',
     'Google プライバシーポリシー': 'Google プライバシーポリシー',
@@ -465,7 +598,7 @@ abstract final class GradusL10n {
         '目的は発音・発話の傾向に関する参考評価やアドバイスを得ることです。録音音声自体は送信しません。'
         '送信のたびに同意を確認します。Googleの規約・プライバシーポリシーが適用されます。',
     'プライバシー_お題生成説明':
-        'お題や発音課題の生成では、あらかじめ用意した固定プロンプトのみをGoogle検索（AIモード）へ送信します。録音・文字起こしなどのユーザーデータは含まれません。Googleの規約・プライバシーポリシーが適用されます。',
+        '問題文や発音課題の生成では、あらかじめ用意した固定プロンプトのみをGoogle検索（AIモード）へ送信します。録音・文字起こしなどのユーザーデータは含まれません。Googleの規約・プライバシーポリシーが適用されます。',
     'プライバシー_Podcast説明':
         'Podcast検索では、検索語をApple Inc.のiTunes Search APIへ送信します。登録したPodcastの更新・再生時は番組の配信元へ直接接続し、IPアドレスやアクセス日時などが通信ログとして処理される場合があります。検索についてはAppleの規約・プライバシーポリシーが、配信元への接続については各配信元のポリシーが適用されます。',
     'プライバシー_ポリシー本文_詳細': '外部送信、保存期間、削除方法などの詳細を記載しています。',
@@ -477,7 +610,7 @@ abstract final class GradusL10n {
     'プライバシー_保持削除詳細':
         '保存データは、ユーザーが削除するか、練習のリセットまたは「すべてのデータを初期化」を行うまで保持します。すでに外部事業者へ送信済みのデータの保持・削除は各社のポリシーに従い、本アプリから削除できません。',
     'プライバシー_撤回注記':
-        '同意を撤回または保留すると、発音練習・採点など音声認識を使う機能は利用できません。Podcastやお題など音声認識を使わない機能は引き続き利用できます。次回音声認識を使う際に再度確認します。すでに第三者へ送信済みのデータは、各事業者のプライバシーポリシーに従って取り扱われます。',
+        '同意を撤回または保留すると、発音練習・採点など音声認識を使う機能は利用できません。Podcastや問題文など音声認識を使わない機能は引き続き利用できます。次回音声認識を使う際に再度確認します。すでに第三者へ送信済みのデータは、各事業者のプライバシーポリシーに従って取り扱われます。',
     'うまく聞き取れませんでした。もう一度録音してみましょう。': 'うまく聞き取れませんでした。もう一度録音してみましょう。',
     '評価結果プレビュー': '評価結果プレビュー',
     'STT結果に基づく参考評価です（音声そのものは判定していません）。':
@@ -542,7 +675,7 @@ abstract final class GradusL10n {
 
     'レイヤーⅠタイトル': 'Layer I',
     'レイヤーⅠ説明':
-        'Long reading, vocabulary tests / Get your ears used to Japanese',
+        'Prompt analysis, long reading, vocabulary tests / Get your ears used to Japanese',
     '日本語に耳を慣らす': 'Get used to Japanese',
     '語彙を増やす': 'Build vocabulary',
     '長文読解': 'Long reading',
@@ -565,8 +698,6 @@ abstract final class GradusL10n {
     '長文を保存しました_V案内':
         'Article saved. Open Layer V → Long form and select the article you just saved to read it aloud',
     '長文を生成': 'Generate article',
-    '隠す': 'Hide',
-    '表示': 'Show',
     '長文読解_JLPTレベル': 'JLPT level',
     '長文読解_キーワード入力': 'Enter a keyword',
     '長文読解_一覧が空です': 'No saved articles yet.',
@@ -647,14 +778,19 @@ abstract final class GradusL10n {
     'レイヤーⅠ_ポッドキャスト_使い方_番組追加': '1️⃣ {{icon}} button: Add a show',
     'レイヤーⅠ_ポッドキャスト_使い方_エピソード選択': '2️⃣ Choose an episode',
     'レイヤーⅡ_使い方_分野': '1️⃣ Choose a category',
-    'レイヤーⅡ_使い方_サイコロ': '2️⃣ {{icon}} button: Show a topic',
-    'レイヤーⅡ_使い方_イメージ': '3️⃣ Read the topic and imagine your answer',
+    'レイヤーⅡ_使い方_サイコロ': '2️⃣ {{icon}} button: Show a prompt',
+    'レイヤーⅡ_使い方_イメージ': '3️⃣ Read the prompt and imagine your answer',
     'レイヤーⅡ_使い方_ノート1':
         'No need to say it aloud — just think through your answer',
-    'レイヤーⅡ_使い方_ノート2': '🌐 button: Explore a wide variety of topics',
+    'レイヤーⅡ_使い方_ノート2': '🌐 button: Explore a wide variety of prompts',
+    'レイヤーⅡ_ランダム_使い方_分野': '1️⃣ Choose a category',
+    'レイヤーⅡ_ランダム_使い方_サイコロ': '2️⃣ {{icon}} button: Show a random prompt',
+    'レイヤーⅡ_ランダム_使い方_イメージ': '3️⃣ Read the prompt and imagine your answer',
+    'レイヤーⅡ_ランダム_使い方_ノート':
+        'No need to say it aloud — just think through your answer',
     'レイヤーⅢ_使い方_タイマー': '1️⃣ Choose a timer',
     'レイヤーⅢ_使い方_分野': '2️⃣ Choose a category',
-    'レイヤーⅢ_使い方_サイコロ': '3️⃣ {{icon}} button: Show a topic',
+    'レイヤーⅢ_使い方_サイコロ': '3️⃣ {{icon}} button: Show a prompt',
     'レイヤーⅢ_使い方_音声回答': '4️⃣ Listen to the audio, then answer',
     'レイヤーⅢ_使い方_結論': '5️⃣ When you state your conclusion, tap [Point]',
     'レイヤーⅢ_使い方_理由': '6️⃣ When you give your reason, tap [Reason]',
@@ -662,7 +798,7 @@ abstract final class GradusL10n {
     'レイヤーⅢ_使い方_ノート': 'You may answer in your native language',
     'レイヤーⅣ_使い方_タイマー': '1️⃣ Choose a timer',
     'レイヤーⅣ_使い方_分野': '2️⃣ Choose a category',
-    'レイヤーⅣ_使い方_サイコロ': '3️⃣ {{icon}} button: Show a topic',
+    'レイヤーⅣ_使い方_サイコロ': '3️⃣ {{icon}} button: Show a prompt',
     'レイヤーⅣ_使い方_日本語回答': '4️⃣ Listen to the audio, then answer in Japanese',
     'レイヤーⅣ_使い方_PREP的中度':
         '5️⃣ {{icon}} button: Also request a PREP score and relevance score',
@@ -678,14 +814,14 @@ abstract final class GradusL10n {
     'PREP評価・的中度は未送信です。':
         'PREP score and relevance have not been requested yet.',
     'レイヤーⅤ_使い方_録音モード': '1️⃣ {{icon}} button: Choose the recording mode',
-    'レイヤーⅤ_使い方_サイコロ': '2️⃣ {{icon}} button: Show a topic',
+    'レイヤーⅤ_使い方_サイコロ': '2️⃣ {{icon}} button: Show a prompt',
     'レイヤーⅤ_使い方_マイク': '3️⃣ {{icon}} button: Read the sentence aloud',
     'レイヤーⅤ_使い方_10問': '4️⃣ Repeat for 10 questions',
     'レイヤーⅤ_使い方_送信': '5️⃣ {{icon}} button: Get a Google AI diagnosis',
     'レイヤーⅤ_使い方_貼り付け':
         '6️⃣ Auto-import on return from Chrome. You can also save with the green paste button',
-    'レイヤーⅤ_短文': 'Short',
-    'レイヤーⅤ_長文': 'Long',
+    'レイヤーⅤ_短文': 'Random',
+    'レイヤーⅤ_長文': 'Long reading',
     'レイヤーⅤ_長文_一覧なし':
         'No saved articles yet. Create one in Layer I → "Long reading".',
     'レイヤーⅤ_長文_最短秒数': 'You can\'t stop recording for the first 15 seconds',
@@ -706,6 +842,7 @@ abstract final class GradusL10n {
         'No words for this level yet. Tap "+" to add some, or turn on '
         'built-in vocabulary in Settings.',
     'レイヤーⅠ_語彙_正解数': '%1 / %2 correct',
+    'レイヤーⅠ_語彙_問題文の見直し': 'Prompt review',
     '語彙力評価結果': 'Vocabulary evaluation result',
     'まだ語彙力評価結果がありません': 'No vocabulary evaluation results yet',
     '出題した単語': 'Words asked',
@@ -717,18 +854,26 @@ abstract final class GradusL10n {
     'レイヤーⅣタイトル': 'Layer IV',
     'レイヤーⅣ説明': 'Speak all the way through in Japanese',
     'レイヤーⅤタイトル': 'Layer V',
-    'レイヤーⅤ説明': 'Check pronunciation habits with short or long passages',
+    'レイヤーⅤ説明':
+        'Check pronunciation with prompts, random drills, or long read-aloud',
     'データ': 'Data',
     'エクスポート': 'Export',
     'インポート': 'Import',
     'ファイルをインポート': 'Import from file',
-    'お題_追加_説明_AI': 'Generate topics with Chrome AI and import them',
-    'お題_追加_説明_手入力': 'Add topics one by one with the keyboard',
-    'お題_追加_説明_ファイルインポート': 'Load a JSON file that contains topics only',
+    'お題_追加_説明_AI': 'Generate prompts with Chrome AI and import them',
+    'お題_追加_説明_手入力': 'Add prompts one by one with the keyboard',
+    'お題_追加_説明_ファイルインポート': 'Load a JSON file that contains prompts only',
     'お題_追加_説明_エクスポート':
-        'Write imported topics only to JSON (built-in topics are excluded)',
+        'Write imported prompts only to JSON (built-in prompts are excluded)',
     'エクスポートするデータがありません': 'No data to export',
-    'エクスポートするお題がありません': 'No imported topics to export',
+    'エクスポートするお題がありません': 'No imported prompts to export',
+    'エクスポートする問題文がありません': 'No prompts to export',
+    'エクスポート範囲を選択': 'Choose what to export',
+    'インポート範囲を選択': 'Choose what to import',
+    '問題のみ': 'Prompts only',
+    '全て': 'Everything',
+    'バックアップ範囲_説明_問題のみ': 'Prompts only (including progress and entered content)',
+    'バックアップ範囲_説明_全て': 'All data, including vocabulary, history, and settings',
     'エクスポートに失敗しました': 'Export failed',
     'データをエクスポートしました': 'Data exported',
     'インポート完了': 'Import complete',
@@ -748,16 +893,16 @@ abstract final class GradusL10n {
     '理由': 'Reason',
     '例示': 'Example',
     '分野': 'Category',
-    'お題の取り込み': 'Import topics',
-    'お題を追加': 'Add a topic',
+    'お題の取り込み': 'Import prompts',
+    'お題を追加': 'Add a prompt',
     'AIで追加': 'Add via AI',
     '自分で追加': 'Add it myself',
-    'お題を自分で追加': 'Add a topic myself',
-    'お題を入力': 'Type a topic',
+    'お題を自分で追加': 'Add a prompt myself',
+    'お題を入力': 'Type a prompt',
     '追加': 'Add',
-    'お題を追加しました。': 'Topic added.',
-    'このお題はすでに追加されています。': 'This topic has already been added.',
-    '追加済みのお題': 'Added topics',
+    'お題を追加しました。': 'Prompt added.',
+    'このお題はすでに追加されています。': 'This prompt has already been added.',
+    '追加済みのお題': 'Added prompts',
     '採点結果': 'Scoring results',
     '発音チェック結果': 'Pronunciation results',
     '発音チェック': 'Pronunciation check',
@@ -768,16 +913,144 @@ abstract final class GradusL10n {
     '一度削除すると元に戻せません。': 'This cannot be undone.',
     '削除': 'Delete',
     'キャンセル': 'Cancel',
+    '保存': 'Save',
     '日常の身近な話題': 'Daily life topics',
     'ビジネスシーン': 'Business situations',
     'シチュエーション': 'Situations',
     'ランダム': 'Random',
-    'ボタンを押してお題を引いてください': 'Tap the button to draw a topic',
+    'ボタンを押してお題を引いてください': 'Tap the button to draw a prompt',
     'なんて回答するかイメージして': 'Imagine how you would answer',
+    'どんな回答をするか想像して': 'Imagine what you would answer',
     '母語で回答してOK': 'Answer in your native language',
     '日本語で回答しよう': 'Answer in Japanese',
     'はっきり声に出して読んでみよう': 'Read aloud clearly',
     'サイコロをタップして問題を表示': 'Tap the dice to show the question',
+
+    // Step 2: Layer I "Prompt Analysis"
+    '問題文解析': 'Prompt Analysis',
+    'ポッドキャスト': 'Podcast',
+    '理解': 'Understood',
+    '問題作成': 'Create quiz',
+    '問題文一覧': 'Prompt List',
+    'フィルタ': 'Filter',
+    '問題文を追加': 'Add prompt',
+    '標準問題文は削除できません': 'Built-in prompts can\'t be deleted',
+    '録音中は移動できません': 'Can\'t switch prompts while recording',
+    '前の問題文': 'Previous prompt',
+    '次の問題文': 'Next prompt',
+    '問題文一覧_使い方_追加': '1️⃣ {{icon}} to add a prompt',
+    '問題文一覧_使い方_フィルタ': '2️⃣ {{icon}} to narrow by source, field, or status',
+    '問題文一覧_使い方_詳細': '3️⃣ Tap a row to open its details',
+    '問題文一覧_使い方_削除':
+        '4️⃣ Swipe a row left to delete it (built-in prompts can\'t be deleted)',
+    '問題文横断一覧_使い方_総評':
+        '3️⃣ Tap “⭕️” in the Summary column (shown when any of Ⅰ–Ⅴ is done) to open the summary',
+    '問題文横断一覧_使い方_レイヤー':
+        '4️⃣ Tap a Ⅰ–Ⅴ mark to open that prompt’s detail (swipe right to return here)',
+    '本文': 'Body',
+    '総評実施状況': 'Summary status',
+    '入手元': 'Source',
+    'すべて': 'All',
+    '組み込み': 'Built-in',
+    'AI': 'AI',
+    '手入力': 'Manual',
+    '語彙テスト実施状況': 'Vocabulary test status',
+    '済み': 'Done',
+    '未実施': 'Not done',
+    '問題文がありません': 'No prompts',
+    '進捗_件数割合': '%1/%2 (%3%)',
+    'レイヤーⅠ_問題文_使い方_問題作成':
+        '1️⃣ Tap "Create quiz" to extract words and take a vocab test (misses go to the word list)',
+    'レイヤーⅠ_問題文_使い方_単語登録':
+        '2️⃣ Long-press and drag over the text to register a word',
+    'レイヤーⅠ_問題文_使い方_訳付':
+        '3️⃣ Tap "Add translations" to ask Chrome AI for translations',
+    'レイヤーⅠ_問題文_使い方_II': '4️⃣ Tap "II" to move on to Layer II',
+    'レイヤーⅠ_問題作成_Google送信確認_タイトル':
+        'Extract vocabulary from this prompt using Google?',
+    'レイヤーⅠ_問題作成_Google送信確認_本文':
+        'To extract vocabulary that may be hard to understand in context, '
+        'this prompt will be sent to Google LLC\'s Google Search (AI mode). '
+        'The content may remain in your browser or Google account history.',
+    'レイヤーⅠ_問題作成_抽出件数': 'Extracted %1 word(s)',
+
+    // Step 3: Layer II "Choose from prompt list"
+    '話題を増やす': 'Explore more topics',
+    '要約': 'Summary',
+    '回答の要約': 'Answer summary',
+    '要約記入状況': 'Summary status',
+    '要約を入力': 'Type a summary',
+    'レイヤーⅡ_問題文_使い方_要約': '1️⃣ Tap "Summary" to write a summary of your answer',
+    'レイヤーⅡ_問題文_使い方_III': '2️⃣ Tap "III" to move on to Layer III',
+
+    // Step 4: Layer III "Choose from prompt list"
+    '問題文一覧から選ぶ': 'Choose from prompt list',
+    'PREP記入状況': 'PREP status',
+    'レイヤーⅢ_問題文_使い方_PREP':
+        '1️⃣ Tap "Point", "Reason", or "Example" to fill it in',
+    'レイヤーⅢ_問題文_使い方_IV': '2️⃣ Tap "IV" to move on to Layer IV',
+
+    // Step 5: Layer IV "Choose from prompt list"
+    'JSST評点': 'JSST level',
+    'JSST評点記入状況': 'JSST level status',
+    '開始': 'Start',
+    'レイヤーⅣ_問題文_使い方_開始': '2️⃣ {{icon}} button: Start',
+    'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ Listen to the audio, then answer in Japanese',
+    'レイヤーⅣ_問題文_使い方_PREP的中度':
+        '4️⃣ {{icon}} button: also ask for a PREP/relevance evaluation',
+    'レイヤーⅣ_問題文_使い方_採点結果': '5️⃣ Check the scoring result',
+    'レイヤーⅣ_問題文_使い方_V': '6️⃣ Tap "V" to move on to Layer V',
+
+    // Step 6: Layer V "Choose from prompt list"
+    '発音評点': 'Pronunciation score',
+    '発音評点記入状況': 'Pronunciation score status',
+    '総評': 'Summary',
+    '問題文回答': 'Prompt practice',
+    '回答した問題文': 'Source prompt',
+    'レイヤーⅤ_問題文_使い方_問題作成':
+        '1️⃣ Tap "Create quiz" to make 10 related sentences (tsu, z-row, r-row, long vowels, sokuon)',
+    'レイヤーⅤ_問題文_使い方_マイク': '3️⃣ {{icon}} button to read the sentence aloud',
+    'レイヤーⅤ_問題文_使い方_送信': '5️⃣ {{icon}} button for a Google AI diagnosis',
+    'レイヤーⅤ_問題文_使い方_貼り付け':
+        '6️⃣ Auto-import on return from Chrome. You can also save with the green paste button',
+    'レイヤーⅤ_問題文_使い方_総評':
+        '7️⃣ Once the diagnosis arrives, tap "Summary" to see the results',
+    'レイヤーⅤ_問題作成_Google送信確認_タイトル':
+        'Create pronunciation sentences related to this prompt using Google?',
+    'レイヤーⅤ_問題作成_Google送信確認_本文':
+        'To create pronunciation practice sentences related to this prompt, '
+        'it will be sent to Google LLC\'s Google Search (AI mode). The '
+        'content may remain in your browser or Google account history.',
+    'レイヤーⅤ_問題作成_生成件数': 'Created %1 sentence(s)',
+
+    // UX plan Step 7: double-tap action hints
+    'ボタンヒント_タップ': 'Tap: %1',
+    'ボタンヒント_長押し': 'Long press: %1',
+    'ボタンヒント_長押しなし': 'None',
+    'ボタンヒント_訳付_長押し': 'Auto-submit for translation',
+
+    // UX plan Step 8: button hint settings
+    'ボタンヒント_設定セクション': 'Button hints',
+    'ボタンヒント_次のアクションまで表示': 'Show until next action',
+    'ボタンヒント_次のアクションまで表示_説明':
+        'OFF: disappears automatically after the display duration. ON: '
+        'stays until your next action instead of timing out.',
+    'ボタンヒント_表示期間': 'Display duration',
+    'ボタンヒント_表示期間_秒': '%1s',
+
+    // Step 7: Summary screen
+    '分からなかった単語': 'Words you didn\'t know',
+    '正解率': 'Accuracy',
+    '総評_Google送信確認_タイトル': 'Send this prompt\'s results to Google?',
+    '総評_Google送信確認_本文':
+        'To get overall advice, everything you\'ve recorded for this '
+        'prompt across Layers I-V (words, summary, PREP, scores, etc.) '
+        'will be sent to Google LLC\'s Google Search (AI mode). It may '
+        'include personal information. The search content may remain in '
+        'your browser or Google account history.',
+    '総評_アドバイス_挑戦': 'Try Layers I-V for this prompt to get advice here',
+    '問題文が見つかりません': 'Prompt not found',
+
     'Chromeから戻ったら貼り付けボタンを押して、発音チェック結果を保存しよう':
         'Copy the Chrome AI answer and return — it imports automatically. You can also save with the green paste button',
     'Chromeから戻ったら貼り付けボタンを押して、語彙力評価結果を保存しよう':
@@ -864,60 +1137,74 @@ abstract final class GradusL10n {
     'help.gradus.overview.tip1': 'Switch layers anytime from the I–V header',
     'help.gradus.overview.tip2': 'Swipe right to close any screen',
     'help.gradus.overview.tip3':
-        'Open Vocabulary, Dashboard, or “…” from the bottom of the launch screen',
+        'Open Vocabulary, Dashboard, Prompt List, or “…” from the bottom of the launch screen',
     'help.gradus.overview.tip4':
         'Choose Japanese, English, or Vietnamese in “… → Settings”',
     'help.gradus.layer1.title': 'Layer I: Vocabulary & listening',
     'help.gradus.layer1.summary':
-        'Grow basics with long reading, vocabulary tests, and podcasts',
+        'Grow basics with prompt analysis, long reading, vocabulary tests, and podcasts',
     'help.gradus.layer1.tip1':
-        'First choose “Long reading”, “Vocabulary test”, or “Get used to '
-        'Japanese”',
+        'First choose “Prompt analysis”, “Long reading”, “Vocabulary test”, '
+        'or “Get used to Japanese”',
     'help.gradus.layer1.tip2':
+        'Prompt analysis: tap “Create quiz” to extract up to 5 hard words and '
+        'take a vocab test. Misses are saved to the word list. Layer I is '
+        'complete when the vocab test is done',
+    'help.gradus.layer1.tip3':
         'Long reading: if you have saved articles, choose “Choose from list” '
         'or “Create new”. The list also supports delete, reorder, and ★. '
-        '“Add translations”: tap to reselect, long-press to auto-send. '
-        'Before any word is registered, “Hide” toggles highlights. After '
+        '“Add translations”: tap to reselect, long-press to auto-send. After '
         'saving, read aloud in Layer V',
-    'help.gradus.layer1.tip3':
-        'Vocab: 10 questions. Answer in 🇻🇳/🇺🇸/🇯🇵 by voice or keyboard. Edit past answers via ✏️. “+” imports via Chrome AI. Built-in words include example sentences',
     'help.gradus.layer1.tip4':
+        'Vocab: 10 questions. Answer in 🇻🇳/🇺🇸/🇯🇵 by voice or keyboard. Edit past answers via ✏️. “+” imports via Chrome AI. Built-in words include example sentences',
+    'help.gradus.layer1.tip5':
         'Listening: register shows from URL, search, or recommendations, then play',
-    'help.gradus.layer1.tip5': 'Switch modes by tapping Ⅰ in the header again',
-    'help.gradus.layer2.title': 'Layer II: Topics',
-    'help.gradus.layer2.summary': 'Sharpen instant responses',
-    'help.gradus.layer2.tip1': 'Roll the dice for a random topic',
-    'help.gradus.layer2.tip2': 'Choose daily life, business, or situation',
-    'help.gradus.layer2.tip3': 'Imagine your answer — no need to say it aloud',
-    'help.gradus.layer2.tip4': 'Tap 🌐 to explore a wide variety of topics',
+    'help.gradus.layer1.tip6': 'Switch modes by tapping Ⅰ in the header again',
+    'help.gradus.layer2.title': 'Layer II: Prompts',
+    'help.gradus.layer2.summary':
+        'Imagine answers to sharpen instant responses',
+    'help.gradus.layer2.tip1':
+        'First choose “Choose from prompt list,” “Random,” or “Add more topics”',
+    'help.gradus.layer2.tip2':
+        '“Choose from prompt list”: pick from the prompt list and write a summary',
+    'help.gradus.layer2.tip3':
+        '“Random”: roll the dice for a prompt and imagine your answer',
+    'help.gradus.layer2.tip4': 'Imagine your answer — no need to say it aloud',
+    'help.gradus.layer2.tip5':
+        '“Add more topics”: use the dice or 🌐 to grow your pool',
     'help.gradus.layer3.title': 'Layer III: PREP',
     'help.gradus.layer3.summary': 'Master a speaking pattern',
     'help.gradus.layer3.tip1':
-        'Follow the PREP guide lights (Point → Reason → Example). This is a guide, not a score — scoring is in Layer IV',
-    'help.gradus.layer3.tip2': 'Timer presets: 45 sec, 60 sec, 15+60 sec',
-    'help.gradus.layer3.tip3': 'Tap the speaker button to hear the topic',
+        'First choose “Choose from prompt list” or “Random”',
+    'help.gradus.layer3.tip2':
+        'List: fill Point / Reason / Example (not scored — scoring is Layer IV)',
+    'help.gradus.layer3.tip3':
+        'Random: follow PREP guide lights. Timers: 45, 60, 15+60 sec',
     'help.gradus.layer3.tip4': 'Answer in your native language',
     'help.gradus.layer4.title': 'Layer IV: Scoring',
     'help.gradus.layer4.summary': 'Speak through in Japanese',
     'help.gradus.layer4.tip1':
+        'First choose “Choose from prompt list” or “Random”',
+    'help.gradus.layer4.tip2':
         'When the timer ends, recording starts and an approximate JSST level is scored',
-    'help.gradus.layer4.tip2': 'Review and save scoring results',
     'help.gradus.layer4.tip3':
         'Use the paper plane to request PREP and relevance scores (scores — separate from Layer III’s PREP guide)',
     'help.gradus.layer5.title': 'Layer V: Pronunciation',
     'help.gradus.layer5.summary': 'Refine your pronunciation',
     'help.gradus.layer5.tip1':
-        'First choose “Short” or “Long”. Long form prefers the article you just '
-        'saved, otherwise ★-first random (disabled when the list is empty). '
+        'First choose “Choose from prompt list”, “Random”, or '
+        '“Long read-aloud”. Long is disabled when the list is empty. '
         'Recording requires at least 15 seconds',
     'help.gradus.layer5.tip2':
-        'Short: read 10 sentences aloud (tsu, z-row, r-row, long vowels, sokuon)',
+        'Random / prompt: read 10 sentences covering tsu, z-row, r-row, long '
+        'vowels, and sokuon. On the prompt path, tap “Create quiz” to make '
+        'sentences related to the prompt',
     'help.gradus.layer5.tip3':
         'With your consent, Google AI gives a reference evaluation from the transcript (recorded audio is not sent to Google)',
     'help.gradus.layer5.tip4':
         'Auto-import on return from Chrome. Save star ratings with the green paste button',
     'help.gradus.layer5.tip5':
-        'Short only: use the top-left button to switch intermittent, '
+        'Random / prompt only: use the top-left button to switch intermittent, '
         'semi-continuous, and continuous modes',
     'help.gradus.vocabulary.title': 'Vocabulary',
     'help.gradus.vocabulary.summary': 'Review words with flashcards',
@@ -951,27 +1238,33 @@ abstract final class GradusL10n {
     'help.gradus.backup.summary': 'Back up your data',
     'help.gradus.backup.tip1': 'Open from “…” on the launch screen',
     'help.gradus.backup.tip2':
-        'Export writes a full-app JSON (vocabulary, history, articles, topics, …)',
+        'Export writes a full-app JSON (vocabulary, history, articles, prompts, …)',
     'help.gradus.backup.tip3': 'Import restores a full backup file',
     'help.gradus.backup.tip4':
-        'Topics-only JSON is under Layer II–IV “+” → “Import from file / Export” '
-        '(imported topics only; built-ins excluded — separate from full backup)',
+        'Prompts-only JSON is under Layer II–IV “+” → “Import from file / Export” '
+        '(imported prompts only; built-ins excluded — separate from full backup)',
     'help.gradus.settings.title': 'Settings',
-    'help.gradus.settings.summary': 'Manage language, speech, and reset',
+    'help.gradus.settings.summary':
+        'Manage language, speech, button hints, and reset',
     'help.gradus.settings.tip1':
         'Open from “… → Settings” on the launch screen',
     'help.gradus.settings.tip2':
         'Change speech, language, and vocab test input mode (voice/keyboard)',
     'help.gradus.settings.tip3': 'Reset deletes all local data',
+    'help.gradus.settings.tip4':
+        'Change how long button hints stay (double-tap an icon to see tap / '
+        'long-press actions) and whether they stay until the next action',
     'help.gradus.gesture.title': 'Basic controls',
     'help.gradus.gesture.summary': 'There is no back button',
     'help.gradus.gesture.tip1': 'Swipe right to go back',
     'help.gradus.gesture.tip2':
         'Tap I–V in the header to switch layers instantly',
+    'help.gradus.gesture.tip3':
+        'Double-tap an icon button to see its tap and long-press actions',
     'help.gradus.sections.layers': 'Five layers',
     'help.gradus.sections.more': 'More',
     'バージョン %@ (%@)': 'Version %@ (%@)',
-    'お題のカテゴリ': 'Topic category',
+    'お題のカテゴリ': 'Prompt category',
     '単語（日本語）': 'Word (Japanese)',
     'ベトナム語訳': 'Vietnamese translation',
     '番組の読み込みに失敗しました': 'Failed to load show',
@@ -996,7 +1289,7 @@ abstract final class GradusL10n {
     '取り込む': 'Import',
     'Chrome AIの解析結果を読み取れませんでした': 'Could not read Chrome AI analysis result',
     '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
-        'This deletes all imported topics (Daily, Business, Situation). This cannot be undone.',
+        'This deletes all imported prompts (Daily, Business, Situation). This cannot be undone.',
     '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。':
         'Tap "Open Chrome AI" to open Google AI mode with this prompt. Copy the answer and paste it below.',
     'Chromeから戻るとクリップボードから自動で読み込みます。空のときは「クリップボードから読み込む」を使ってください。内容を確認・編集してから「取り込む」を押してください。':
@@ -1008,18 +1301,18 @@ abstract final class GradusL10n {
     '同意してGoogleへ送信': 'Agree and send to Google',
     '音声認識同意_タイトル': 'How recorded audio is processed',
     '音声認識同意_本文':
-        'For pronunciation practice and scoring, recorded audio is passed to your device\'s built-in speech-recognition service (such as Apple\'s Speech Recognition on iOS) to create a transcript. Depending on the device, OS, and settings, that provider may process audio on its servers. Transcripts and evaluations are stored on this device and can be deleted in Settings. If you decline, features that do not use speech recognition, such as podcasts and topics, remain available.',
+        'For pronunciation practice and scoring, recorded audio is passed to your device\'s built-in speech-recognition service (such as Apple\'s Speech Recognition on iOS) to create a transcript. Depending on the device, OS, and settings, that provider may process audio on its servers. Transcripts and evaluations are stored on this device and can be deleted in Settings. If you decline, features that do not use speech recognition, such as podcasts and prompts, remain available.',
     '音声認識同意_本文_iOS':
-        'For pronunciation practice and scoring, recorded audio is passed to your device\'s built-in speech-recognition service (Apple\'s Speech Recognition) to create a transcript. It may be processed on Apple\'s servers. Transcripts and evaluations are stored on this device and can be deleted in Settings. If you decline, features that do not use speech recognition, such as podcasts and topics, remain available. Apple\'s terms and privacy policy apply.',
+        'For pronunciation practice and scoring, recorded audio is passed to your device\'s built-in speech-recognition service (Apple\'s Speech Recognition) to create a transcript. It may be processed on Apple\'s servers. Transcripts and evaluations are stored on this device and can be deleted in Settings. If you decline, features that do not use speech recognition, such as podcasts and prompts, remain available. Apple\'s terms and privacy policy apply.',
     '音声認識同意_本文_Android':
-        'For pronunciation practice and scoring, recorded audio is passed to the speech-recognition service built into the OS. If recognition fails, it falls back to the on-device Vosk model (offline) and nothing is sent externally. Transcripts and evaluations are stored on this device and can be deleted in Settings. If you decline, features that do not use speech recognition, such as podcasts and topics, remain available.',
+        'For pronunciation practice and scoring, recorded audio is passed to the speech-recognition service built into the OS. If recognition fails, it falls back to the on-device Vosk model (offline) and nothing is sent externally. Transcripts and evaluations are stored on this device and can be deleted in Settings. If you decline, features that do not use speech recognition, such as podcasts and prompts, remain available.',
     '同意しない': 'Do not agree',
     '同意して続ける': 'Agree and continue',
     'プライバシー': 'Privacy',
     'プライバシーとデータ': 'Privacy & Data',
     '音声認識': 'Speech recognition',
     'Google AIによる発音評価': 'Pronunciation evaluation by Google AI',
-    'お題・練習課題の生成': 'Generating topics and practice tasks',
+    'お題・練習課題の生成': 'Generating prompts and practice tasks',
     'Podcast検索・再生': 'Podcast search and playback',
     'プライバシーポリシー': 'Privacy Policy',
     'Google プライバシーポリシー': 'Google Privacy Policy',
@@ -1045,7 +1338,7 @@ abstract final class GradusL10n {
         'The dashboard also sends recent Layer IV, V, and I history when you request overall advice. '
         'The goal is a reference evaluation of speaking and pronunciation tendencies, or advice based on them. Recorded audio itself is not sent. Consent is requested for every submission. Google’s terms and privacy policy apply.',
     'プライバシー_お題生成説明':
-        'Generating topics and pronunciation tasks sends only a fixed, pre-written prompt to Google Search (AI Mode). No recordings, transcripts, or other user data are included. Google’s terms and privacy policy apply.',
+        'Generating prompts and pronunciation tasks sends only a fixed, pre-written prompt to Google Search (AI Mode). No recordings, transcripts, or other user data are included. Google’s terms and privacy policy apply.',
     'プライバシー_Podcast説明':
         'Podcast search sends your search term to Apple Inc.’s iTunes Search API. Updating or playing a subscribed podcast connects directly to that show’s host, which may process your IP address, access time, and requested content in its logs. Apple’s terms and privacy policy apply to search; each host’s own policy applies to the direct connection.',
     'プライバシー_ポリシー本文_詳細':
@@ -1058,7 +1351,7 @@ abstract final class GradusL10n {
     'プライバシー_保持削除詳細':
         'Stored data is retained until you delete it, reset practice, or use “Reset All Data.” Data already sent to a third party is retained and deleted under that provider’s own policy and cannot be deleted from this app.',
     'プライバシー_撤回注記':
-        'If you withdraw or have not consented, features that use speech recognition, such as pronunciation practice and scoring, are unavailable. Podcasts, topics, and other features that do not use speech recognition remain available. You’ll be asked again the next time speech recognition is used. Data already sent to a third party is handled under that provider’s privacy policy.',
+        'If you withdraw or have not consented, features that use speech recognition, such as pronunciation practice and scoring, are unavailable. Podcasts, prompts, and other features that do not use speech recognition remain available. You’ll be asked again the next time speech recognition is used. Data already sent to a third party is handled under that provider’s privacy policy.',
     'うまく聞き取れませんでした。もう一度録音してみましょう。':
         "Couldn't recognize your speech clearly. Please try recording again.",
     '評価結果プレビュー': 'Evaluation preview',
@@ -1131,8 +1424,8 @@ abstract final class GradusL10n {
 
     'レイヤーⅠタイトル': 'Tầng I',
     'レイヤーⅠ説明':
-        'Đọc đoạn văn dài, kiểm tra từ vựng / Làm quen đôi tai với tiếng '
-        'Nhật',
+        'Phân tích đề bài, đọc đoạn văn dài, kiểm tra từ vựng / Làm quen '
+        'đôi tai với tiếng Nhật',
     '日本語に耳を慣らす': 'Làm quen với tiếng Nhật',
     '語彙を増やす': 'Mở rộng vốn từ',
     '長文読解': 'Đọc đoạn văn dài',
@@ -1154,8 +1447,6 @@ abstract final class GradusL10n {
     '長文を保存しました_V案内':
         'Đã lưu bài đọc dài. Mở Tầng V → Đoạn dài và chọn bài vừa lưu để đọc to',
     '長文を生成': 'Tạo bài đọc dài',
-    '隠す': 'Ẩn',
-    '表示': 'Hiện',
     '長文読解_JLPTレベル': 'Trình độ JLPT',
     '長文読解_キーワード入力': 'Nhập từ khóa',
     '長文読解_一覧が空です': 'Chưa có bài đọc dài nào được lưu.',
@@ -1239,13 +1530,18 @@ abstract final class GradusL10n {
     'レイヤーⅠ_ポッドキャスト_使い方_番組追加': '1️⃣ Nút {{icon}}: Thêm chương trình',
     'レイヤーⅠ_ポッドキャスト_使い方_エピソード選択': '2️⃣ Chọn một tập',
     'レイヤーⅡ_使い方_分野': '1️⃣ Chọn danh mục',
-    'レイヤーⅡ_使い方_サイコロ': '2️⃣ Nút {{icon}}: Hiện chủ đề',
-    'レイヤーⅡ_使い方_イメージ': '3️⃣ Đọc chủ đề và hình dung câu trả lời',
+    'レイヤーⅡ_使い方_サイコロ': '2️⃣ Nút {{icon}}: Hiện đề bài',
+    'レイヤーⅡ_使い方_イメージ': '3️⃣ Đọc đề bài và hình dung câu trả lời',
     'レイヤーⅡ_使い方_ノート1': 'Không cần nói thành tiếng, chỉ cần nghĩ về câu trả lời',
-    'レイヤーⅡ_使い方_ノート2': 'Nút 🌐: Khám phá nhiều chủ đề đa dạng',
+    'レイヤーⅡ_使い方_ノート2': 'Nút 🌐: Khám phá nhiều đề bài đa dạng',
+    'レイヤーⅡ_ランダム_使い方_分野': '1️⃣ Chọn danh mục',
+    'レイヤーⅡ_ランダム_使い方_サイコロ': '2️⃣ Nút {{icon}}: Hiện đề bài ngẫu nhiên',
+    'レイヤーⅡ_ランダム_使い方_イメージ': '3️⃣ Đọc đề bài và hình dung câu trả lời',
+    'レイヤーⅡ_ランダム_使い方_ノート':
+        'Không cần nói thành tiếng, chỉ cần nghĩ về câu trả lời',
     'レイヤーⅢ_使い方_タイマー': '1️⃣ Chọn hẹn giờ',
     'レイヤーⅢ_使い方_分野': '2️⃣ Chọn danh mục',
-    'レイヤーⅢ_使い方_サイコロ': '3️⃣ Nút {{icon}}: Hiện chủ đề',
+    'レイヤーⅢ_使い方_サイコロ': '3️⃣ Nút {{icon}}: Hiện đề bài',
     'レイヤーⅢ_使い方_音声回答': '4️⃣ Nghe xong thì trả lời',
     'レイヤーⅢ_使い方_結論': '5️⃣ Khi nói kết luận, nhấn [Kết luận]',
     'レイヤーⅢ_使い方_理由': '6️⃣ Khi nói lý do, nhấn [Lý do]',
@@ -1253,7 +1549,7 @@ abstract final class GradusL10n {
     'レイヤーⅢ_使い方_ノート': 'Có thể trả lời bằng tiếng mẹ đẻ',
     'レイヤーⅣ_使い方_タイマー': '1️⃣ Chọn hẹn giờ',
     'レイヤーⅣ_使い方_分野': '2️⃣ Chọn danh mục',
-    'レイヤーⅣ_使い方_サイコロ': '3️⃣ Nút {{icon}}: Hiện chủ đề',
+    'レイヤーⅣ_使い方_サイコロ': '3️⃣ Nút {{icon}}: Hiện đề bài',
     'レイヤーⅣ_使い方_日本語回答': '4️⃣ Nghe xong thì trả lời bằng tiếng Nhật',
     'レイヤーⅣ_使い方_PREP的中度':
         '5️⃣ Nút {{icon}}: Yêu cầu thêm điểm PREP và độ trúng đích',
@@ -1267,14 +1563,14 @@ abstract final class GradusL10n {
         'Không thể phân tích phản hồi của AI. Chỉ lưu lại văn bản gốc.',
     'PREP評価・的中度は未送信です。': 'Chưa yêu cầu điểm PREP và độ trúng đích.',
     'レイヤーⅤ_使い方_録音モード': '1️⃣ Nút {{icon}}: Chọn chế độ ghi âm',
-    'レイヤーⅤ_使い方_サイコロ': '2️⃣ Nút {{icon}}: Hiện chủ đề',
+    'レイヤーⅤ_使い方_サイコロ': '2️⃣ Nút {{icon}}: Hiện đề bài',
     'レイヤーⅤ_使い方_マイク': '3️⃣ Nút {{icon}}: Đọc to câu văn',
     'レイヤーⅤ_使い方_10問': '4️⃣ Lặp lại cho 10 câu',
     'レイヤーⅤ_使い方_送信': '5️⃣ Nút {{icon}}: Chẩn đoán bằng Google AI',
     'レイヤーⅤ_使い方_貼り付け':
         '6️⃣ Tự nhập khi quay lại từ Chrome. Có thể lưu bằng nút dán màu xanh',
-    'レイヤーⅤ_短文': 'Câu ngắn',
-    'レイヤーⅤ_長文': 'Bài dài',
+    'レイヤーⅤ_短文': 'Ngẫu nhiên',
+    'レイヤーⅤ_長文': 'Đọc to bài dài',
     'レイヤーⅤ_長文_一覧なし':
         'Chưa có bài đọc dài nào được lưu. Hãy tạo một bài trong '
         'Tầng I → "Đọc đoạn văn dài".',
@@ -1295,6 +1591,7 @@ abstract final class GradusL10n {
     'レイヤーⅠ_語彙_プール空':
         'Chưa có từ nào ở cấp độ này. Nhấn "+" để thêm, hoặc bật từ có sẵn trong Cài đặt.',
     'レイヤーⅠ_語彙_正解数': 'Đúng %1 / %2 câu',
+    'レイヤーⅠ_語彙_問題文の見直し': 'Ôn lại đề bài',
     '語彙力評価結果': 'Kết quả đánh giá vốn từ vựng',
     'まだ語彙力評価結果がありません': 'Chưa có kết quả đánh giá vốn từ vựng',
     '出題した単語': 'Các từ đã ra đề',
@@ -1306,18 +1603,25 @@ abstract final class GradusL10n {
     'レイヤーⅣタイトル': 'Tầng IV',
     'レイヤーⅣ説明': 'Nói trọn vẹn bằng tiếng Nhật',
     'レイヤーⅤタイトル': 'Tầng V',
-    'レイヤーⅤ説明': 'Kiểm tra thói quen phát âm qua câu ngắn hoặc đoạn văn dài',
+    'レイヤーⅤ説明': 'Kiểm tra phát âm qua đề bài, ngẫu nhiên hoặc đọc đoạn văn dài',
     'データ': 'Dữ liệu',
     'エクスポート': 'Xuất dữ liệu',
     'インポート': 'Nhập dữ liệu',
     'ファイルをインポート': 'Nhập từ tệp',
-    'お題_追加_説明_AI': 'Tạo chủ đề bằng Chrome AI rồi nhập vào',
-    'お題_追加_説明_手入力': 'Thêm từng chủ đề bằng bàn phím',
-    'お題_追加_説明_ファイルインポート': 'Đọc tệp JSON chỉ chứa chủ đề',
+    'お題_追加_説明_AI': 'Tạo đề bài bằng Chrome AI rồi nhập vào',
+    'お題_追加_説明_手入力': 'Thêm từng đề bài bằng bàn phím',
+    'お題_追加_説明_ファイルインポート': 'Đọc tệp JSON chỉ chứa đề bài',
     'お題_追加_説明_エクスポート':
-        'Chỉ xuất chủ đề đã nhập ra JSON (không gồm chủ đề mặc định)',
+        'Chỉ xuất đề bài đã nhập ra JSON (không gồm đề bài mặc định)',
     'エクスポートするデータがありません': 'Không có dữ liệu để xuất',
-    'エクスポートするお題がありません': 'Không có chủ đề nào đã nhập để xuất',
+    'エクスポートするお題がありません': 'Không có đề bài nào đã nhập để xuất',
+    'エクスポートする問題文がありません': 'Không có đề bài để xuất',
+    'エクスポート範囲を選択': 'Chọn phạm vi xuất dữ liệu',
+    'インポート範囲を選択': 'Chọn phạm vi nhập dữ liệu',
+    '問題のみ': 'Chỉ đề bài',
+    '全て': 'Tất cả',
+    'バックアップ範囲_説明_問題のみ': 'Chỉ đề bài (bao gồm tiến độ và nội dung đã nhập)',
+    'バックアップ範囲_説明_全て': 'Toàn bộ dữ liệu: từ vựng, lịch sử, cài đặt, v.v.',
     'エクスポートに失敗しました': 'Xuất dữ liệu thất bại',
     'データをエクスポートしました': 'Đã xuất dữ liệu',
     'インポート完了': 'Nhập xong',
@@ -1337,16 +1641,16 @@ abstract final class GradusL10n {
     '理由': 'Lý do',
     '例示': 'Ví dụ',
     '分野': 'Lĩnh vực',
-    'お題の取り込み': 'Nhập chủ đề',
-    'お題を追加': 'Thêm chủ đề',
+    'お題の取り込み': 'Nhập đề bài',
+    'お題を追加': 'Thêm đề bài',
     'AIで追加': 'Thêm bằng AI',
     '自分で追加': 'Tự thêm',
-    'お題を自分で追加': 'Tự thêm chủ đề',
-    'お題を入力': 'Nhập nội dung chủ đề',
+    'お題を自分で追加': 'Tự thêm đề bài',
+    'お題を入力': 'Nhập nội dung đề bài',
     '追加': 'Thêm',
-    'お題を追加しました。': 'Đã thêm chủ đề.',
-    'このお題はすでに追加されています。': 'Chủ đề này đã được thêm rồi.',
-    '追加済みのお題': 'Chủ đề đã thêm',
+    'お題を追加しました。': 'Đã thêm đề bài.',
+    'このお題はすでに追加されています。': 'Đề bài này đã được thêm rồi.',
+    '追加済みのお題': 'Đề bài đã thêm',
     '採点結果': 'Kết quả chấm điểm',
     '発音チェック結果': 'Kết quả phát âm',
     '発音チェック': 'Kiểm tra phát âm',
@@ -1357,16 +1661,142 @@ abstract final class GradusL10n {
     '一度削除すると元に戻せません。': 'Không thể hoàn tác.',
     '削除': 'Xóa',
     'キャンセル': 'Hủy',
+    '保存': 'Lưu',
     '日常の身近な話題': 'Chủ đề đời sống',
     'ビジネスシーン': 'Tình huống công việc',
     'シチュエーション': 'Tình huống',
     'ランダム': 'Ngẫu nhiên',
-    'ボタンを押してお題を引いてください': 'Nhấn nút để rút chủ đề',
+    'ボタンを押してお題を引いてください': 'Nhấn nút để rút đề bài',
     'なんて回答するかイメージして': 'Hình dung cách bạn sẽ trả lời',
+    'どんな回答をするか想像して': 'Hình dung xem bạn sẽ trả lời thế nào',
     '母語で回答してOK': 'Trả lời bằng tiếng mẹ đẻ cũng được',
     '日本語で回答しよう': 'Hãy trả lời bằng tiếng Nhật',
     'はっきり声に出して読んでみよう': 'Hãy đọc to và rõ ràng',
     'サイコロをタップして問題を表示': 'Nhấn vào xúc xắc để hiện câu hỏi',
+
+    // Step 2: Tầng I "Phân tích đề bài"
+    '問題文解析': 'Phân tích đề bài',
+    'ポッドキャスト': 'Podcast',
+    '理解': 'Đã hiểu',
+    '問題作成': 'Tạo bài kiểm tra',
+    '問題文一覧': 'Danh sách đề bài',
+    'フィルタ': 'Bộ lọc',
+    '問題文を追加': 'Thêm đề bài',
+    '標準問題文は削除できません': 'Không thể xóa đề bài mặc định',
+    '録音中は移動できません': 'Không thể chuyển đề bài khi đang ghi âm',
+    '前の問題文': 'Đề bài trước',
+    '次の問題文': 'Đề bài tiếp theo',
+    '問題文一覧_使い方_追加': '1️⃣ Nhấn {{icon}} để thêm đề bài',
+    '問題文一覧_使い方_フィルタ':
+        '2️⃣ Nhấn {{icon}} để lọc theo nguồn, danh mục, tình trạng',
+    '問題文一覧_使い方_詳細': '3️⃣ Nhấn vào một dòng để xem chi tiết',
+    '問題文一覧_使い方_削除': '4️⃣ Vuốt sang trái để xóa (không thể xóa đề bài mặc định)',
+    '問題文横断一覧_使い方_総評':
+        '3️⃣ Nhấn “⭕️” ở cột Tổng kết (hiện khi đã làm bất kỳ lớp Ⅰ–Ⅴ) để mở tổng kết',
+    '問題文横断一覧_使い方_レイヤー':
+        '4️⃣ Nhấn dấu Ⅰ–Ⅴ để mở chi tiết đề bài (vuốt sang phải để quay lại đây)',
+    '本文': 'Nội dung',
+    '総評実施状況': 'Tình trạng tổng kết',
+    '入手元': 'Nguồn',
+    'すべて': 'Tất cả',
+    '組み込み': 'Có sẵn',
+    'AI': 'AI',
+    '手入力': 'Tự nhập',
+    '語彙テスト実施状況': 'Tình trạng kiểm tra từ vựng',
+    '済み': 'Đã xong',
+    '未実施': 'Chưa làm',
+    '問題文がありません': 'Không có đề bài nào',
+    '進捗_件数割合': '%1/%2 (%3%)',
+    'レイヤーⅠ_問題文_使い方_問題作成':
+        '1️⃣ Nhấn "Tạo bài kiểm tra" để trích xuất từ và làm bài kiểm tra '
+        '(từ sai được lưu vào sổ từ)',
+    'レイヤーⅠ_問題文_使い方_単語登録': '2️⃣ Nhấn giữ và kéo trên văn bản để đăng ký từ',
+    'レイヤーⅠ_問題文_使い方_訳付': '3️⃣ Nhấn "Thêm bản dịch" để nhờ Chrome AI dịch',
+    'レイヤーⅠ_問題文_使い方_II': '4️⃣ Nhấn "II" để chuyển sang Tầng II',
+    'レイヤーⅠ_問題作成_Google送信確認_タイトル':
+        'Trích xuất từ vựng từ đề bài này bằng Google?',
+    'レイヤーⅠ_問題作成_Google送信確認_本文':
+        'Để trích xuất các từ vựng có thể khó hiểu theo ngữ cảnh, đề bài này '
+        'sẽ được gửi đến Google Search (chế độ AI) của Google LLC. Nội dung '
+        'có thể được lưu lại trong lịch sử trình duyệt hoặc tài khoản '
+        'Google của bạn.',
+    'レイヤーⅠ_問題作成_抽出件数': 'Đã trích xuất %1 từ',
+
+    // Step 3: Tầng II "Chọn từ danh sách đề bài"
+    '話題を増やす': 'Khám phá thêm đề bài',
+    '要約': 'Tóm tắt',
+    '回答の要約': 'Tóm tắt câu trả lời',
+    '要約記入状況': 'Tình trạng tóm tắt',
+    '要約を入力': 'Nhập nội dung tóm tắt',
+    'レイヤーⅡ_問題文_使い方_要約': '1️⃣ Nhấn "Tóm tắt" để viết tóm tắt câu trả lời',
+    'レイヤーⅡ_問題文_使い方_III': '2️⃣ Nhấn "III" để chuyển sang Tầng III',
+
+    // Step 4: Tầng III "Chọn từ danh sách đề bài"
+    '問題文一覧から選ぶ': 'Chọn từ danh sách đề bài',
+    'PREP記入状況': 'Tình trạng PREP',
+    'レイヤーⅢ_問題文_使い方_PREP': '1️⃣ Nhấn "Kết luận", "Lý do" hoặc "Ví dụ" để nhập',
+    'レイヤーⅢ_問題文_使い方_IV': '2️⃣ Nhấn "IV" để chuyển sang Tầng IV',
+
+    // Step 5: Tầng IV "Chọn từ danh sách đề bài"
+    'JSST評点': 'Điểm JSST',
+    'JSST評点記入状況': 'Tình trạng điểm JSST',
+    '開始': 'Bắt đầu',
+    'レイヤーⅣ_問題文_使い方_開始': '2️⃣ Nút {{icon}}: Bắt đầu',
+    'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ Nghe xong thì trả lời bằng tiếng Nhật',
+    'レイヤーⅣ_問題文_使い方_PREP的中度':
+        '4️⃣ Nút {{icon}}: Nhờ đánh giá thêm PREP và độ chính xác',
+    'レイヤーⅣ_問題文_使い方_採点結果': '5️⃣ Xem kết quả chấm điểm',
+    'レイヤーⅣ_問題文_使い方_V': '6️⃣ Nhấn "V" để chuyển sang Tầng V',
+
+    // Step 6: Tầng V "Chọn từ danh sách đề bài"
+    '発音評点': 'Điểm phát âm',
+    '発音評点記入状況': 'Tình trạng điểm phát âm',
+    '総評': 'Tổng kết',
+    '問題文回答': 'Luyện đề bài',
+    '回答した問題文': 'Đề bài gốc',
+    'レイヤーⅤ_問題文_使い方_問題作成':
+        '1️⃣ Nhấn "Tạo bài kiểm tra" để tạo 10 câu liên quan (つ, hàng ざ, hàng ら, âm dài, âm ngắt)',
+    'レイヤーⅤ_問題文_使い方_マイク': '3️⃣ Nút {{icon}} để đọc to câu ngắn',
+    'レイヤーⅤ_問題文_使い方_送信': '5️⃣ Nút {{icon}} để nhờ Google AI chẩn đoán',
+    'レイヤーⅤ_問題文_使い方_貼り付け':
+        '6️⃣ Tự nhập khi quay lại từ Chrome. Có thể lưu bằng nút dán màu xanh',
+    'レイヤーⅤ_問題文_使い方_総評': '7️⃣ Khi có kết quả chẩn đoán, nhấn "Tổng kết" để xem',
+    'レイヤーⅤ_問題作成_Google送信確認_タイトル':
+        'Tạo câu luyện phát âm liên quan đến đề bài này bằng Google?',
+    'レイヤーⅤ_問題作成_Google送信確認_本文':
+        'Để tạo câu luyện phát âm liên quan đến đề bài này, đề bài sẽ được '
+        'gửi đến Google Search (chế độ AI) của Google LLC. Nội dung có thể '
+        'được lưu lại trong lịch sử trình duyệt hoặc tài khoản Google của bạn.',
+    'レイヤーⅤ_問題作成_生成件数': 'Đã tạo %1 câu',
+
+    // Kế hoạch UX Step 7: gợi ý chức năng khi chạm đúp
+    'ボタンヒント_タップ': 'Chạm: %1',
+    'ボタンヒント_長押し': 'Chạm giữ: %1',
+    'ボタンヒント_長押しなし': 'Không có',
+    'ボタンヒント_訳付_長押し': 'Tự động gửi để dịch',
+
+    // Kế hoạch UX Step 8: cài đặt gợi ý nút bấm
+    'ボタンヒント_設定セクション': 'Gợi ý nút bấm',
+    'ボタンヒント_次のアクションまで表示': 'Hiển thị đến khi có thao tác tiếp theo',
+    'ボタンヒント_次のアクションまで表示_説明':
+        'TẮT: tự động biến mất sau thời gian hiển thị. BẬT: không biến mất '
+        'theo thời gian mà giữ nguyên đến khi có thao tác tiếp theo.',
+    'ボタンヒント_表示期間': 'Thời gian hiển thị',
+    'ボタンヒント_表示期間_秒': '%1 giây',
+
+    // Step 7: Màn hình tổng kết
+    '分からなかった単語': 'Từ bạn chưa biết',
+    '正解率': 'Tỷ lệ đúng',
+    '総評_Google送信確認_タイトル': 'Gửi kết quả của đề bài này cho Google?',
+    '総評_Google送信確認_本文':
+        'Để nhận lời khuyên tổng hợp, mọi nội dung bạn đã ghi lại cho đề '
+        'bài này qua Lớp I-V (từ vựng, tóm tắt, PREP, điểm số, v.v.) sẽ '
+        'được gửi đến Google Search (chế độ AI) của Google LLC. Có thể '
+        'chứa thông tin cá nhân. Nội dung tìm kiếm có thể được lưu lại '
+        'trong lịch sử trình duyệt hoặc tài khoản Google.',
+    '総評_アドバイス_挑戦': 'Hãy thử Lớp I-V cho đề bài này để nhận lời khuyên ở đây',
+    '問題文が見つかりません': 'Không tìm thấy đề bài',
+
     'Chromeから戻ったら貼り付けボタンを押して、発音チェック結果を保存しよう':
         'Sao chép câu trả lời Chrome AI rồi quay lại — sẽ tự nhập. Có thể lưu bằng nút dán màu xanh',
     'Chromeから戻ったら貼り付けボタンを押して、語彙力評価結果を保存しよう':
@@ -1452,61 +1882,75 @@ abstract final class GradusL10n {
     'help.gradus.overview.tip1': 'Chuyển tầng I–V bất cứ lúc nào từ thanh đầu',
     'help.gradus.overview.tip2': 'Vuốt sang phải để đóng màn hình',
     'help.gradus.overview.tip3':
-        'Mở Sổ từ, Bảng điều khiển hoặc “…” ở cuối màn hình khởi động',
+        'Mở Sổ từ, Bảng điều khiển, Danh sách đề bài hoặc “…” ở cuối màn hình khởi động',
     'help.gradus.overview.tip4':
         'Chọn tiếng Nhật, English hoặc Tiếng Việt trong “… → Cài đặt”',
     'help.gradus.layer1.title': 'Tầng I: Từ vựng & nghe',
     'help.gradus.layer1.summary':
-        'Rèn nền tảng bằng đọc đoạn văn dài, kiểm tra từ vựng và podcast',
+        'Rèn nền tảng bằng phân tích đề bài, đọc đoạn văn dài, kiểm tra từ vựng và podcast',
     'help.gradus.layer1.tip1':
-        'Trước hết chọn “Đọc đoạn văn dài”, “Kiểm tra từ vựng” hoặc '
-        '“Làm quen với tiếng Nhật”',
+        'Trước hết chọn “Phân tích đề bài”, “Đọc đoạn văn dài”, '
+        '“Kiểm tra từ vựng” hoặc “Làm quen với tiếng Nhật”',
     'help.gradus.layer1.tip2':
+        'Phân tích đề bài: nhấn “Tạo bài kiểm tra” để trích tối đa 5 từ khó '
+        'và làm bài kiểm tra từ vựng. Từ sai được lưu vào sổ từ. Tầng I hoàn '
+        'thành khi đã làm bài kiểm tra từ vựng',
+    'help.gradus.layer1.tip3':
         'Đọc dài: nếu đã có bài lưu, chọn “Chọn từ danh sách” hoặc “Tạo mới”. '
         'Danh sách cũng có thể xóa, sắp xếp, ★. “Thêm bản dịch”: chạm để '
-        'chọn lại, nhấn giữ để gửi tự động. Trước khi đăng ký từ, “Ẩn” '
-        'bật/tắt tô sáng. Sau khi lưu có thể đọc to ở Tầng V',
-    'help.gradus.layer1.tip3':
-        'Từ vựng: 10 câu. Trả lời 🇻🇳/🇺🇸/🇯🇵 bằng giọng nói hoặc bàn phím. Sửa câu trước bằng ✏️. “+” nhập qua Chrome AI. Từ chuẩn có câu ví dụ',
+        'chọn lại, nhấn giữ để gửi tự động. Sau khi lưu có thể đọc to ở Tầng V',
     'help.gradus.layer1.tip4':
+        'Từ vựng: 10 câu. Trả lời 🇻🇳/🇺🇸/🇯🇵 bằng giọng nói hoặc bàn phím. Sửa câu trước bằng ✏️. “+” nhập qua Chrome AI. Từ chuẩn có câu ví dụ',
+    'help.gradus.layer1.tip5':
         'Nghe: đăng ký chương trình qua URL, tìm kiếm hoặc gợi ý rồi phát',
-    'help.gradus.layer1.tip5': 'Đổi chế độ bằng cách chạm lại Ⅰ trên thanh đầu',
-    'help.gradus.layer2.title': 'Tầng II: Chủ đề',
-    'help.gradus.layer2.summary': 'Rèn phản xạ trả lời',
-    'help.gradus.layer2.tip1': 'Xúc xắc rút chủ đề ngẫu nhiên',
-    'help.gradus.layer2.tip2': 'Chọn đời sống, công việc hoặc tình huống',
+    'help.gradus.layer1.tip6': 'Đổi chế độ bằng cách chạm lại Ⅰ trên thanh đầu',
+    'help.gradus.layer2.title': 'Tầng II: Đề bài',
+    'help.gradus.layer2.summary': 'Hình dung câu trả lời để rèn phản xạ',
+    'help.gradus.layer2.tip1':
+        'Trước hết chọn “Chọn từ danh sách đề bài”, “Ngẫu nhiên” hoặc '
+        '“Thêm chủ đề”',
+    'help.gradus.layer2.tip2':
+        '“Chọn từ danh sách đề bài”: chọn từ danh sách đề bài và viết tóm tắt',
     'help.gradus.layer2.tip3':
+        '“Ngẫu nhiên”: tung xúc xắc để ra đề bài và hình dung câu trả lời',
+    'help.gradus.layer2.tip4':
         'Hình dung câu trả lời — không cần nói thành tiếng',
-    'help.gradus.layer2.tip4': 'Chạm 🌐 để khám phá nhiều chủ đề đa dạng',
+    'help.gradus.layer2.tip5':
+        '“Thêm chủ đề”: dùng xúc xắc hoặc 🌐 để mở rộng đề bài',
     'help.gradus.layer3.title': 'Tầng III: PREP',
     'help.gradus.layer3.summary': 'Rèn mẫu câu trả lời',
     'help.gradus.layer3.tip1':
-        'Nói theo đèn hướng dẫn PREP (Kết luận → Lý do → Ví dụ). Đây là hướng dẫn, không phải điểm — điểm ở Tầng IV',
-    'help.gradus.layer3.tip2': 'Hẹn giờ: 45 giây, 60 giây, 15+60 giây',
-    'help.gradus.layer3.tip3': 'Nút loa đọc chủ đề',
+        'Trước hết chọn “Chọn từ danh sách đề bài” hoặc “Ngẫu nhiên”',
+    'help.gradus.layer3.tip2':
+        'Danh sách: điền Kết luận / Lý do / Ví dụ (chưa chấm điểm — điểm ở Tầng IV)',
+    'help.gradus.layer3.tip3':
+        'Ngẫu nhiên: nói theo đèn PREP. Hẹn giờ: 45, 60, 15+60 giây',
     'help.gradus.layer3.tip4': 'Trả lời bằng tiếng mẹ đẻ cũng được',
     'help.gradus.layer4.title': 'Tầng IV: Chấm điểm',
     'help.gradus.layer4.summary': 'Nói trọn vẹn bằng tiếng Nhật',
     'help.gradus.layer4.tip1':
+        'Trước hết chọn “Chọn từ danh sách đề bài” hoặc “Ngẫu nhiên”',
+    'help.gradus.layer4.tip2':
         'Hết giờ thì tự ghi âm và chấm mức JSST tham khảo',
-    'help.gradus.layer4.tip2': 'Xem và lưu kết quả chấm điểm',
     'help.gradus.layer4.tip3':
         'Dùng máy bay giấy để nhờ đánh giá PREP và độ trúng đích (điểm — khác với hướng dẫn PREP ở Tầng III)',
     'help.gradus.layer5.title': 'Tầng V: Phát âm',
     'help.gradus.layer5.summary': 'Chỉnh phát âm',
     'help.gradus.layer5.tip1':
-        'Trước hết chọn “Câu ngắn” hoặc “Đoạn dài”. Đoạn dài ưu tiên bài vừa '
-        'lưu, không thì ngẫu nhiên ưu tiên ★ (không chọn được nếu danh sách '
-        'trống). Ghi âm tối thiểu 15 giây',
+        'Trước hết chọn “Chọn từ danh sách đề bài”, “Ngẫu nhiên” hoặc '
+        '“Đọc đoạn dài”. Đoạn dài không chọn được nếu danh sách trống. '
+        'Ghi âm tối thiểu 15 giây',
     'help.gradus.layer5.tip2':
-        'Câu ngắn: đọc to 10 câu (âm つ, hàng ざ, hàng ら, âm dài, âm ngắt)',
+        'Ngẫu nhiên / đề bài: đọc to 10 câu gồm つ, hàng ざ, hàng ら, âm dài, '
+        'âm ngắt. Ở đường đề bài, nhấn “Tạo bài kiểm tra” để tạo câu liên '
+        'quan đến đề',
     'help.gradus.layer5.tip3':
         'Sau khi bạn đồng ý, Google AI đánh giá tham khảo từ bản ghi (không gửi âm thanh ghi âm cho Google)',
     'help.gradus.layer5.tip4':
         'Tự nhập khi quay lại từ Chrome. Lưu đánh giá sao bằng nút dán màu xanh',
     'help.gradus.layer5.tip5':
-        'Chỉ câu ngắn: dùng nút góc trên trái để chuyển chế độ ngắt quãng / '
-        'bán liên tục / liên tục',
+        'Chỉ ngẫu nhiên / đề bài: dùng nút góc trên trái để chuyển chế độ '
+        'ngắt quãng / bán liên tục / liên tục',
     'help.gradus.vocabulary.title': 'Sổ từ vựng',
     'help.gradus.vocabulary.summary': 'Ôn từ bằng thẻ flashcard',
     'help.gradus.vocabulary.tip1': 'Mở từ biểu tượng màn hình khởi động',
@@ -1539,26 +1983,32 @@ abstract final class GradusL10n {
     'help.gradus.backup.summary': 'Sao lưu dữ liệu của bạn',
     'help.gradus.backup.tip1': 'Mở từ “…” trên màn hình khởi động',
     'help.gradus.backup.tip2':
-        'Xuất ghi JSON toàn app (từ vựng, lịch sử, bài dài, chủ đề, …)',
+        'Xuất ghi JSON toàn app (từ vựng, lịch sử, bài dài, đề bài, …)',
     'help.gradus.backup.tip3': 'Nhập để khôi phục bản sao lưu đầy đủ',
     'help.gradus.backup.tip4':
-        'JSON chỉ chứa chủ đề nằm ở Tầng II–IV “+” → “Nhập từ tệp / Xuất” '
-        '(chỉ chủ đề đã nhập; không gồm mặc định — khác bản sao lưu đầy đủ)',
+        'JSON chỉ chứa đề bài nằm ở Tầng II–IV “+” → “Nhập từ tệp / Xuất” '
+        '(chỉ đề bài đã nhập; không gồm mặc định — khác bản sao lưu đầy đủ)',
     'help.gradus.settings.title': 'Cài đặt',
-    'help.gradus.settings.summary': 'Quản lý ngôn ngữ, giọng đọc và đặt lại',
+    'help.gradus.settings.summary':
+        'Quản lý ngôn ngữ, giọng đọc, gợi ý nút bấm và đặt lại',
     'help.gradus.settings.tip1': 'Mở từ “… → Cài đặt” trên màn hình khởi động',
     'help.gradus.settings.tip2':
         'Đổi giọng đọc, ngôn ngữ và chế độ nhập bài kiểm tra từ vựng '
         '(giọng nói/bàn phím)',
     'help.gradus.settings.tip3': 'Đặt lại xóa toàn bộ dữ liệu cục bộ',
+    'help.gradus.settings.tip4':
+        'Đổi thời gian hiện gợi ý nút (chạm đúp biểu tượng để xem chạm / '
+        'chạm giữ) và tùy chọn hiện đến khi có thao tác tiếp theo',
     'help.gradus.gesture.title': 'Thao tác cơ bản',
     'help.gradus.gesture.summary': 'Không có nút quay lại',
     'help.gradus.gesture.tip1': 'Vuốt sang phải để quay lại',
     'help.gradus.gesture.tip2': 'Chạm I–V trên thanh đầu để chuyển tầng ngay',
+    'help.gradus.gesture.tip3':
+        'Chạm đúp nút biểu tượng để xem chức năng chạm và chạm giữ',
     'help.gradus.sections.layers': 'Năm tầng',
     'help.gradus.sections.more': 'Khác',
     'バージョン %@ (%@)': 'Phiên bản %@ (%@)',
-    'お題のカテゴリ': 'Danh mục chủ đề',
+    'お題のカテゴリ': 'Danh mục đề bài',
     '単語（日本語）': 'Từ (tiếng Nhật)',
     'ベトナム語訳': 'Bản dịch tiếng Việt',
     '番組の読み込みに失敗しました': 'Không tải được chương trình',
@@ -1584,7 +2034,7 @@ abstract final class GradusL10n {
     'Chrome AIの解析結果を読み取れませんでした':
         'Không đọc được kết quả phân tích từ Chrome AI',
     '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
-        'Xóa tất cả chủ đề đã nhập (Đời sống, Công việc, Tình huống). Không thể hoàn tác.',
+        'Xóa tất cả đề bài đã nhập (Đời sống, Công việc, Tình huống). Không thể hoàn tác.',
     '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。':
         'Nhấn "Mở Chrome AI" để mở chế độ AI của Google với prompt này. Sao chép câu trả lời và dán bên dưới.',
     'Chromeから戻るとクリップボードから自動で読み込みます。空のときは「クリップボードから読み込む」を使ってください。内容を確認・編集してから「取り込む」を押してください。':
@@ -1596,18 +2046,18 @@ abstract final class GradusL10n {
     '同意してGoogleへ送信': 'Đồng ý và gửi đến Google',
     '音声認識同意_タイトル': 'Cách xử lý âm thanh ghi âm',
     '音声認識同意_本文':
-        'Để luyện phát âm và chấm điểm, âm thanh ghi âm được chuyển cho dịch vụ nhận dạng giọng nói tích hợp trên thiết bị của bạn (ví dụ: Speech Recognition của Apple trên iOS) để tạo bản ghi. Tùy thiết bị, hệ điều hành và cài đặt, âm thanh có thể được xử lý trên máy chủ của nhà cung cấp. Bản ghi và kết quả đánh giá được lưu trên thiết bị và có thể xóa trong Cài đặt. Nếu không đồng ý, bạn vẫn có thể dùng các tính năng không cần nhận dạng giọng nói như podcast và chủ đề.',
+        'Để luyện phát âm và chấm điểm, âm thanh ghi âm được chuyển cho dịch vụ nhận dạng giọng nói tích hợp trên thiết bị của bạn (ví dụ: Speech Recognition của Apple trên iOS) để tạo bản ghi. Tùy thiết bị, hệ điều hành và cài đặt, âm thanh có thể được xử lý trên máy chủ của nhà cung cấp. Bản ghi và kết quả đánh giá được lưu trên thiết bị và có thể xóa trong Cài đặt. Nếu không đồng ý, bạn vẫn có thể dùng các tính năng không cần nhận dạng giọng nói như podcast và đề bài.',
     '音声認識同意_本文_iOS':
-        'Để luyện phát âm và chấm điểm, âm thanh ghi âm được chuyển cho dịch vụ nhận dạng giọng nói tích hợp trên thiết bị (Speech Recognition của Apple) để tạo bản ghi. Có thể được xử lý trên máy chủ của Apple. Bản ghi và kết quả đánh giá được lưu trên thiết bị và có thể xóa trong Cài đặt. Nếu không đồng ý, bạn vẫn có thể dùng các tính năng không cần nhận dạng giọng nói như podcast và chủ đề. Áp dụng điều khoản và chính sách quyền riêng tư của Apple.',
+        'Để luyện phát âm và chấm điểm, âm thanh ghi âm được chuyển cho dịch vụ nhận dạng giọng nói tích hợp trên thiết bị (Speech Recognition của Apple) để tạo bản ghi. Có thể được xử lý trên máy chủ của Apple. Bản ghi và kết quả đánh giá được lưu trên thiết bị và có thể xóa trong Cài đặt. Nếu không đồng ý, bạn vẫn có thể dùng các tính năng không cần nhận dạng giọng nói như podcast và đề bài. Áp dụng điều khoản và chính sách quyền riêng tư của Apple.',
     '音声認識同意_本文_Android':
-        'Để luyện phát âm và chấm điểm, âm thanh ghi âm được chuyển cho dịch vụ nhận dạng giọng nói tích hợp trên hệ điều hành để tạo bản ghi. Nếu nhận dạng thất bại, ứng dụng chuyển sang mô hình Vosk ngoại tuyến trên thiết bị và không gửi gì ra ngoài. Bản ghi và kết quả đánh giá được lưu trên thiết bị và có thể xóa trong Cài đặt. Nếu không đồng ý, bạn vẫn có thể dùng các tính năng không cần nhận dạng giọng nói như podcast và chủ đề.',
+        'Để luyện phát âm và chấm điểm, âm thanh ghi âm được chuyển cho dịch vụ nhận dạng giọng nói tích hợp trên hệ điều hành để tạo bản ghi. Nếu nhận dạng thất bại, ứng dụng chuyển sang mô hình Vosk ngoại tuyến trên thiết bị và không gửi gì ra ngoài. Bản ghi và kết quả đánh giá được lưu trên thiết bị và có thể xóa trong Cài đặt. Nếu không đồng ý, bạn vẫn có thể dùng các tính năng không cần nhận dạng giọng nói như podcast và đề bài.',
     '同意しない': 'Không đồng ý',
     '同意して続ける': 'Đồng ý và tiếp tục',
     'プライバシー': 'Quyền riêng tư',
     'プライバシーとデータ': 'Quyền riêng tư & Dữ liệu',
     '音声認識': 'Nhận dạng giọng nói',
     'Google AIによる発音評価': 'Đánh giá phát âm bằng Google AI',
-    'お題・練習課題の生成': 'Tạo chủ đề và bài luyện tập',
+    'お題・練習課題の生成': 'Tạo đề bài và bài luyện tập',
     'Podcast検索・再生': 'Tìm kiếm và phát Podcast',
     'プライバシーポリシー': 'Chính sách quyền riêng tư',
     'Google プライバシーポリシー': 'Chính sách quyền riêng tư của Google',
@@ -1633,7 +2083,7 @@ abstract final class GradusL10n {
         'Bảng điều khiển cũng gửi lịch sử Lớp IV, V và I gần đây khi bạn yêu cầu lời khuyên tổng hợp. '
         'Mục đích là nhận đánh giá tham khảo về xu hướng nói/phát âm hoặc lời khuyên dựa trên đó. Âm thanh ghi âm không được gửi đi. Ứng dụng hỏi sự đồng ý cho mỗi lần gửi. Áp dụng điều khoản và chính sách quyền riêng tư của Google.',
     'プライバシー_お題生成説明':
-        'Việc tạo chủ đề và bài luyện phát âm chỉ gửi một prompt cố định, đã soạn sẵn đến Google Search (chế độ AI). Không bao gồm bản ghi âm, bản ghi lời nói hay dữ liệu người dùng khác. Áp dụng điều khoản và chính sách quyền riêng tư của Google.',
+        'Việc tạo đề bài và bài luyện phát âm chỉ gửi một prompt cố định, đã soạn sẵn đến Google Search (chế độ AI). Không bao gồm bản ghi âm, bản ghi lời nói hay dữ liệu người dùng khác. Áp dụng điều khoản và chính sách quyền riêng tư của Google.',
     'プライバシー_Podcast説明':
         'Tìm kiếm Podcast gửi từ khóa tìm kiếm của bạn đến iTunes Search API của Apple Inc. Khi cập nhật hoặc phát một podcast đã đăng ký, ứng dụng kết nối trực tiếp đến nhà cung cấp của chương trình đó, nơi có thể xử lý địa chỉ IP, thời gian truy cập và nội dung yêu cầu trong nhật ký của họ. Điều khoản và chính sách quyền riêng tư của Apple áp dụng cho tìm kiếm; chính sách riêng của từng nhà cung cấp áp dụng cho kết nối trực tiếp.',
     'プライバシー_ポリシー本文_詳細':
@@ -1646,7 +2096,7 @@ abstract final class GradusL10n {
     'プライバシー_保持削除詳細':
         'Dữ liệu đã lưu được giữ đến khi bạn xóa, đặt lại luyện tập hoặc dùng "Đặt lại toàn bộ dữ liệu". Dữ liệu đã gửi cho bên thứ ba được lưu giữ và xóa theo chính sách riêng của nhà cung cấp đó, và không thể xóa từ ứng dụng này.',
     'プライバシー_撤回注記':
-        'Nếu bạn rút lại hoặc chưa đồng ý, các tính năng dùng nhận dạng giọng nói như luyện phát âm và chấm điểm sẽ không dùng được. Podcast, chủ đề và các tính năng khác không cần nhận dạng giọng nói vẫn dùng được. Bạn sẽ được hỏi lại vào lần tới khi dùng nhận dạng giọng nói. Dữ liệu đã gửi cho bên thứ ba được xử lý theo chính sách quyền riêng tư của nhà cung cấp đó.',
+        'Nếu bạn rút lại hoặc chưa đồng ý, các tính năng dùng nhận dạng giọng nói như luyện phát âm và chấm điểm sẽ không dùng được. Podcast, đề bài và các tính năng khác không cần nhận dạng giọng nói vẫn dùng được. Bạn sẽ được hỏi lại vào lần tới khi dùng nhận dạng giọng nói. Dữ liệu đã gửi cho bên thứ ba được xử lý theo chính sách quyền riêng tư của nhà cung cấp đó.',
     'うまく聞き取れませんでした。もう一度録音してみましょう。':
         'Không nhận dạng rõ giọng nói. Hãy thử ghi âm lại.',
     '評価結果プレビュー': 'Xem trước kết quả đánh giá',

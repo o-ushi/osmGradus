@@ -10,11 +10,13 @@ import '../../main.dart' show appSettings, jsstCalibrationPreferences;
 import '../../models/long_article_word_selection_mode.dart';
 import '../../models/vocab_answer_mode.dart';
 import '../../services/app_logger.dart';
+import '../../services/app_preferences.dart';
 import '../../services/app_reset.dart';
 import '../../services/dashboard_advice_storage.dart';
 import '../../services/jsst_calibration_service.dart';
 import '../../services/native_tts_platform.dart';
 import '../../services/pronunciation_check_storage.dart';
+import '../../services/question_prompt_service.dart';
 import '../../services/scoring_result_storage.dart';
 import '../../services/topic_speech_reader.dart';
 import '../../services/tts_settings_service.dart';
@@ -121,6 +123,29 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
     );
   }
 
+  void _showButtonHintDisplaySecondsPicker() {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (sheetCtx) => CupertinoActionSheet(
+        actions: [
+          for (final seconds in AppPreferences.buttonHintDisplaySecondsOptions)
+            CupertinoActionSheetAction(
+              isDefaultAction: appSettings.buttonHintDisplaySeconds == seconds,
+              onPressed: () {
+                appSettings.buttonHintDisplaySeconds = seconds;
+                Navigator.pop(sheetCtx);
+              },
+              child: Text('ボタンヒント_表示期間_秒'.trFmt(_lang, ['$seconds'])),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(sheetCtx),
+          child: Text('キャンセル'.tr(_lang)),
+        ),
+      ),
+    );
+  }
+
   String _displayRate(double rate) {
     final normalized = (rate - _minRate) / (_maxRate - _minRate);
     final display = normalized * 1.5 + 0.5;
@@ -165,6 +190,7 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
     await _pronunciationStorage.clearAll();
     await _vocabularyStorage.clearAll();
     await DashboardAdviceStorage().clear();
+    await QuestionPromptService().clearAllScores();
     if (!mounted) return;
     setState(() => _hasSavedResults = false);
   }
@@ -344,6 +370,32 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
                     subtitle: 'スタートアップ画面_説明'.tr(lang),
                     value: appSettings.showStartupScreen,
                     onChanged: (value) => appSettings.showStartupScreen = value,
+                  ),
+                ],
+              ),
+
+              // ─── ボタンヒント（Step 7のダブルタップヒントの消え方）───
+              SettingsSectionHeader(
+                'ボタンヒント_設定セクション'.tr(lang),
+                icon: Icons.touch_app_outlined,
+              ),
+              SettingsSectionCard(
+                children: [
+                  SettingsSwitchRow(
+                    label: 'ボタンヒント_次のアクションまで表示'.tr(lang),
+                    subtitle: 'ボタンヒント_次のアクションまで表示_説明'.tr(lang),
+                    value: appSettings.buttonHintPersistUntilNextAction,
+                    onChanged: (value) =>
+                        appSettings.buttonHintPersistUntilNextAction = value,
+                  ),
+                  const SettingsItemDivider(),
+                  SettingsValueRow(
+                    label: 'ボタンヒント_表示期間'.tr(lang),
+                    value: 'ボタンヒント_表示期間_秒'.trFmt(lang, [
+                      '${appSettings.buttonHintDisplaySeconds}',
+                    ]),
+                    enabled: !appSettings.buttonHintPersistUntilNextAction,
+                    onTap: _showButtonHintDisplaySecondsPicker,
                   ),
                 ],
               ),

@@ -22,6 +22,13 @@ import '../theme/app_colors.dart';
 /// 同じアリーナで競合してタップが奪われることが実機（特にAndroid）で
 /// 報告されたための対策で、[Listener]はアリーナに一切参加しないため、
 /// アプリ内のどんなジェスチャーとも競合しない。
+///
+/// ダブルタップの機能ヒント（Step 7の`ButtonActionHint`）には対応しない。
+/// このボタンは「サイコロ→録音開始→録音終了」を1問ごとに連打する、
+/// レイテンシに最も敏感な操作のため、単タップに約300msの確定待ちを
+/// 追加するとその操作感を大きく損なう。試験導入したところ、素早い連打で
+/// 録音が開始直後に終了してしまいSTTが失敗する不具合も出たため見送った
+/// （他のヒント対応ボタンは一回性の操作のため許容できる）。
 class PronunciationMicButton extends StatefulWidget {
   const PronunciationMicButton({
     super.key,
@@ -30,6 +37,7 @@ class PronunciationMicButton extends StatefulWidget {
     this.recording = false,
     this.size = 140,
     this.recordingColor = Colors.redAccent,
+    this.remainingSeconds,
   });
 
   /// trueならマイクのアイコン（録音の構え）、falseならサイコロのアイコン
@@ -48,6 +56,13 @@ class PronunciationMicButton extends StatefulWidget {
   /// レイヤーⅤ長文音読の「最短15秒はタップで止められない」表現では、
   /// 15秒経過後にオレンジへ切り替えて「もう止められる」ことを示す。
   final Color recordingColor;
+
+  /// 非nullかつ[recording]がtrueの間、マイクアイコンの代わりにこの残り秒数を
+  /// 表示する（[TopicSpeakerTimerButton]のcounting表示と同じ形。レイヤーⅤ
+  /// 「問題文一覧から選ぶ」の固定秒数カウントダウン用）。未指定・[recording]が
+  /// falseの間は従来どおりアイコン表示のまま。指定中は[recordingColor]の
+  /// 背景を出さず、カウントダウン中も背景は透明のままにする。
+  final int? remainingSeconds;
 
   @override
   State<PronunciationMicButton> createState() => _PronunciationMicButtonState();
@@ -88,13 +103,31 @@ class _PronunciationMicButtonState extends State<PronunciationMicButton> {
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           borderRadius: const BorderRadius.all(Radius.circular(16)),
-          color: widget.recording ? widget.recordingColor : Colors.transparent,
+          color: widget.recording && widget.remainingSeconds == null
+              ? widget.recordingColor
+              : Colors.transparent,
         ),
-        child: Icon(
-          widget.armed ? Icons.mic_rounded : Icons.casino,
-          size: widget.size,
-          color: palette.onAccent,
-        ),
+        child: widget.recording && widget.remainingSeconds != null
+            ? SizedBox(
+                width: widget.size * 2,
+                height: widget.size,
+                child: FittedBox(
+                  fit: BoxFit.contain,
+                  child: Text(
+                    '${widget.remainingSeconds}',
+                    style: TextStyle(
+                      color: palette.onAccent,
+                      fontSize: 88,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              )
+            : Icon(
+                widget.armed ? Icons.mic_rounded : Icons.casino,
+                size: widget.size,
+                color: palette.onAccent,
+              ),
       ),
     );
   }

@@ -4,16 +4,25 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/topic_bank.dart';
 import '../models/drawn_topic.dart';
+import '../models/question_prompt_source.dart';
 import '../models/situation_prompt.dart';
 import '../models/topic_category.dart';
+import 'question_prompt_service.dart';
 
 /// osmWashabeの「サイコロでお題を引く」ロジックの移植。
 /// `pool.randomElement()` 相当の単純な乱数選択で、履歴を避ける仕組みは持たない
 /// （osmWashabe本体と同じ挙動）。
+///
+/// カテゴリ別SharedPreferencesリスト（`topics.imported.*`）は抽選・既存の
+/// バックアップ/JSON入出力が引き続き依存するためStep 1でも維持するが、
+/// [importTopics]・[clearImported]は[QuestionPromptService]の構造化ストアへも
+/// 同じ内容をミラーする（[source]付き）。[loadImported]・[drawRandom]自体は
+/// 従来どおりこのリストを直接読む。
 class TopicService {
-  static const _importedKeyPrefix = 'topics.imported.';
+  static const _importedKeyPrefix = topicsImportedKeyPrefix;
 
   final _random = Random();
+  final _promptService = QuestionPromptService();
 
   Future<List<String>> loadImported(TopicCategory category) async {
     final prefs = await SharedPreferences.getInstance();
@@ -25,16 +34,28 @@ class TopicService {
 
   /// osmWashabeの `mergeTopics`（重複除外・件数上限）を移植。
   /// 戻り値は新規に追加できた件数（重複分は除く。取り込み結果メッセージの
-  /// 「N件を追加しました」に使う）。
+  /// 「N件を追加しました」に使う）。[source]は問題文の入手元
+  /// （AI取り込み・手入力・JSON/バックアップ経由のインポート）。既定は
+  /// `imported`（呼び出し元がAI・手入力を明示しない場合の後方互換）。
   Future<int> importTopics(
     TopicCategory category,
-    List<String> newTopics,
-  ) async {
+    List<String> newTopics, {
+    QuestionPromptSource source = QuestionPromptSource.imported,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final existing = await loadImported(category);
     final existingSet = existing.toSet();
     final additions = newTopics.where((t) => !existingSet.contains(t)).toList();
     if (additions.isEmpty) return 0;
+    // 先にQuestionPromptService側へsource付きで記録してから、SharedPreferences
+    // の生リストを更新する。順序を逆にすると、recordImport内のloadAll()が
+    // 「まだミラーされていない生リストの新規分」を検知して先にimported扱いで
+    // 取り込んでしまい、正しいsourceで記録できなくなる（Step 1回帰テストで発見）。
+    await _promptService.recordImport(
+      field: category,
+      bodies: additions,
+      source: source,
+    );
     final merged = [...existing, ...additions];
     await prefs.setStringList(
       '$_importedKeyPrefix${category.storageKey}',
@@ -46,6 +67,7 @@ class TopicService {
   Future<void> clearImported(TopicCategory category) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('$_importedKeyPrefix${category.storageKey}');
+    await _promptService.clearImportedField(category);
   }
 
   /// osmWashabeの「全てクリア」ボタンに相当。取り込み済みお題を全カテゴリ分削除する。

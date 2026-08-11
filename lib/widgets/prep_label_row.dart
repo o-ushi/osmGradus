@@ -18,22 +18,60 @@ class PrepLabelRow extends StatelessWidget {
   const PrepLabelRow({
     super.key,
     this.showConclusion = false,
+    this.conclusionLabel,
+    this.conclusionIcon,
+    this.conclusionTooltip,
+    this.onConclusionTap,
+    this.conclusionActive = false,
+    this.conclusionHintTapText,
+    this.conclusionHintLongPressText,
     this.showReason = false,
     this.showExample = false,
     this.reasonLabel,
     this.reasonIcon,
     this.reasonTooltip,
     this.onReasonTap,
+    this.reasonActive = false,
+    this.reasonActiveFill,
+    this.reasonActiveForeground,
     this.reasonShowBorder = true,
     this.reasonHorizontalPadding = 18,
     this.reasonLabelFontSize = 18,
+    this.reasonHintTapText,
+    this.reasonHintLongPressText,
     this.exampleIcon,
     this.exampleTooltip,
     this.exampleActive = false,
+    this.exampleActiveFill,
+    this.exampleActiveForeground,
     this.onExampleTap,
+    this.exampleHintTapText,
+    this.exampleHintLongPressText,
   });
 
   final bool showConclusion;
+
+  /// nullなら「結論」。レイヤーⅠの問題文詳細では「理解」に差し替える
+  /// （[reasonLabel]と同じ差し替え方式）。
+  final String? conclusionLabel;
+
+  /// 非nullの場合、[conclusionLabel]より優先して枠なし・余白ゼロの
+  /// 大きいアイコンボタンにする（[exampleIcon]と同じ差し替え方式。
+  /// レイヤーⅠの「理解」チェックで使う。文字ラベルだと3等分の枠に
+  /// 収まらず小さくなるため）。
+  final IconData? conclusionIcon;
+  final String? conclusionTooltip;
+  final VoidCallback? onConclusionTap;
+
+  /// trueの間、[conclusionIcon]を橙色にして「実施済み」を示す（falseは白）。
+  /// アイコン自体は差し替えず、色だけ変える（背景のピル自体は常に透明）。
+  final bool conclusionActive;
+
+  /// 非nullの場合、[conclusionIcon]モードのピルにダブルタップの機能ヒント
+  /// （Step 7の[ButtonActionHint]基盤）を付ける（[GhostPill.hintTapText]）。
+  final String? conclusionHintTapText;
+  final String? conclusionHintLongPressText;
+
   final bool showReason;
   final bool showExample;
 
@@ -43,15 +81,38 @@ class PrepLabelRow extends StatelessWidget {
   final String? reasonTooltip;
   final VoidCallback? onReasonTap;
 
+  /// trueの間、[reasonIcon]を[reasonActiveForeground]（既定は橙）にして
+  /// 「実施済み」を示す（[conclusionActive]と同じ、背景は透明のまま色だけ
+  /// 変える方式。レイヤーⅢのPREP「理由」欄で使う）。
+  final bool reasonActive;
+  final Color? reasonActiveFill;
+  final Color? reasonActiveForeground;
+
   /// レイヤーⅡの🌐など、枠なしで絵文字を大きくしたいときに使う。
   final bool reasonShowBorder;
   final double reasonHorizontalPadding;
   final double reasonLabelFontSize;
 
+  /// 非nullの場合、[reasonIcon]モードのピルにダブルタップの機能ヒント
+  /// （[conclusionHintTapText]と同じStep 7の[ButtonActionHint]基盤）を付ける。
+  final String? reasonHintTapText;
+  final String? reasonHintLongPressText;
+
   final IconData? exampleIcon;
   final String? exampleTooltip;
   final bool exampleActive;
+
+  /// [exampleActive]時の塗り・前景色。未指定なら既存どおり
+  /// [AppPalette.accentColor]の塗りつぶし（レイヤーⅣ・Ⅴの「結果一覧」）。
+  /// レイヤーⅢのPREP「具体例」欄では透明＋橙に差し替える。
+  final Color? exampleActiveFill;
+  final Color? exampleActiveForeground;
   final VoidCallback? onExampleTap;
+
+  /// 非nullの場合、[exampleIcon]モードのピルにダブルタップの機能ヒント
+  /// （[conclusionHintTapText]と同じStep 7の[ButtonActionHint]基盤）を付ける。
+  final String? exampleHintTapText;
+  final String? exampleHintLongPressText;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +121,32 @@ class PrepLabelRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: GhostPill(label: '結論'.tr(lang), visible: showConclusion),
+          child: conclusionIcon != null
+              ? GhostPill(
+                  // オン/オフで同じアイコン（未実施用の輪郭アイコン）のまま、
+                  // 色だけ橙⇔白に切り替える（アイコンそのものを差し替えると
+                  // オン/オフでサイズ感が変わって見えるため）。
+                  icon: conclusionIcon,
+                  tooltip: conclusionTooltip?.tr(lang),
+                  visible: showConclusion,
+                  active: conclusionActive,
+                  activeFill: Colors.transparent,
+                  activeForeground: Colors.orange,
+                  showBorder: false,
+                  horizontalPadding: 0,
+                  onTap: onConclusionTap,
+                  hintTapText: conclusionHintTapText?.tr(lang),
+                  hintLongPressText: conclusionHintLongPressText?.tr(lang),
+                )
+              : GhostPill(
+                  label: conclusionLabel ?? '結論'.tr(lang),
+                  tooltip: conclusionTooltip?.tr(lang),
+                  visible: showConclusion,
+                  active: conclusionActive,
+                  activeFill: palette.accentColor,
+                  activeForeground: palette.onAccent,
+                  onTap: onConclusionTap,
+                ),
         ),
         const SizedBox(width: 8),
         Expanded(
@@ -69,9 +155,14 @@ class PrepLabelRow extends StatelessWidget {
                   icon: reasonIcon,
                   tooltip: reasonTooltip?.tr(lang),
                   visible: showReason,
+                  active: reasonActive,
+                  activeFill: reasonActiveFill ?? Colors.transparent,
+                  activeForeground: reasonActiveForeground ?? Colors.orange,
                   onTap: onReasonTap,
                   showBorder: reasonShowBorder,
                   horizontalPadding: reasonHorizontalPadding,
+                  hintTapText: reasonHintTapText?.tr(lang),
+                  hintLongPressText: reasonHintLongPressText?.tr(lang),
                 )
               : GhostPill(
                   label: reasonLabel ?? '理由'.tr(lang),
@@ -91,11 +182,13 @@ class PrepLabelRow extends StatelessWidget {
                   tooltip: exampleTooltip?.tr(lang),
                   visible: showExample,
                   active: exampleActive,
-                  activeFill: palette.accentColor,
-                  activeForeground: palette.onAccent,
+                  activeFill: exampleActiveFill ?? palette.accentColor,
+                  activeForeground: exampleActiveForeground ?? palette.onAccent,
                   showBorder: false,
                   horizontalPadding: 0,
                   onTap: onExampleTap,
+                  hintTapText: exampleHintTapText?.tr(lang),
+                  hintLongPressText: exampleHintLongPressText?.tr(lang),
                 )
               : GhostPill(label: '例示'.tr(lang), visible: showExample),
         ),

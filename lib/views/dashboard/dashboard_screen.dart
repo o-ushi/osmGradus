@@ -20,6 +20,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
 import '../../widgets/genki_transport_row.dart';
 import '../../widgets/google_ai_send_consent_dialog.dart';
+import '../../widgets/layer_numeral_badge.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
 
 /// スタート画面から開く総合ダッシュボード。
@@ -271,30 +272,35 @@ class _DashboardScreenState extends State<DashboardScreen>
                                   ),
                                 ],
                                 _JudgmentRow(
-                                  label: 'JSST'.tr(lang),
-                                  value: _summary.jsstDisplayLabel,
-                                  onTap: _openScoringHistory,
-                                  trailingHint: true,
-                                ),
-                                _JudgmentRow(
-                                  label: '的中度'.tr(lang),
-                                  value: _summary.hitDisplayLabel,
-                                  onTap: _openScoringHistory,
-                                  trailingHint: true,
-                                ),
-                                _JudgmentRow(
-                                  label: 'PREP'.tr(lang),
-                                  value: _summary.prepDisplayLabel,
-                                  onTap: _openScoringHistory,
-                                  trailingHint: true,
-                                ),
-                                _JudgmentRow(
+                                  layerIndex: 0,
                                   label: '語彙'.tr(lang),
                                   value: _summary.vocabularyDisplayLabel,
                                   onTap: _openVocabularyHistory,
                                   trailingHint: true,
                                 ),
                                 _JudgmentRow(
+                                  layerIndex: 1,
+                                  label: '的中度'.tr(lang),
+                                  value: _summary.hitDisplayLabel,
+                                  onTap: _openScoringHistory,
+                                  trailingHint: true,
+                                ),
+                                _JudgmentRow(
+                                  layerIndex: 2,
+                                  label: 'PREP'.tr(lang),
+                                  value: _summary.prepDisplayLabel,
+                                  onTap: _openScoringHistory,
+                                  trailingHint: true,
+                                ),
+                                _JudgmentRow(
+                                  layerIndex: 3,
+                                  label: 'JSST'.tr(lang),
+                                  value: _summary.jsstDisplayLabel,
+                                  onTap: _openScoringHistory,
+                                  trailingHint: true,
+                                ),
+                                _JudgmentRow(
+                                  layerIndex: 4,
                                   label: '発音'.tr(lang),
                                   value: _summary.pronunciationDisplayLabel,
                                   onTap: _openPronunciationHistory,
@@ -352,6 +358,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                       diagnoseAwaitingPaste: chromeAiAwaitingPaste,
                       onDiagnose: diagnoseEnabled ? _onDiagnoseTap : null,
                       languageCode: lang,
+                      enableActionHints: true,
                     ),
                   ],
                   const SizedBox(height: 12),
@@ -453,6 +460,7 @@ class _JudgmentRow extends StatelessWidget {
   const _JudgmentRow({
     required this.label,
     required this.value,
+    this.layerIndex,
     this.valueEmphasized = false,
     this.onTap,
     this.trailingHint = false,
@@ -460,6 +468,11 @@ class _JudgmentRow extends StatelessWidget {
 
   final String label;
   final String value;
+
+  /// 0=Ⅰ〜4=Ⅴ。非nullなら起動画面の[LayerListTile]と同じ「色付き丸＋
+  /// ローマ数字」を行頭に出す（「総合」行はnullのまま、バッジ無し）。
+  final int? layerIndex;
+
   final bool valueEmphasized;
   final VoidCallback? onTap;
   final bool trailingHint;
@@ -467,28 +480,38 @@ class _JudgmentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.current;
+    final layerIndex = this.layerIndex;
+    // ラベルをExpandedにして残りの幅をすべて割り当てることで、英語・
+    // ベトナム語の長いラベル（Overall/Relevance/Pronunciation等）でも
+    // 折り返さないようにする。値は固定幅にせず自然な大きさのまま
+    // 右側（行の末尾）に寄る（Rowはまず非flexな子＝値とchevronの必要幅を
+    // 確保してから、残りをExpandedのラベルに割り当てるため）。
     final row = Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          SizedBox(
-            width: 72,
+          if (layerIndex != null) ...[
+            LayerNumeralIcon(layerIndex: layerIndex, size: 28),
+            const SizedBox(width: 10),
+          ],
+          Expanded(
             child: Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 15,
                 color: palette.textOnCardSecondary,
               ),
             ),
           ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: valueEmphasized ? 28 : 18,
-                fontWeight: valueEmphasized ? FontWeight.w700 : FontWeight.w600,
-                color: palette.textOnCardPrimary,
-              ),
+          const SizedBox(width: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: valueEmphasized ? 28 : 18,
+              fontWeight: valueEmphasized ? FontWeight.w700 : FontWeight.w600,
+              color: palette.textOnCardPrimary,
             ),
           ),
           if (trailingHint)

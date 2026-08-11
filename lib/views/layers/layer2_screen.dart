@@ -48,13 +48,6 @@ class Layer2ScreenState extends State<Layer2Screen> {
 
   void _onSettingsChanged() => setState(() {});
 
-  /// 起動画面のレイヤータイル長押し「始めから始める」用。引いたお題を
-  /// クリアし、サイコロ未タップの状態へ戻す。
-  void resetDrawnTopic() {
-    if (!mounted || _drawnTopic == null) return;
-    setState(() => _drawnTopic = null);
-  }
-
   Future<void> _drawTopic() async {
     setState(() => _drawing = true);
     final topic = await _topicService.drawRandom(_selectedCategory);
@@ -65,10 +58,8 @@ class Layer2ScreenState extends State<Layer2Screen> {
     });
   }
 
-  Future<void> _showAddChoice() => showTopicAddChoiceFlow(
-    context,
-    initialCategory: _selectedCategory,
-  );
+  Future<void> _showAddChoice() =>
+      showTopicAddChoiceFlow(context, initialCategory: _selectedCategory);
 
   /// 「理由」枠を転用した🌐ボタンから、カテゴリに応じた検索語で
   /// 外部ブラウザを開く（以前はサイコロボタンの長押しだった機能）。
@@ -117,6 +108,8 @@ class Layer2ScreenState extends State<Layer2Screen> {
                 addTooltip: 'お題の取り込み',
                 onAddTap: _showAddChoice,
                 onAddLongPress: _showUsageHelp,
+                addHintTapText: 'お題の取り込み',
+                addHintLongPressText: '操作方法',
               ),
               const SizedBox(height: 4),
               CategorySelectField(

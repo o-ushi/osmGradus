@@ -56,9 +56,9 @@ List<String> splitJapaneseIntoChunks(String text) {
 
 /// [splitJapaneseIntoChunks]と違い、漢字・カタカナの連続も一切マージしない、
 /// 1コードユニット=1要素の分割（osmCogitoの`splitCogitoJapaneseIntoCharacters`
-/// を移植）。既登録語ハイライト・タップ登録には使わず、長押しドラッグの
-/// ヒットテストと選択ハイライトの単位専用
-/// （[LongArticleWordSelectionMode.character]、S24等での誤選択対策）。
+/// を移植）。[LongArticleWordSelectionMode.character]では長押しドラッグの
+/// ヒットテスト・下書き選択・既登録語ハイライトの単位として使う
+/// （S24等での誤選択対策。タップ即時登録は引き続きチャンク単位）。
 List<String> splitJapaneseIntoCharacters(String text) => [
   for (var i = 0; i < text.length; i++) text[i],
 ];

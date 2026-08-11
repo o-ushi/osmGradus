@@ -16,4 +16,15 @@ extension TopicCategoryLabel on TopicCategory {
     TopicCategory.situational => 'situational',
     TopicCategory.random => 'random',
   };
+
+  static TopicCategory fromStorageKey(String key) =>
+      TopicCategory.values.firstWhere(
+        (category) => category.storageKey == key,
+        orElse: () => throw ArgumentError('Unknown TopicCategory: $key'),
+      );
 }
+
+/// [TopicService]の「取り込み済みお題」SharedPreferencesキーの接頭辞。
+/// [QuestionPromptService]が同じキーを読んで既存データを移行するため、
+/// 定数を共有する（`TopicService`↔`QuestionPromptService`の循環importを避ける）。
+const String topicsImportedKeyPrefix = 'topics.imported.';

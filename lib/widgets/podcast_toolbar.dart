@@ -22,6 +22,7 @@ class PodcastToolbar extends StatelessWidget {
     required this.onAddShow,
     this.onAddShowLongPress,
     this.showPlaybackControls = true,
+    this.enableActionHints = false,
   });
 
   final VoidCallback onSkipNext;
@@ -33,6 +34,12 @@ class PodcastToolbar extends StatelessWidget {
   /// 非nullの場合、「＋」の長押しで呼ぶ（レイヤーⅠの使い方シートを開く導線）。
   final VoidCallback? onAddShowLongPress;
   final bool showPlaybackControls;
+
+  /// trueの間、ランダム再生／並べ替え／番組を追加にダブルタップの機能ヒント
+  /// （Step 7の[ButtonActionHint]基盤）を付ける。ヒント文言は各ボタンの
+  /// [GhostPill.tooltip]と同じ文言をそのまま使う。「次のエピソードへ」は
+  /// 連打する操作系ボタンのため対象外（[PronunciationMicButton]と同じ理由）。
+  final bool enableActionHints;
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +65,7 @@ class PodcastToolbar extends StatelessWidget {
             activeFill: palette.accentColor,
             activeForeground: palette.onAccent,
             onTap: onToggleRandom,
+            hintTapText: enableActionHints ? 'ランダム再生'.tr(lang) : null,
           ),
         ),
         const SizedBox(width: 8),
@@ -67,6 +75,7 @@ class PodcastToolbar extends StatelessWidget {
             tooltip: '並べ替え'.tr(lang),
             visible: showPlaybackControls,
             onTap: onOpenSort,
+            hintTapText: enableActionHints ? '並べ替え'.tr(lang) : null,
           ),
         ),
         const SizedBox(width: 8),
@@ -79,6 +88,7 @@ class PodcastToolbar extends StatelessWidget {
             onLongPress: onAddShowLongPress,
             showBorder: false,
             horizontalPadding: 0,
+            hintTapText: enableActionHints ? '番組を追加'.tr(lang) : null,
           ),
         ),
       ],

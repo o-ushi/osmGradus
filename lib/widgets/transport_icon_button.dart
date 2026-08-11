@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import 'button_action_hint.dart';
 
 /// [GenkiTransportRow]の各ボタン（アイコンのみ、高さ56・角丸28）を切り出した
 /// 公開版。`borderless: true`（余白ゼロ・背景と枠線は透明・アイコンを
@@ -18,6 +19,8 @@ class TransportIconButton extends StatelessWidget {
     this.highlightColor,
     this.borderless = false,
     this.enabled = true,
+    this.hintTapText,
+    this.hintLongPressText,
   });
 
   final IconData icon;
@@ -43,6 +46,13 @@ class TransportIconButton extends StatelessWidget {
   /// 見た目で「今は使えない」ことを示す）。
   final bool enabled;
 
+  /// 非nullの場合、ダブルタップで「タップ：[hintTapText]／長押し：
+  /// [hintLongPressText]（未指定なら「なし」）」のヒントを表示する
+  /// （[GhostPill.hintTapText]と同じStep 7の[ButtonActionHint]基盤。同じ
+  /// トレードオフ・理由も[GhostPill.hintTapText]のコメントを参照）。
+  final String? hintTapText;
+  final String? hintLongPressText;
+
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.current;
@@ -54,9 +64,7 @@ class TransportIconButton extends StatelessWidget {
         ? palette.scene
         : (emphasize ? palette.onFill(accent) : sceneOutline);
     final fill = emphasize ? accent : Colors.transparent;
-    final border = !shown
-        ? palette.scene
-        : (emphasize ? accent : sceneOutline);
+    final border = !shown ? palette.scene : (emphasize ? accent : sceneOutline);
     final resolvedIconSize = borderless ? 56.0 : 30.0;
     return Tooltip(
       message: tooltip,
@@ -70,6 +78,13 @@ class TransportIconButton extends StatelessWidget {
           child: GestureDetector(
             onTap: onTap,
             onLongPress: onLongPress,
+            onDoubleTap: hintTapText == null
+                ? null
+                : () => ButtonActionHint.show(
+                    context,
+                    tapText: hintTapText!,
+                    longPressText: hintLongPressText,
+                  ),
             child: Container(
               height: 56,
               alignment: Alignment.center,

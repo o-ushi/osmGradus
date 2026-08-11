@@ -7,6 +7,7 @@ import '../../models/pronunciation_exercise.dart';
 import '../../models/saved_pronunciation_check.dart';
 import '../../services/pronunciation_advice_service.dart';
 import '../../services/pronunciation_check_storage.dart';
+import '../../services/question_prompt_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/history_format_badge.dart';
 import '../../widgets/history_list_card.dart';
@@ -46,7 +47,7 @@ class PronunciationHistoryScreen extends StatelessWidget {
       emptyMessage: 'まだ発音チェック結果がありません',
       languageCode: lang,
       loadAll: storage.loadAll,
-      delete: (item) => storage.delete(item.id),
+      delete: (item) => _deleteAndResync(storage, item),
       itemId: (item) => item.id,
       onItemTap: (context, saved) => Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -63,6 +64,8 @@ class PronunciationHistoryScreen extends StatelessWidget {
             HistoryFormatBadge(label: '未解析'.tr(lang)),
           if (saved.source == 'long')
             HistoryFormatBadge(label: '長文音読'.tr(lang)),
+          if (saved.source == 'questionPrompt')
+            HistoryFormatBadge(label: '問題文回答'.tr(lang)),
         ],
         children: _buildCardBody(palette, lang, saved),
       ),
@@ -113,6 +116,20 @@ class PronunciationHistoryScreen extends StatelessWidget {
       _CategoryStarsSummary(evaluation: evaluation),
     ];
   }
+}
+
+/// [item]を削除したあと、[item.questionPromptId]が紐づく問題文があれば
+/// pronunciationScoresを残りの記録から再計算する（問題文一覧の実施状況が、
+/// 削除済みの記録のまま古くなって残るのを防ぐ）。
+Future<void> _deleteAndResync(
+  PronunciationCheckStorage storage,
+  SavedPronunciationCheck item,
+) async {
+  await storage.delete(item.id);
+  final promptId = item.questionPromptId;
+  if (promptId == null) return;
+  final remaining = await storage.loadAll();
+  await QuestionPromptService().resyncPronunciationScores(promptId, remaining);
 }
 
 /// 5カテゴリの星評価を1行に収めた要約表示（履歴一覧用）。

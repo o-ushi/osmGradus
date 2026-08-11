@@ -569,6 +569,7 @@ class Layer5LongReadingScreenState extends State<Layer5LongReadingScreen>
                 onPlay: _toggleRecordingPlayback,
                 onReset: resetAttempt,
                 onDiagnose: submitEnabled ? _onSubmitTap : null,
+                enableActionHints: true,
               ),
             ],
           ),

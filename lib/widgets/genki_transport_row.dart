@@ -25,6 +25,8 @@ class GenkiTransportRow extends StatelessWidget {
     this.onReset,
     this.onDiagnose,
     this.languageCode = 'vi',
+    this.diagnoseOverride,
+    this.enableActionHints = false,
   });
 
   final bool showPlay;
@@ -54,6 +56,17 @@ class GenkiTransportRow extends StatelessWidget {
   /// ツールチップ等の表示言語（`appSettings.language`）。
   final String languageCode;
 
+  /// 非nullなら3番目（送信/貼り付け）の枠をこのウィジェットに丸ごと差し替える
+  /// （レイヤーⅣ「一覧から選ぶ」で、AI評価が届いたら紙飛行機の代わりに
+  /// [LayerNumeralBadge]「Ⅴ」を同じ枠に出す用途）。[showDiagnose]は無視される。
+  final Widget? diagnoseOverride;
+
+  /// trueの間、リセット／送信・貼り付けボタンにダブルタップの機能ヒント
+  /// （Step 7の[ButtonActionHint]基盤）を付ける。ヒント文言はそれぞれの
+  /// ボタンの[tooltip]と同じ文言をそのまま使う。「再生」は連打する操作系
+  /// ボタンのため対象外（[PronunciationMicButton]と同じ理由）。
+  final bool enableActionHints;
+
   @override
   Widget build(BuildContext context) {
     final lang = languageCode;
@@ -79,20 +92,28 @@ class GenkiTransportRow extends StatelessWidget {
             visible: showReset,
             onTap: onReset,
             borderless: true,
+            hintTapText: enableActionHints ? 'リセット'.tr(lang) : null,
           ),
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: TransportIconButton(
-            icon: diagnoseAwaitingPaste
-                ? Icons.content_paste_go_rounded
-                : Icons.send_rounded,
-            tooltip: diagnoseAwaitingPaste ? '貼り付け'.tr(lang) : '送信'.tr(lang),
-            visible: showDiagnose,
-            onTap: onDiagnose,
-            highlighted: diagnoseHighlighted || diagnoseAwaitingPaste,
-            highlightColor: diagnoseAwaitingPaste ? kPasteReadyColor : null,
-          ),
+          child:
+              diagnoseOverride ??
+              TransportIconButton(
+                icon: diagnoseAwaitingPaste
+                    ? Icons.content_paste_go_rounded
+                    : Icons.send_rounded,
+                tooltip: diagnoseAwaitingPaste
+                    ? '貼り付け'.tr(lang)
+                    : '送信'.tr(lang),
+                visible: showDiagnose,
+                onTap: onDiagnose,
+                highlighted: diagnoseHighlighted || diagnoseAwaitingPaste,
+                highlightColor: diagnoseAwaitingPaste ? kPasteReadyColor : null,
+                hintTapText: enableActionHints
+                    ? (diagnoseAwaitingPaste ? '貼り付け'.tr(lang) : '送信'.tr(lang))
+                    : null,
+              ),
         ),
       ],
     );

@@ -10,7 +10,7 @@ import 'long_article_vocab_enrich_screen.dart';
 /// 長文読解フローの読解画面。本文をタップで単語帳登録できる
 /// ([TappableJapaneseText])。操作バーは[GenkiTransportRow]と同じ枠
 /// （余白ゼロ・背景と枠線は透明・大アイコン）を流用した
-/// [LongArticleActionRow]で、左から「訳を付ける」または「隠す」／
+/// [LongArticleActionRow]で、左から「訳を付ける」（登録語があるとき）／
 /// 「単語帳」／「次へ」。osmCogitoの関連質問・日本語回答・セッションラウンドは
 /// 移植しない。
 class LongArticleReaderScreen extends StatefulWidget {
@@ -32,7 +32,7 @@ class LongArticleReaderScreen extends StatefulWidget {
 
 class LongArticleReaderScreenState extends State<LongArticleReaderScreen> {
   final List<String> _registeredWordIds = [];
-  var _highlightsVisible = true;
+  final _textKey = GlobalKey<TappableJapaneseTextState>();
 
   void _onWordRegistered(String id) {
     setState(() => _registeredWordIds.add(id));
@@ -48,6 +48,7 @@ class LongArticleReaderScreenState extends State<LongArticleReaderScreen> {
       context,
       entryIds: List.of(_registeredWordIds),
     );
+    await _textKey.currentState?.reloadRegisteredWords();
   }
 
   /// 長押し：選び直し画面を経由せず、確認なしで直接Chrome AIへ進む。
@@ -57,9 +58,13 @@ class LongArticleReaderScreenState extends State<LongArticleReaderScreen> {
       entryIds: List.of(_registeredWordIds),
       autoSubmit: true,
     );
+    await _textKey.currentState?.reloadRegisteredWords();
   }
 
-  Future<void> _openVocabulary() => VocabularySheet.show(context);
+  Future<void> _openVocabulary() async {
+    await VocabularySheet.show(context);
+    await _textKey.currentState?.reloadRegisteredWords();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,10 +88,10 @@ class LongArticleReaderScreenState extends State<LongArticleReaderScreen> {
                     border: Border.all(color: palette.cardBorder),
                   ),
                   child: TappableJapaneseText(
+                    key: _textKey,
                     text: widget.body,
                     onWordRegistered: _onWordRegistered,
                     onWordUnregistered: _onWordUnregistered,
-                    showRegisteredHighlights: _highlightsVisible,
                   ),
                 ),
               ),
@@ -96,14 +101,13 @@ class LongArticleReaderScreenState extends State<LongArticleReaderScreen> {
               child: LongArticleActionRow(
                 showEnrich: hasRegisteredWords,
                 onEnrich: hasRegisteredWords ? _openEnrich : null,
-                onEnrichLongPress:
-                    hasRegisteredWords ? _openEnrichAutoSubmit : null,
-                highlightsVisible: _highlightsVisible,
-                onToggleHighlights: () =>
-                    setState(() => _highlightsVisible = !_highlightsVisible),
+                onEnrichLongPress: hasRegisteredWords
+                    ? _openEnrichAutoSubmit
+                    : null,
                 onVocabulary: _openVocabulary,
                 onNext: widget.onFinish,
                 languageCode: lang,
+                enableActionHints: true,
               ),
             ),
           ],

@@ -46,6 +46,26 @@ class AppTheme {
       ),
       splashFactory: NoSplash.splashFactory,
       highlightColor: Colors.transparent,
+      // 全画面が独自の端スワイプ閉じる操作（[SwipeToCloseWrapper]、生の
+      // [Listener]でジェスチャーアリーナに参加しない実装）を持つため、
+      // Flutter既定のプラットフォーム別インタラクティブ戻るジェスチャー
+      // （iOS/macOSの[CupertinoPageTransitionsBuilder]の端スワイプ、
+      // Androidの[PredictiveBackPageTransitionsBuilder]）は無効化する。
+      // 既定のままだと、[SwipeToCloseWrapper]と同じ左端スワイプに両方の
+      // ジェスチャー系統が同時に反応し、SnackBar表示中（SnackBarはFlutter
+      // 内部で`transitionOnUserGestures: true`のHeroを持つ）に競合すると
+      // 「multiple heroes share the same tag」からアサーション連鎖に陥り、
+      // 以後タップ操作を含め一切反応しなくなる（実機で確認済みの不具合）。
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.iOS: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+          TargetPlatform.fuchsia: FadeUpwardsPageTransitionsBuilder(),
+        },
+      ),
     );
   }
 }

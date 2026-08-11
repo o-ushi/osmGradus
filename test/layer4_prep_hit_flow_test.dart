@@ -19,6 +19,11 @@ import 'package:osm_gradus/views/layers/layer4_screen.dart';
 const _lang = 'vi';
 String _t(String key) => key.tr(_lang);
 
+/// 「送信」「リセット」等、ダブルタップの機能ヒントが付いたボタン（Step 7）
+/// はGestureDetector.onDoubleTapで単タップ判定を約300ms（kDoubleTapTimeout）
+/// 保留するため、単タップとして確定させるにはこの分だけ余分にpumpする。
+const _tapConfirmWait = Duration(milliseconds: 350);
+
 const _validPrepHitJson = '''
 {
   "prepStars": 4,
@@ -150,6 +155,7 @@ void main() {
     expect(diagnoseIgnorePointer.ignoring, isFalse);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -160,6 +166,7 @@ void main() {
 
     await Clipboard.setData(const ClipboardData(text: _validPrepHitJson));
     await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -202,6 +209,7 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -209,6 +217,7 @@ void main() {
 
     await Clipboard.setData(const ClipboardData(text: '日本語での自由な感想文です'));
     await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

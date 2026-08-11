@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 import '../../data/prep_hit_ai_prompt_template.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings, topicSpeechReader;
+import '../../models/drawn_topic.dart';
 import '../../models/practice_timer_models.dart';
+import '../../models/question_prompt.dart';
 import '../../models/saved_scoring_result.dart';
 import '../../services/alarm_sound_service.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/jsst_scoring_service.dart';
 import '../../services/prep_hit_ai_response_parser.dart';
+import '../../services/question_prompt_service.dart';
 import '../../services/recording_stt_service.dart';
 import '../../services/scoring_result_storage.dart';
 import '../../theme/app_colors.dart';
@@ -21,7 +24,9 @@ import '../../widgets/dice_action_row.dart';
 import '../../widgets/dice_topic_card.dart';
 import '../../widgets/genki_transport_row.dart';
 import '../../widgets/layer_help_sheet.dart';
+import '../../widgets/layer_numeral_badge.dart';
 import '../../widgets/prep_label_row.dart';
+import '../../widgets/question_prompt_nav_row.dart';
 import '../../widgets/topic_speaker_timer_button.dart';
 import '../../widgets/transcribe_progress_indicator.dart';
 import '../../widgets/last_recording_playback_mixin.dart';
@@ -43,7 +48,34 @@ import 'scoring_history_screen.dart';
 /// お題・TTS・タイマー・録音開始タイミングの共通部分は[PracticeLayerScreenState]
 /// （レイヤーⅢ・Ⅴと共有）に集約されている。
 class Layer4Screen extends StatefulWidget {
-  const Layer4Screen({super.key});
+  const Layer4Screen({
+    super.key,
+    this.fixedPrompt,
+    this.onGoToLayer5,
+    this.canGoPrevious = false,
+    this.canGoNext = false,
+    this.onGoPrevious,
+    this.onGoNext,
+  });
+
+  /// 非nullなら「一覧から選ぶ」経由（Step 5）。抽選（サイコロ）・分野選択を
+  /// 隠し、この問題文で固定して録音・採点フローを進める。採点結果は
+  /// [SavedScoringResult]としての保存に加え、この問題文の
+  /// `jsstScore`/`hitScore`/`prepScore`にも反映する。
+  final QuestionPrompt? fixedPrompt;
+
+  /// [fixedPrompt]がnullでないとき、AI評価（PREP・的中度）が届いた後の
+  /// 「V」タップで呼ぶ（[MainShellState.openPromptDetailInLayer]への参照）。
+  final VoidCallback? onGoToLayer5;
+
+  /// [fixedPrompt]がnullでないとき、隠された「分野」枠に前後の問題文へ
+  /// 移動する▲▼ボタン（[QuestionPromptNavRow]）を表示するための状態。
+  /// [Layer4QuestionPromptDetailScreen]から渡される
+  /// （録音中などは呼び出し側の`_confirmCanNavigate`が移動を拒否する）。
+  final bool canGoPrevious;
+  final bool canGoNext;
+  final VoidCallback? onGoPrevious;
+  final VoidCallback? onGoNext;
 
   @override
   State<Layer4Screen> createState() => Layer4ScreenState();
@@ -57,6 +89,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
         ResetButtonVisibilityMixin,
         LastRecordingPlaybackMixin {
   final _storage = ScoringResultStorage();
+  final _questionPromptService = QuestionPromptService();
   final _idRandom = Random();
 
   List<SavedScoringResult> _savedResults = [];
@@ -91,8 +124,76 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    final fixedPrompt = widget.fixedPrompt;
+    if (fixedPrompt != null) selectedCategory = fixedPrompt.field;
     _loadSavedResults();
     initLastRecordingPlayback();
+  }
+
+  /// [Layer4QuestionPromptDetailScreen]が上下スワイプで前後の問題文へ移動
+  /// するとき、この画面自身は破棄せず[fixedPrompt]だけ差し替えて再利用する
+  /// （[GlobalKey]を安定させ、[isBusy]を呼び出し側から参照し続けられるように
+  /// するため）。そのため、対象の問題文が変わったらここで明示的に
+  /// [resetAttempt]し、前の問題文の読み上げ・カウントダウン・録音・
+  /// 採点結果・AI貼り付け待ちの状態を持ち越さないようにする。
+  @override
+  void didUpdateWidget(Layer4Screen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newPrompt = widget.fixedPrompt;
+    if (newPrompt != null && newPrompt.id != oldWidget.fixedPrompt?.id) {
+      selectedCategory = newPrompt.field;
+      unawaited(resetAttempt());
+    }
+  }
+
+  /// [fixedPrompt]モードでの抽選スキップ。固定の問題文をそのまま
+  /// [DrawnTopic]として返す（分野・シチュエーション条件も引き継ぐ）。
+  @override
+  Future<DrawnTopic> pickTopic() async {
+    final prompt = widget.fixedPrompt;
+    if (prompt == null) return super.pickTopic();
+    return DrawnTopic(
+      category: prompt.field,
+      text: prompt.body,
+      subtext: prompt.situationCondition,
+    );
+  }
+
+  /// [drawnTopic]が未設定（抽選/開始前）のとき、[fixedPrompt]モードでは
+  /// 本文カードに問題文をあらかじめ表示しておく（一覧経由で既に決まっている
+  /// 問題文のため、サイコロ待ちのプレースホルダーを見せる必要がない）。
+  DrawnTopic? get _displayedTopic => drawnTopic ?? _fixedDisplayTopic;
+
+  DrawnTopic? get _fixedDisplayTopic {
+    final prompt = widget.fixedPrompt;
+    if (prompt == null) return null;
+    return DrawnTopic(
+      category: prompt.field,
+      text: prompt.body,
+      subtext: prompt.situationCondition,
+    );
+  }
+
+  /// [fixedPrompt]の`jsstScore`/`hitScore`/`prepScore`を更新する
+  /// （渡さなかった軸は変更しない）。[QuestionPromptService.update]は
+  /// 対象の最新値を読み直してから書くため、複数回の採点・AI評価が
+  /// 別タイミングで来ても互いを上書きしない。
+  Future<void> _persistScoreToPrompt({
+    int? jsstScore,
+    int? hitScore,
+    int? prepScore,
+  }) async {
+    final fixedPrompt = widget.fixedPrompt;
+    if (fixedPrompt == null) return;
+    final current = await _questionPromptService.loadById(fixedPrompt.id);
+    if (current == null) return;
+    await _questionPromptService.update(
+      current.copyWith(
+        jsstScore: jsstScore,
+        hitScore: hitScore,
+        prepScore: prepScore,
+      ),
+    );
   }
 
   Future<void> _loadSavedResults() async {
@@ -182,12 +283,20 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
         ),
       );
       final now = DateTime.now();
+      final fixedPrompt = widget.fixedPrompt;
       final saved = SavedScoringResult(
         id: '${now.microsecondsSinceEpoch}_${_idRandom.nextInt(1 << 32)}',
         createdAt: now,
         result: result,
+        questionPromptId: fixedPrompt?.id,
+        questionPromptBody: fixedPrompt?.body,
       );
       await _storage.save(saved);
+      unawaited(
+        _persistScoreToPrompt(
+          jsstScore: JsstScoringService.combinedReferenceLevel(result),
+        ),
+      );
       if (!mounted) return;
       setState(() {
         _savedResults = [saved, ..._savedResults];
@@ -260,6 +369,12 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
         hitAdvice: eval.hitAdvice,
       );
       await _storage.update(updated);
+      unawaited(
+        _persistScoreToPrompt(
+          hitScore: eval.hitStars,
+          prepScore: eval.prepStars,
+        ),
+      );
       if (!mounted) return;
       _applyUpdatedResult(updated);
       clearChromeAiPendingState();
@@ -324,24 +439,54 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
       showTopicAddChoiceFlow(context, initialCategory: selectedCategory);
 
   /// 「＋」長押し：タイマー〜採点結果確認までのステップを表示する。
+  /// [fixedPrompt]モードでは、分野選択・サイコロ抽選のステップの代わりに、
+  /// 開始ボタン・「Ⅴ」への遷移ステップを案内する。
   void _showUsageHelp() {
     final lang = appSettings.language;
+    final fixedPrompt = widget.fixedPrompt;
     LayerHelpSheet.show(
       context,
       title: '操作方法'.tr(lang),
-      lines: [
-        LayerHelpLine(text: 'レイヤーⅣ_使い方_タイマー'.tr(lang)),
-        LayerHelpLine(text: 'レイヤーⅣ_使い方_分野'.tr(lang)),
-        LayerHelpLine(text: 'レイヤーⅣ_使い方_サイコロ'.tr(lang), icon: Icons.casino),
-        LayerHelpLine(text: 'レイヤーⅣ_使い方_日本語回答'.tr(lang)),
-        LayerHelpLine(
-          text: 'レイヤーⅣ_使い方_PREP的中度'.tr(lang),
-          icon: Icons.send_rounded,
-        ),
-        LayerHelpLine(text: 'レイヤーⅣ_使い方_採点結果'.tr(lang)),
-      ],
+      lines: fixedPrompt != null
+          ? [
+              LayerHelpLine(text: 'レイヤーⅣ_使い方_タイマー'.tr(lang)),
+              LayerHelpLine(
+                text: 'レイヤーⅣ_問題文_使い方_開始'.tr(lang),
+                icon: Icons.play_circle_fill_rounded,
+              ),
+              LayerHelpLine(text: 'レイヤーⅣ_問題文_使い方_日本語回答'.tr(lang)),
+              LayerHelpLine(
+                text: 'レイヤーⅣ_問題文_使い方_PREP的中度'.tr(lang),
+                icon: Icons.send_rounded,
+              ),
+              LayerHelpLine(text: 'レイヤーⅣ_問題文_使い方_採点結果'.tr(lang)),
+              LayerHelpLine(text: 'レイヤーⅣ_問題文_使い方_V'.tr(lang)),
+            ]
+          : [
+              LayerHelpLine(text: 'レイヤーⅣ_使い方_タイマー'.tr(lang)),
+              LayerHelpLine(text: 'レイヤーⅣ_使い方_分野'.tr(lang)),
+              LayerHelpLine(
+                text: 'レイヤーⅣ_使い方_サイコロ'.tr(lang),
+                icon: Icons.casino,
+              ),
+              LayerHelpLine(text: 'レイヤーⅣ_使い方_日本語回答'.tr(lang)),
+              LayerHelpLine(
+                text: 'レイヤーⅣ_使い方_PREP的中度'.tr(lang),
+                icon: Icons.send_rounded,
+              ),
+              LayerHelpLine(text: 'レイヤーⅣ_使い方_採点結果'.tr(lang)),
+            ],
     );
   }
+
+  /// 読み上げ・カウントダウン・録音・文字起こし・AI貼り付け待ちのいずれかが
+  /// 進行中かどうか（[Layer4QuestionPromptDetailScreen]が上下スワイプでの
+  /// 問題文切り替えを許可するかどうかの判定に使う。進行中の録音・AI待ちを
+  /// 保存せず失わせないためのガード）。
+  bool get isBusy =>
+      buttonPhase != TopicSpeakerTimerPhase.idle ||
+      _isEvaluating ||
+      chromeAiAwaitingPaste;
 
   // ── テスト専用フック ──────────────────────────────────────────────────
   // 実機のネイティブ録音・文字起こしは Flutter widget test 上で再現できない
@@ -350,6 +495,19 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
 
   @visibleForTesting
   SavedScoringResult? get debugLastResult => _lastResult;
+
+  /// [fixedPrompt]モードの、採点結果の問題文への反映（[_persistScoreToPrompt]）
+  /// を実際の録音・AI貼り付けを経由せず直接呼ぶ（テスト用）。
+  @visibleForTesting
+  Future<void> debugPersistScoreToPrompt({
+    int? jsstScore,
+    int? hitScore,
+    int? prepScore,
+  }) => _persistScoreToPrompt(
+    jsstScore: jsstScore,
+    hitScore: hitScore,
+    prepScore: prepScore,
+  );
 
   /// 実際のタイマー終了・録音・文字起こしを経由せず、JSST採点済みの結果を
   /// 直接与える（[_sendToChromeAi]・[_pasteAndSaveResult]のテスト用）。
@@ -365,6 +523,11 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
   Widget build(BuildContext context) {
     final lang = appSettings.language;
     final palette = AppColors.current;
+    final fixedPrompt = widget.fixedPrompt;
+    final showLayer5Badge =
+        fixedPrompt != null &&
+        widget.onGoToLayer5 != null &&
+        (_lastResult?.hasAiEvaluation ?? false);
     return Container(
       color: palette.scene,
       child: SafeArea(
@@ -381,29 +544,43 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
                   show15Plus60: true,
                   showAdd: true,
                   addIcon: Icons.add_rounded,
-                  addTooltip: 'お題の取り込み',
+                  addTooltip: fixedPrompt != null ? '操作方法' : 'お題の取り込み',
                   selectedOption: timerController.option,
                   onPresetTap: onPresetTap,
-                  onAddTap: _showAddChoice,
+                  // 既存の問題文で採点するモードのため、ここからの新規追加は
+                  // 行わない（タップは無効。長押しの使い方シートのみ）。
+                  onAddTap: fixedPrompt != null ? () {} : _showAddChoice,
                   onAddLongPress: _showUsageHelp,
+                  addHintTapText: fixedPrompt != null ? null : 'お題の取り込み',
+                  addHintLongPressText: '操作方法',
                 ),
               ),
               const SizedBox(height: 4),
-              ListenableBuilder(
-                listenable: timerController,
-                builder: (context, _) => CategorySelectField(
-                  selected: selectedCategory,
-                  availableCategories: availableCategories,
-                  onChanged: onCategoryChanged,
-                ),
-              ),
+              // 分野は一覧のフィルタで絞り込めるため、[fixedPrompt]モードの
+              // 詳細では表示せず、同じ枠に前後の問題文へ移動する▲▼ボタンを
+              // 置く。
+              fixedPrompt != null
+                  ? QuestionPromptNavRow(
+                      canGoPrevious: widget.canGoPrevious,
+                      canGoNext: widget.canGoNext,
+                      onPrevious: widget.onGoPrevious ?? () {},
+                      onNext: widget.onGoNext ?? () {},
+                    )
+                  : ListenableBuilder(
+                      listenable: timerController,
+                      builder: (context, _) => CategorySelectField(
+                        selected: selectedCategory,
+                        availableCategories: availableCategories,
+                        onChanged: onCategoryChanged,
+                      ),
+                    ),
               const SizedBox(height: 4),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      DiceTopicCard(topic: drawnTopic),
+                      DiceTopicCard(topic: _displayedTopic),
                       const SizedBox(height: 8),
                       Text(
                         '日本語で回答しよう'.tr(lang),
@@ -429,6 +606,10 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
                     isPaused: topicSpeechReader.isPaused,
                     onTap: onButtonTap,
                     size: 98,
+                    idleIcon: fixedPrompt != null
+                        ? Icons.play_circle_fill_rounded
+                        : Icons.casino,
+                    idleTooltip: fixedPrompt != null ? '開始'.tr(lang) : null,
                   ),
                 ),
               ),
@@ -466,6 +647,17 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
                               (_showSendPrepHit || chromeAiAwaitingPaste)
                           ? _onSubmitPrepHitTap
                           : null,
+                      // AI評価（PREP・的中度）が届いたら、紙飛行機の代わりに
+                      // 「Ⅴ」へ進むバッジを同じ枠に出す（一覧から選ぶモードのみ）。
+                      diagnoseOverride: showLayer5Badge
+                          ? LayerNumeralBadge(
+                              layerIndex: 4,
+                              onTap: widget.onGoToLayer5!,
+                              tooltip: 'レイヤーⅤタイトル'.tr(lang),
+                              hintTapText: 'レイヤーⅤタイトル'.tr(lang),
+                            )
+                          : null,
+                      enableActionHints: true,
                     ),
                   ),
                   // 文字起こし中は、レイアウトの高さを変えずに「再生」

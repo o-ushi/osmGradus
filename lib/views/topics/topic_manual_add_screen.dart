@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
+import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
 import '../../services/topic_service.dart';
 import '../../theme/app_colors.dart';
@@ -88,7 +89,9 @@ class _TopicManualAddScreenState extends State<TopicManualAddScreen> {
   Future<void> _add() async {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
-    final added = await _service.importTopics(_category, [text]);
+    final added = await _service.importTopics(_category, [
+      text,
+    ], source: QuestionPromptSource.manual);
     if (!mounted) return;
     if (added == 0) {
       setState(() {

@@ -12,8 +12,9 @@ import '../utils/japanese_text_chunks.dart';
 
 /// タップした単語（[splitJapaneseIntoChunks]の1チャンク。漢字・カタカナの
 /// 連続はまとめて1語）を、確認ダイアログなしで即座に単語帳へ登録する
-/// テキスト。登録済みの語は太字＋背景色でハイライトする（複数チャンクに
-/// またがる語も、本文中の全出現箇所をハイライトする）。
+/// テキスト。登録済みの語は太字＋背景色でハイライトする（選択方式に応じた
+/// 単位で照合するため、文字単位で選んだ部分語もハイライトし、本文中の全出現
+/// 箇所を対象にする）。
 ///
 /// - **タップ**: その場の1チャンクを確認なしで即座に登録する（常に
 ///   チャンク単位。1文字だけ即時登録しても大抵は意味を成さないため）。
@@ -36,7 +37,6 @@ class TappableJapaneseText extends StatefulWidget {
     required this.text,
     required this.onWordRegistered,
     this.onWordUnregistered,
-    this.showRegisteredHighlights = true,
     this.bodyKey = const ValueKey('tappableJapaneseText'),
   });
 
@@ -47,10 +47,6 @@ class TappableJapaneseText extends StatefulWidget {
 
   /// 長押しで登録を取り消した[VocabularyEntry.id]を通知する。
   final ValueChanged<String>? onWordUnregistered;
-
-  /// falseのとき、既登録語の太字・背景ハイライトを出さない（「隠す」用）。
-  /// タップ登録・長押し選択そのものは有効のまま。
-  final bool showRegisteredHighlights;
 
   /// 本文[Text.rich]に付けるキー。
   final Key bodyKey;
@@ -67,41 +63,18 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
   /// チャンク単位（漢字・カタカナの連続はまとまる）。
   late final List<String> _chunks = splitJapaneseIntoChunks(widget.text);
 
-  /// 長押しドラッグのヒットテスト用の1文字単位
+  /// 長押しドラッグのヒットテスト・既登録語ハイライト用の1文字単位
   /// （[LongArticleWordSelectionMode.character]のときの[_hitUnits]）。
-  late final List<String> _charUnits = splitJapaneseIntoCharacters(
-    widget.text,
-  );
-
-  /// [_charUnits]の各要素が[_chunks]の何番目に属するか。
-  late final List<int> _charToChunkIndex = _buildCharToChunkIndex();
-
-  List<int> _buildCharToChunkIndex() {
-    final mapping = <int>[];
-    for (var chunkIndex = 0; chunkIndex < _chunks.length; chunkIndex++) {
-      for (var k = 0; k < _chunks[chunkIndex].length; k++) {
-        mapping.add(chunkIndex);
-      }
-    }
-    return mapping;
-  }
+  late final List<String> _charUnits = splitJapaneseIntoCharacters(widget.text);
 
   /// [AppSettings.longArticleWordSelectionMode]に応じた、長押しドラッグの
-  /// ヒットテストと描画分割に使う単位（[_anchorIndex]・[_hoverIndex]は
-  /// この配列へのインデックス）。
+  /// ヒットテストと描画分割に使う単位（[_anchorIndex]・[_hoverIndex]・
+  /// 既登録語ハイライトは、この配列へのインデックス）。
   List<String> get _hitUnits =>
       appSettings.longArticleWordSelectionMode ==
           LongArticleWordSelectionMode.chunk
       ? _chunks
       : _charUnits;
-
-  /// [_hitUnits]の各要素が[_chunks]の何番目に属するか（既登録語ハイライトの
-  /// 判定用）。チャンクモードでは[_hitUnits]自体が[_chunks]なので恒等写像。
-  List<int> get _hitUnitToChunkIndex =>
-      appSettings.longArticleWordSelectionMode ==
-          LongArticleWordSelectionMode.chunk
-      ? List<int>.generate(_chunks.length, (i) => i)
-      : _charToChunkIndex;
 
   Set<String> _registeredWords = {};
 
@@ -134,16 +107,27 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
   @override
   void initState() {
     super.initState();
-    unawaited(_loadRegisteredWords());
+    unawaited(reloadRegisteredWords());
   }
 
-  Future<void> _loadRegisteredWords() async {
+  /// 単語帳の内容を再読み込みし、ハイライトとセッション登録を同期する。
+  /// 単語帳シートなどでエントリが削除・編集されたあとに呼ぶ。
+  Future<void> reloadRegisteredWords() async {
     final entries = await _vocabularyService.loadEntries();
     if (!mounted) return;
+    final words = {for (final entry in entries) entry.word};
+    final removedSessionIds = <String>[
+      for (final entry in _sessionRegisteredIds.entries)
+        if (!words.contains(entry.key)) entry.value,
+    ];
     setState(() {
-      _registeredWords = {for (final entry in entries) entry.word};
+      _registeredWords = words;
+      _sessionRegisteredIds.removeWhere((word, _) => !words.contains(word));
       _loadingVocabulary = false;
     });
+    for (final id in removedSessionIds) {
+      widget.onWordUnregistered?.call(id);
+    }
   }
 
   void _onTapUp(TapUpDetails details) {
@@ -164,8 +148,7 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
     );
     if (hitIndex == null) return;
     _longPressActive = true;
-    final chunkIndex = _hitUnitToChunkIndex[hitIndex];
-    final existingWord = _sessionWordAtChunkIndex(chunkIndex);
+    final existingWord = _sessionWordAtHitUnitIndex(hitIndex);
     if (existingWord != null) {
       // 既登録範囲の長押し＝キャンセル操作。ドラッグでは範囲を変えない。
       setState(() {
@@ -295,18 +278,20 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
     widget.onWordUnregistered?.call(id);
   }
 
-  /// [index]（[_chunks]へのインデックス）が、このウィジェット表示中に
+  /// [index]（[_hitUnits]へのインデックス）が、このウィジェット表示中に
   /// 登録した語のどれかに含まれていれば、その語を返す（同じ語が本文中に
-  /// 複数回出現する場合も対応）。
-  String? _sessionWordAtChunkIndex(int index) =>
-      _wordAtChunkIndex(index, _sessionRegisteredIds.keys);
+  /// 複数回出現する場合も対応）。文字単位モードで1文字だけ登録した語も
+  /// 対象になる。
+  String? _sessionWordAtHitUnitIndex(int index) =>
+      _wordAtHitUnitIndex(index, _sessionRegisteredIds.keys);
 
-  String? _wordAtChunkIndex(int index, Iterable<String> words) {
+  String? _wordAtHitUnitIndex(int index, Iterable<String> words) {
+    final units = _hitUnits;
     for (final word in words) {
-      for (var start = 0; start < _chunks.length; start++) {
+      for (var start = 0; start < units.length; start++) {
         final buffer = StringBuffer();
-        for (var end = start; end < _chunks.length; end++) {
-          buffer.write(_chunks[end]);
+        for (var end = start; end < units.length; end++) {
+          buffer.write(units[end]);
           final joined = buffer.toString();
           if (joined == word) {
             if (index >= start && index <= end) return word;
@@ -319,18 +304,21 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
     return null;
   }
 
-  /// [_registeredWords]（複数チャンクにまたがる語も含む）が、[_chunks]の
-  /// どのインデックスに該当するかをまとめて求める（既登録語ハイライト用）。
-  /// 本文中に同じ語が複数回現れる場合は、その全ての出現箇所を対象にする。
-  Set<int> _registeredChunkIndices() {
+  /// [_registeredWords]が[_hitUnits]のどのインデックスに該当するかをまとめて
+  /// 求める（既登録語ハイライト用）。文字単位モードではチャンク境界に揃って
+  /// いない語（例: 「友」だけ）もハイライトでき、チャンク単位モードでは
+  /// [_hitUnits]が[_chunks]そのものなので従来どおり。本文中に同じ語が複数回
+  /// 現れる場合は、その全ての出現箇所を対象にする。
+  Set<int> _registeredHitUnitIndices() {
+    final units = _hitUnits;
     final indices = <int>{};
     for (final rawWord in _registeredWords) {
       final word = rawWord.trim();
       if (word.isEmpty) continue;
-      for (var start = 0; start < _chunks.length; start++) {
+      for (var start = 0; start < units.length; start++) {
         final buffer = StringBuffer();
-        for (var end = start; end < _chunks.length; end++) {
-          buffer.write(_chunks[end]);
+        for (var end = start; end < units.length; end++) {
+          buffer.write(units[end]);
           final joined = buffer.toString();
           if (joined == word) {
             for (var k = start; k <= end; k++) {
@@ -355,13 +343,11 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
     return index >= start && index <= end;
   }
 
-  /// 描画自体は[_hitUnits]（現在の[LongArticleWordSelectionMode]に応じた
-  /// 単位）で行う。既登録語ハイライトは[_hitUnitToChunkIndex]でチャンク単位
-  /// の判定結果を各要素へ引き当てる。
+  /// 描画・既登録語ハイライトとも[_hitUnits]（現在の
+  /// [LongArticleWordSelectionMode]に応じた単位）で行う。
   List<TextSpan> _buildSpans(AppPalette palette) {
     final units = _hitUnits;
-    final unitToChunk = _hitUnitToChunkIndex;
-    final registeredIndices = _registeredChunkIndices();
+    final registeredIndices = _registeredHitUnitIndices();
     return [
       for (var i = 0; i < units.length; i++)
         TextSpan(
@@ -370,15 +356,12 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
             fontSize: 16,
             height: 1.9,
             color: palette.textOnCardPrimary,
-            fontWeight:
-                widget.showRegisteredHighlights &&
-                    registeredIndices.contains(unitToChunk[i])
+            fontWeight: registeredIndices.contains(i)
                 ? FontWeight.bold
                 : FontWeight.normal,
             backgroundColor: _isHitUnitInDraftSelection(i)
                 ? palette.accentColor.withValues(alpha: 0.35)
-                : (widget.showRegisteredHighlights &&
-                          registeredIndices.contains(unitToChunk[i])
+                : (registeredIndices.contains(i)
                       ? palette.cardAccent.withValues(alpha: 0.35)
                       : null),
           ),
@@ -408,6 +391,10 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
   /// に応じて[debugChunks]または1文字ずつの分割になる）。
   @visibleForTesting
   List<String> get debugHitUnits => _hitUnits;
+
+  /// 既登録語ハイライト対象の[_hitUnits]インデックス（テスト用）。
+  @visibleForTesting
+  Set<int> get debugRegisteredHitUnitIndices => _registeredHitUnitIndices();
 
   @override
   Widget build(BuildContext context) {

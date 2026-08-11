@@ -4,10 +4,14 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../data/pronunciation_ai_prompt_template.dart';
+import '../../data/question_prompt_pronunciation_sentences_ai_prompt_template.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings, topicSpeechReader;
+import '../../models/pronunciation_exercise.dart';
 import '../../models/pronunciation_practice_session.dart';
 import '../../models/pronunciation_evaluation.dart';
+import '../../models/question_prompt.dart';
+import '../../models/question_prompt_pronunciation_sentence.dart';
 import '../../models/recording_mode.dart';
 import '../../models/saved_pronunciation_check.dart';
 import '../../models/topic_category.dart';
@@ -15,12 +19,15 @@ import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/pronunciation_ai_response_parser.dart';
 import '../../services/pronunciation_check_storage.dart';
 import '../../services/pronunciation_exercise_service.dart';
+import '../../services/question_prompt_pronunciation_sentences_parser.dart';
+import '../../services/question_prompt_service.dart';
 import '../../services/recording_stt_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
 import '../../widgets/category_select_field.dart';
 import '../../widgets/dice_action_row.dart';
 import '../../widgets/genki_transport_row.dart';
+import '../../widgets/google_ai_send_consent_dialog.dart';
 import '../../widgets/last_recording_playback_mixin.dart';
 import '../../widgets/reset_button_visibility_mixin.dart';
 import '../../widgets/layer_help_sheet.dart';
@@ -28,6 +35,8 @@ import '../../widgets/prep_label_row.dart';
 import '../../widgets/pronunciation_exercise_card.dart';
 import '../../widgets/pronunciation_evaluation_result_view.dart';
 import '../../widgets/pronunciation_mic_button.dart';
+import '../../widgets/question_prompt_nav_row.dart';
+import '../../widgets/question_prompt_summary_badge.dart';
 import '../../widgets/speech_processing_consent_dialog.dart';
 import '../../widgets/transcribe_progress_indicator.dart';
 import 'pronunciation_exercise_import_screen.dart';
@@ -63,8 +72,49 @@ import 'pronunciation_history_screen.dart';
 /// - 連続：サイコロタップ（1問目）または録音停止後に自動的に表示される
 ///   次の問題（2問目以降）と同時に、録音まで自動的に始まる。結果は一切
 ///   表示せず、そのまま10問目まで進み続ける。
+///
+/// Step 5: [gradedPrompt]が非nullのとき、レイヤーⅤ「問題文一覧から選ぶ」
+/// （[Layer5QuestionPromptDetailScreen]）経由のセッションとして動作する
+/// （[Layer1VocabScreen.gradedPrompt]・[Layer4Screen.fixedPrompt]と同じ
+/// 「固定入力で通常フローを流用する」設計）。全問評価後、5カテゴリの発音
+/// 評点を[QuestionPrompt.pronunciationScores]へ書き足し、「総評」への導線
+/// （[QuestionPromptSummaryBadge]）を出す。単体の「ランダム」モードでは
+/// `gradedPrompt`を渡さないため、既存動作は変わらない。
+///
+/// Step 6: レイヤーⅠと同じ「結論」枠（[PrepLabelRow.showConclusion]）に
+/// 「問題作成」を配置する（`gradedPrompt`が非nullのときのみ表示）。タップで
+/// 問題文に関連した発音練習用の短文を最大10個Chrome AIに作らせ
+/// （[QuestionPromptPronunciationSentencesAiPromptTemplate]）、
+/// [QuestionPrompt.pronunciationSentences]へ保存。生成済みのときはそれを
+/// 「ランダム」と同じセッションUIの出題プールとして使う（未生成の間は既存の
+/// 「ランダム」プールにフォールバックする）。紙飛行機（発音評価送信）と
+/// 同じ[ChromeAiSubmitMixin]の送受信状態を共有するため、[_awaitingSentenceGeneration]
+/// でどちらの送信/貼り付けかを判別する。
 class Layer5Screen extends StatefulWidget {
-  const Layer5Screen({super.key});
+  const Layer5Screen({
+    super.key,
+    this.gradedPrompt,
+    this.onGoToSummary,
+    this.canGoPrevious = false,
+    this.canGoNext = false,
+    this.onGoPrevious,
+    this.onGoNext,
+  });
+
+  /// Step 5: 非nullの場合、この問題文に紐づくセッションとして動作する。
+  final QuestionPrompt? gradedPrompt;
+
+  /// [gradedPrompt]が非nullのとき、AI評価が届いた後の「総評」タップで
+  /// この問題文のIDを渡して呼ぶ（[QuestionPromptSummaryScreen]への遷移）。
+  final void Function(String promptId)? onGoToSummary;
+
+  /// [gradedPrompt]が非nullのとき、隠された「分野」枠に前後の問題文へ
+  /// 移動する▲▼ボタン（[QuestionPromptNavRow]）を表示するための状態
+  /// （[Layer5QuestionPromptDetailScreen]から渡される）。
+  final bool canGoPrevious;
+  final bool canGoNext;
+  final VoidCallback? onGoPrevious;
+  final VoidCallback? onGoNext;
 
   @override
   State<Layer5Screen> createState() => Layer5ScreenState();
@@ -79,6 +129,7 @@ class Layer5ScreenState extends State<Layer5Screen>
         LastRecordingPlaybackMixin {
   final _recordingService = RecordingSttService();
   final _storage = PronunciationCheckStorage();
+  final _questionPromptService = QuestionPromptService();
   final _idRandom = Random();
 
   late PronunciationPracticeSession _session;
@@ -91,6 +142,23 @@ class Layer5ScreenState extends State<Layer5Screen>
   double _transcribeProgress = 0;
   String _transcribePhase = '';
   StreamSubscription<TranscribeProgress>? _transcribeProgressSub;
+
+  /// Step 5: 直近に保存したAI評価（[widget.onGoToSummary]が使える「総評」
+  /// 導線の表示判定に使う。[widget.gradedPrompt]がnullの「ランダム」単体
+  /// モードでは参照されない）。
+  PronunciationEvaluation? _lastEvaluation;
+
+  /// Step 6: [widget.gradedPrompt]の[QuestionPrompt.pronunciationSentences]の
+  /// 手元コピー。「問題作成」で新しく生成したら即座にここを更新し、セッションの
+  /// 出題プールに反映する（[widget.gradedPrompt]自体は呼び出し側が
+  /// 都度読み直すまで更新されない、Step 5の`gradedPrompt`と同じ考え方）。
+  List<QuestionPromptPronunciationSentence> _pronunciationSentences = const [];
+
+  /// Step 6: 「問題作成」（単文生成）の送信〜貼り付け待ちの間だけtrue。
+  /// 紙飛行機（発音評価送信）と同じ[ChromeAiSubmitMixin]の状態
+  /// （chromeAiAwaitingPaste等）を共有するため、貼り付けが届いたときに
+  /// どちらの解析処理を呼ぶべきかをこのフラグで判別する。
+  bool _awaitingSentenceGeneration = false;
 
   /// 録音開始処理の途中かどうか（マイクをタップしてから実際に録音が
   /// 始まるまでの非同期区間）。この間は二重タップ防止のため次のタップを
@@ -149,6 +217,8 @@ class Layer5ScreenState extends State<Layer5Screen>
     // 設定画面で言語を変えて戻ってきただけでは再構築されず表示が古い言語の
     // ままになる。appSettingsの変更を直接購読し、その場で再描画する。
     appSettings.addListener(_onSettingsChanged);
+    _pronunciationSentences =
+        widget.gradedPrompt?.pronunciationSentences ?? const [];
     _session = _newSession();
     _sessionId = _newSessionId();
     // initStateは同期処理しかできないため、まず組み込み25問だけでセッションを
@@ -159,8 +229,60 @@ class Layer5ScreenState extends State<Layer5Screen>
     initLastRecordingPlayback();
   }
 
-  PronunciationPracticeSession _newSession() =>
-      const PronunciationExerciseService().buildSession();
+  /// Step 5: [Layer5QuestionPromptDetailScreen]が上下スワイプで前後の問題文へ
+  /// 移動するとき、この画面自身は破棄せず[gradedPrompt]だけ差し替えて再利用
+  /// する（[GlobalKey]を安定させ、[isBusy]を呼び出し側から参照し続けられる
+  /// ようにするため）。対象の問題文が変わったら明示的に[resetAttempt]し、前の
+  /// 問題文のセッション・AI貼り付け待ちの状態を持ち越さないようにする。
+  @override
+  void didUpdateWidget(Layer5Screen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.gradedPrompt?.id != oldWidget.gradedPrompt?.id) {
+      _pronunciationSentences =
+          widget.gradedPrompt?.pronunciationSentences ?? const [];
+      unawaited(resetAttempt());
+    }
+  }
+
+  /// Step 5: [Layer5QuestionPromptDetailScreen]が上下スワイプでの問題文切り
+  /// 替えを許可するかどうかの判定に使う（進行中の録音・AI貼り付け待ちを
+  /// 保存せず失わせないためのガード。[gradedPrompt]がnullのときは呼ばれない）。
+  bool get isBusy => _recordingBusy || chromeAiAwaitingPaste;
+
+  /// Step 6: [widget.gradedPrompt]が非nullで[_pronunciationSentences]が
+  /// 生成済みなら、この問題文専用の出題プールでセッションを組み立てる。
+  /// 未生成の間（またはgradedPromptがnullの「ランダム」単体モード）は、
+  /// 従来どおり組み込みプールで組み立てる（[_refreshSessionWithFullPoolIfUntouched]
+  /// が取り込み済みプールと統合し直す）。
+  PronunciationPracticeSession _newSession() {
+    if (widget.gradedPrompt != null && _pronunciationSentences.isNotEmpty) {
+      return _buildSessionFromPronunciationSentences(_pronunciationSentences);
+    }
+    return const PronunciationExerciseService().buildSession();
+  }
+
+  PronunciationPracticeSession _buildSessionFromPronunciationSentences(
+    List<QuestionPromptPronunciationSentence> sentences,
+  ) {
+    final promptId = widget.gradedPrompt!.id;
+    return PronunciationPracticeSession(
+      questions: [
+        for (var i = 0; i < sentences.length; i++)
+          PronunciationPracticeQuestion(
+            exercise: PronunciationExercise(
+              id: 'qppron_${promptId}_$i',
+              category: sentences[i].category,
+              sentence: sentences[i].text,
+              reading: sentences[i].reading,
+              targetExpressions: const [],
+              vietnameseHint: '',
+              evaluationPoint: '',
+              source: PronunciationExerciseSource.imported,
+            ),
+          ),
+      ],
+    );
+  }
 
   bool get _sessionUntouched => _session.questions.every(
     (q) => q.status == PronunciationQuestionStatus.waiting,
@@ -169,7 +291,13 @@ class Layer5ScreenState extends State<Layer5Screen>
   /// 組み込み課題と取り込み済み課題を統合したプールでセッションを引き直す
   /// （まだ何も答えていない場合のみ）。抽選時に組み込み・取り込み済み両方の
   /// 課題が対象になるようにする。
+  ///
+  /// Step 6: [widget.gradedPrompt]が非nullのときは、この問題文専用の出題
+  /// プール（[_pronunciationSentences]、生成済みならそれ、未生成なら
+  /// [_newSession]が組み込みプールにフォールバックする）を使うため、
+  /// グローバルなランダムプールへの引き直しはしない。
   Future<void> _refreshSessionWithFullPoolIfUntouched() async {
+    if (widget.gradedPrompt != null) return;
     if (!_sessionUntouched) return;
     final pool = await const PronunciationExerciseService().loadFullPool();
     if (!mounted || !_sessionUntouched) return;
@@ -203,6 +331,22 @@ class Layer5ScreenState extends State<Layer5Screen>
   @override
   void showChromeAiMessage(String message) => _showMessage(message);
 
+  /// Step 6: 「問題作成」（単文生成）と紙飛行機（発音評価送信）は同じ
+  /// [ChromeAiSubmitMixin]の状態を共有するため、[_awaitingSentenceGeneration]
+  /// でどちらの送信かを判別し、適切な同意文言を出し分ける。
+  @override
+  Future<bool> confirmChromeAiSend(String lang) {
+    if (_awaitingSentenceGeneration) {
+      return GoogleAiSendConsentDialog.confirm(
+        context,
+        languageCode: lang,
+        titleKey: 'レイヤーⅤ_問題作成_Google送信確認_タイトル',
+        bodyKey: 'レイヤーⅤ_問題作成_Google送信確認_本文',
+      );
+    }
+    return GoogleAiSendConsentDialog.confirm(context, languageCode: lang);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) =>
       handleAppLifecycleState(state);
@@ -210,7 +354,11 @@ class Layer5ScreenState extends State<Layer5Screen>
   @override
   void onResumedFromExternalApp() {
     if (!chromeAiAwaitingPaste) return;
-    unawaited(_pasteAndSaveResult());
+    if (_awaitingSentenceGeneration) {
+      unawaited(_pastePronunciationSentences());
+    } else {
+      unawaited(_pasteAndSaveResult());
+    }
   }
 
   void _showMessage(String message) {
@@ -461,13 +609,113 @@ class Layer5ScreenState extends State<Layer5Screen>
         unparsedResponse: null,
       );
       await _storage.save(saved);
+      if (widget.gradedPrompt != null) {
+        await _persistScoresToPrompt(evaluation);
+      }
       if (!mounted) return;
       setState(() {
         _isSessionSaved = true;
         _hasSavedChecks = true;
+        _lastEvaluation = evaluation;
       });
       clearChromeAiPendingState();
       unawaited(_showResultDialog(evaluation));
+    });
+  }
+
+  /// Step 5: [widget.gradedPrompt]が非nullのとき、5カテゴリの発音評点を
+  /// この問題文の[QuestionPrompt.pronunciationScores]へ書き足す（既存の
+  /// 評価軸ごとの値を、届いた分だけ更新する）。
+  Future<void> _persistScoresToPrompt(
+    PronunciationEvaluation evaluation,
+  ) async {
+    final gradedPrompt = widget.gradedPrompt;
+    if (gradedPrompt == null) return;
+    final current = await _questionPromptService.loadById(gradedPrompt.id);
+    if (current == null) return;
+    final scores = {
+      ...current.pronunciationScores,
+      for (final entry in evaluation.categoryEvaluations.entries)
+        entry.key: entry.value.score,
+    };
+    await _questionPromptService.update(
+      current.copyWith(pronunciationScores: scores),
+    );
+  }
+
+  /// Step 6: 「問題作成」タップ：貼り付け待ちならクリップボードを解析して
+  /// 保存する。そうでなければ、問題文に関連した発音練習用の短文を
+  /// Chrome AIに生成させる（既に生成済みでも、タップのたびに作り直す。
+  /// 現在のセッションの途中経過は[_pastePronunciationSentences]が新しい
+  /// セッションに置き換える）。
+  Future<void> _onCreateQuizTap() async {
+    if (_awaitingSentenceGeneration) {
+      await _pastePronunciationSentences();
+      return;
+    }
+    await _sendPronunciationSentences();
+  }
+
+  Future<void> _sendPronunciationSentences() async {
+    final gradedPrompt = widget.gradedPrompt;
+    if (gradedPrompt == null) return;
+    setState(() => _awaitingSentenceGeneration = true);
+    final lang = appSettings.language;
+    final plan =
+        QuestionPromptPronunciationSentencesAiPromptTemplate.buildLaunchPlan(
+          prompt: gradedPrompt,
+        );
+    await chromeAiSend(
+      lang: lang,
+      prompt: plan.prompt,
+      url: plan.url,
+      requiresClipboardPaste: plan.requiresClipboardPaste,
+    );
+    if (!mounted) return;
+    // 同意が却下された、またはChrome起動に失敗した場合は貼り付け待ちに
+    // ならないため、フラグを戻して次回タップで再送信できるようにする。
+    if (!chromeAiAwaitingPaste) {
+      setState(() => _awaitingSentenceGeneration = false);
+    }
+  }
+
+  Future<void> _pastePronunciationSentences() async {
+    await runChromeAiPaste(() async {
+      final lang = appSettings.language;
+      final text = await consumeChromeAiPasteText(lang);
+      if (text == null || !mounted) return;
+
+      final result = QuestionPromptPronunciationSentencesParser.parse(text);
+      final sentences = result.sentences;
+      if (!result.isSuccess || sentences == null) {
+        showChromeAiMessage('Chrome AIの回答を解析できませんでした'.tr(lang));
+        return;
+      }
+      clearChromeAiPendingState();
+
+      final gradedPrompt = widget.gradedPrompt;
+      if (gradedPrompt == null) return;
+      // 送信〜貼り付けの間に他レイヤー画面が同じ問題文を更新している
+      // 可能性があるため、直前に最新状態を読み直してから
+      // pronunciationSentencesだけ上書きする（Step 2の単語抽出と同じ考え方）。
+      final current = await _questionPromptService.loadById(gradedPrompt.id);
+      if (current == null || !mounted) return;
+      final updated = current.copyWith(pronunciationSentences: sentences);
+      await _questionPromptService.update(updated);
+      if (!mounted) return;
+      setState(() {
+        _pronunciationSentences = sentences;
+        _awaitingSentenceGeneration = false;
+        _session = _buildSessionFromPronunciationSentences(sentences);
+        _sessionId = _newSessionId();
+        _armed = false;
+        _isSessionSaved = false;
+        _lastEvaluation = null;
+        hideResetUntilNextChange(_resetStateKey());
+      });
+      showChromeAiMessage(
+        'レイヤーⅤ_問題作成_生成件数'.trFmt(lang, ['${sentences.length}']),
+      );
     });
   }
 
@@ -520,6 +768,8 @@ class Layer5ScreenState extends State<Layer5Screen>
       _actionInFlight = false;
       _startingRecording = false;
       _armed = false;
+      _lastEvaluation = null;
+      _awaitingSentenceGeneration = false;
       hideResetUntilNextChange(_resetStateKey());
     });
     unawaited(_refreshSessionWithFullPoolIfUntouched());
@@ -539,21 +789,34 @@ class Layer5ScreenState extends State<Layer5Screen>
   }
 
   /// 「＋」長押し：録音モード〜貼り付けまでのステップを表示する。
+  /// 問題文経路（[gradedPrompt]）では先頭に「問題作成」、末尾に「総評」を足す。
   void _showUsageHelp() {
     final lang = appSettings.language;
+    final graded = widget.gradedPrompt != null;
     LayerHelpSheet.show(
       context,
       title: '操作方法'.tr(lang),
       lines: [
-        LayerHelpLine(
-          text: 'レイヤーⅤ_使い方_録音モード'.tr(lang),
-          icon: Icons.more_horiz_rounded,
-        ),
+        if (graded) LayerHelpLine(text: 'レイヤーⅤ_問題文_使い方_問題作成'.tr(lang)),
+        if (!graded)
+          LayerHelpLine(
+            text: 'レイヤーⅤ_使い方_録音モード'.tr(lang),
+            icon: Icons.more_horiz_rounded,
+          ),
         LayerHelpLine(text: 'レイヤーⅤ_使い方_サイコロ'.tr(lang), icon: Icons.casino),
-        LayerHelpLine(text: 'レイヤーⅤ_使い方_マイク'.tr(lang), icon: Icons.mic_rounded),
+        LayerHelpLine(
+          text: (graded ? 'レイヤーⅤ_問題文_使い方_マイク' : 'レイヤーⅤ_使い方_マイク').tr(lang),
+          icon: Icons.mic_rounded,
+        ),
         LayerHelpLine(text: 'レイヤーⅤ_使い方_10問'.tr(lang)),
-        LayerHelpLine(text: 'レイヤーⅤ_使い方_送信'.tr(lang), icon: Icons.send_rounded),
-        LayerHelpLine(text: 'レイヤーⅤ_使い方_貼り付け'.tr(lang)),
+        LayerHelpLine(
+          text: (graded ? 'レイヤーⅤ_問題文_使い方_送信' : 'レイヤーⅤ_使い方_送信').tr(lang),
+          icon: Icons.send_rounded,
+        ),
+        LayerHelpLine(
+          text: (graded ? 'レイヤーⅤ_問題文_使い方_貼り付け' : 'レイヤーⅤ_使い方_貼り付け').tr(lang),
+        ),
+        if (graded) LayerHelpLine(text: 'レイヤーⅤ_問題文_使い方_総評'.tr(lang)),
       ],
     );
   }
@@ -599,6 +862,19 @@ class Layer5ScreenState extends State<Layer5Screen>
     });
   }
 
+  /// Step 5: 実際のAI貼り付けを経由せず、評価済みの結果を直接与える
+  /// （「総評」導線の表示条件・[QuestionPrompt.pronunciationScores]反映の
+  /// テスト用。[widget.gradedPrompt]がnullのときは評点の反映はスキップされる）。
+  @visibleForTesting
+  Future<void> debugApplyEvaluation(PronunciationEvaluation evaluation) =>
+      _persistScoresToPrompt(evaluation).then((_) {
+        if (!mounted) return;
+        setState(() {
+          _isSessionSaved = true;
+          _lastEvaluation = evaluation;
+        });
+      });
+
   @override
   Widget build(BuildContext context) {
     final lang = appSettings.language;
@@ -606,9 +882,19 @@ class Layer5ScreenState extends State<Layer5Screen>
     final current = _session.current;
     final status = current.status;
     final showSubmit = _allAnswered && !_isSessionSaved;
-    final submitEnabled = !_actionInFlight &&
+    // Step 6: 「問題作成」の貼り付け待ちの間は、紙飛行機（発音評価送信）の
+    // 枠を貼り付け待ち扱いにしない（同じchromeAiAwaitingPasteを共有するため）。
+    final awaitingEvaluationPaste =
+        chromeAiAwaitingPaste && !_awaitingSentenceGeneration;
+    final submitEnabled =
+        !_actionInFlight &&
         !chromeAiActionInFlight &&
-        (showSubmit || chromeAiAwaitingPaste);
+        (showSubmit || awaitingEvaluationPaste);
+    // Step 5: 問題文に紐づくセッションでAI評価が届いたら、紙飛行機の代わりに
+    // 「総評」バッジを同じ枠に出す（onGoToSummaryが未指定ならこの分岐には
+    // 入らない）。
+    final showSummaryBadge =
+        widget.onGoToSummary != null && _lastEvaluation != null;
 
     return Container(
       color: palette.scene,
@@ -648,25 +934,49 @@ class Layer5ScreenState extends State<Layer5Screen>
                 fortyFiveHorizontalPadding: 0,
                 fortyFiveIconSize: 48,
                 onFortyFiveTap: _toggleRecordingMode,
+                fortyFiveHintTapText: switch (appSettings.layer5RecordingMode) {
+                  RecordingMode.intermittent => '断続モード',
+                  RecordingMode.semiContinuous => '半連続モード',
+                  RecordingMode.continuous => '連続モード',
+                },
                 showAdd: true,
                 addIcon: Icons.add_rounded,
-                addTooltip: '発音課題を取り込む',
-                onAddTap: _openExerciseImport,
+                // Step 5: 問題文に紐づくセッションでは、ここからの発音課題
+                // 取り込みは行わない（既存の問題文を対象にするモードのため。
+                // [Layer1QuestionPromptDetailScreen]と同じ設計）。
+                addTooltip: widget.gradedPrompt != null ? '操作方法' : '発音課題を取り込む',
+                onAddTap: widget.gradedPrompt != null
+                    ? () {}
+                    : _openExerciseImport,
                 onAddLongPress: _showUsageHelp,
+                addHintTapText: widget.gradedPrompt != null
+                    ? null
+                    : '発音課題を取り込む',
+                addHintLongPressText: '操作方法',
               ),
               const SizedBox(height: 4),
-              // 分野（お題カテゴリ）セレクタはレイヤーⅤでは使わないが、
-              // レイアウトの高さを他レイヤーと揃えるため枠だけ確保して隠す。
-              Visibility(
-                visible: false,
-                maintainState: true,
-                maintainAnimation: true,
-                maintainSize: true,
-                child: CategorySelectField(
-                  selected: TopicCategory.daily,
-                  onChanged: (_) {},
-                ),
-              ),
+              // Step 5: 問題文に紐づくセッションでは、分野（お題カテゴリ）
+              // セレクタの枠に前後の問題文へ移動する▲▼ボタンを置く
+              // （[Layer1QuestionPromptDetailScreen]と同じ設計）。「ランダム」
+              // 単体モードでは分野セレクタ自体を使わないため、レイアウトの
+              // 高さを他レイヤーと揃えるためだけに枠だけ確保して隠す。
+              widget.gradedPrompt != null
+                  ? QuestionPromptNavRow(
+                      canGoPrevious: widget.canGoPrevious,
+                      canGoNext: widget.canGoNext,
+                      onPrevious: widget.onGoPrevious ?? () {},
+                      onNext: widget.onGoNext ?? () {},
+                    )
+                  : Visibility(
+                      visible: false,
+                      maintainState: true,
+                      maintainAnimation: true,
+                      maintainSize: true,
+                      child: CategorySelectField(
+                        selected: TopicCategory.daily,
+                        onChanged: (_) {},
+                      ),
+                    ),
               const SizedBox(height: 4),
               Expanded(
                 child: SingleChildScrollView(
@@ -771,6 +1081,11 @@ class Layer5ScreenState extends State<Layer5Screen>
                         recording:
                             status == PronunciationQuestionStatus.recording,
                         onTap: _onButtonTap,
+                        // マイクは「サイコロ→録音開始→録音終了」を1問ごとに
+                        // 連打する、レイテンシに最も敏感な操作。ダブルタップ
+                        // ヒントを有効にすると単タップも約300ms待たされる
+                        // ようになり、この核となる操作感を損なうため、
+                        // 見送る（他の5ボタンは一回性の操作のため許容した）。
                       ),
                       if (_isTranscribing)
                         Positioned.fill(
@@ -796,10 +1111,34 @@ class Layer5ScreenState extends State<Layer5Screen>
                 ),
               ),
               const SizedBox(height: 12),
-              // 結論/理由（PREPガイド）はレイヤーⅤでは使わないため非表示のまま、
-              // 「例示」の枠だけ、上段の＋から移した発音チェック結果一覧に転用する。
-              // 保存済み結果があるときだけ表示する。
+              // Step 6: gradedPromptモードでは「結論」枠にレイヤーⅠと同じ
+              // 「問題作成」を配置する（「ランダム」単体モードは既定どおり
+              // 非表示のまま）。理由（PREPガイド）はレイヤーⅤでは使わないため
+              // 非表示のまま、「例示」の枠だけ、上段の＋から移した発音チェック
+              // 結果一覧に転用する。保存済み結果があるときだけ表示する。
               PrepLabelRow(
+                showConclusion: widget.gradedPrompt != null,
+                // 「ランダム」単体モード（gradedPrompt==null）では
+                // conclusionIconをnullのままにし、PrepLabelRowを既定の
+                // ラベル型ゴースト（「結論」の予約席）にとどめる
+                // （非表示ではあるが、レイアウト予約席テストが文字列
+                // 「結論」で枠を探すため、アイコン型に切り替えてはいけない）。
+                conclusionIcon: widget.gradedPrompt == null
+                    ? null
+                    : (_awaitingSentenceGeneration
+                          ? Icons.content_paste_go_rounded
+                          : Icons.quiz_outlined),
+                conclusionTooltip: widget.gradedPrompt == null
+                    ? null
+                    : (_awaitingSentenceGeneration ? '貼り付け' : '問題作成'),
+                conclusionActive: _pronunciationSentences.isNotEmpty,
+                onConclusionTap:
+                    widget.gradedPrompt == null || chromeAiActionInFlight
+                    ? null
+                    : _onCreateQuizTap,
+                conclusionHintTapText: widget.gradedPrompt == null
+                    ? null
+                    : (_awaitingSentenceGeneration ? '貼り付け' : '問題作成'),
                 showExample: _hasSavedChecks,
                 exampleIcon: Icons.list_alt_rounded,
                 exampleTooltip: '発音チェック結果',
@@ -810,15 +1149,23 @@ class Layer5ScreenState extends State<Layer5Screen>
               GenkiTransportRow(
                 showPlay: true,
                 showReset: _showResetButton,
-                showDiagnose: showSubmit || chromeAiAwaitingPaste,
+                showDiagnose: showSubmit || awaitingEvaluationPaste,
                 languageCode: lang,
                 playing: isPlayingLastRecording,
                 playHasData: _recordingService.lastRecordingPath != null,
-                diagnoseHighlighted: showSubmit && !chromeAiAwaitingPaste,
-                diagnoseAwaitingPaste: chromeAiAwaitingPaste,
+                diagnoseHighlighted: showSubmit && !awaitingEvaluationPaste,
+                diagnoseAwaitingPaste: awaitingEvaluationPaste,
                 onPlay: _toggleRecordingPlayback,
                 onReset: resetAttempt,
                 onDiagnose: submitEnabled ? _onSubmitTap : null,
+                diagnoseOverride: showSummaryBadge
+                    ? QuestionPromptSummaryBadge(
+                        onTap: () =>
+                            widget.onGoToSummary!(widget.gradedPrompt!.id),
+                        enableActionHint: true,
+                      )
+                    : null,
+                enableActionHints: true,
               ),
             ],
           ),

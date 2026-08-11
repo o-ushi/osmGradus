@@ -8,7 +8,9 @@ import '../localization/gradus_l10n.dart';
 import '../main.dart' show appSettings, topicSpeechReader, ttsSettings;
 import '../navigation/app_routes.dart';
 import '../services/gradus_backup_actions.dart';
+import '../services/question_prompt_backup_actions.dart';
 import '../theme/app_colors.dart';
+import '../widgets/backup_scope_sheet.dart';
 import '../widgets/gradus_more_actions_menu.dart';
 import '../widgets/layer_list_tile.dart';
 import '../widgets/swipe_to_close_wrapper.dart';
@@ -20,6 +22,7 @@ class LaunchScreen extends StatefulWidget {
   const LaunchScreen({
     super.key,
     this.onOpenLayer,
+    this.onOpenLayerInListMode,
     this.onShowStartup,
     this.onResume,
   });
@@ -35,6 +38,10 @@ class LaunchScreen extends StatefulWidget {
   /// 未指定の場合は従来通りこの画面自身が[MainShell]をpushする
   /// （[AppRootShell]を経由しない単体利用向けのフォールバック）。
   final void Function(int index, {bool forceReset})? onOpenLayer;
+
+  /// 横断問題文一覧の詳細ヘッダー「Ⅰ」〜「Ⅴ」から、入口の2/3択を飛ばして
+  /// 問題文一覧モードでそのレイヤーを開く。
+  final void Function(int index)? onOpenLayerInListMode;
 
   /// 左端からの右スワイプで[StartupScreen]へ戻る操作を呼ぶ。
   /// 設定の「スタートアップ画面」がONかつこれが指定されているときだけ
@@ -147,7 +154,11 @@ class _LaunchScreenState extends State<LaunchScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              _LaunchActionRow(lang: lang, onResume: widget.onResume),
+              _LaunchActionRow(
+                lang: lang,
+                onResume: widget.onResume,
+                onOpenLayerInListMode: widget.onOpenLayerInListMode,
+              ),
               const SizedBox(height: 8),
             ],
           ),
@@ -163,19 +174,26 @@ class _LaunchScreenState extends State<LaunchScreen> {
   }
 }
 
-/// 起動画面下部：単語帳 / ダッシュボード / •••（白アイコン・透明背景）。
+/// 起動画面下部：単語帳 / ダッシュボード / 問題文一覧 / •••（白アイコン・透明背景）。
 /// Podcast・お題・発音課題の取り込みは、各レイヤー画面自身の「＋」
 /// （長押しで操作方法を表示）に一本化したため、ここには置かない。
 /// エクスポート・インポート・設定・ヘルプは低頻度の操作のため、•••から
 /// 開くアイコンメニュー（[GradusMoreActionsMenu]）にまとめている
 /// （osmGenkiの起動画面と同じ配置方式）。
 class _LaunchActionRow extends StatefulWidget {
-  const _LaunchActionRow({required this.lang, this.onResume});
+  const _LaunchActionRow({
+    required this.lang,
+    this.onResume,
+    this.onOpenLayerInListMode,
+  });
 
   final String lang;
 
   /// 非nullなら「戻る」（[Icons.arrow_back_rounded]）を単語帳の左に出す。
   final VoidCallback? onResume;
+
+  /// 問題文一覧の詳細ヘッダーから、入口を飛ばして問題文一覧モードで開く。
+  final void Function(int index)? onOpenLayerInListMode;
 
   @override
   State<_LaunchActionRow> createState() => _LaunchActionRowState();
@@ -223,11 +241,11 @@ class _LaunchActionRowState extends State<_LaunchActionRow> {
               },
               onExport: () {
                 Navigator.pop(dialogContext);
-                unawaited(exportGradusData(context));
+                unawaited(_chooseScopeAndExport(context));
               },
               onImport: () {
                 Navigator.pop(dialogContext);
-                unawaited(importGradusData(context));
+                unawaited(_chooseScopeAndImport(context));
               },
               onSettings: () {
                 Navigator.pop(dialogContext);
@@ -246,6 +264,36 @@ class _LaunchActionRowState extends State<_LaunchActionRow> {
         ],
       ),
     );
+  }
+
+  /// エクスポート先で「問題のみ」／「全て」を選ばせてから、対応する処理へ渡す。
+  Future<void> _chooseScopeAndExport(BuildContext context) async {
+    final lang = widget.lang;
+    final scope = await BackupScopeSheet.show(
+      context,
+      title: 'エクスポート範囲を選択'.tr(lang),
+    );
+    if (scope == null || !context.mounted) return;
+    if (scope == BackupScope.questionPromptsOnly) {
+      await exportQuestionPromptsData(context);
+    } else {
+      await exportGradusData(context);
+    }
+  }
+
+  /// インポート先で「問題のみ」／「全て」を選ばせてから、対応する処理へ渡す。
+  Future<void> _chooseScopeAndImport(BuildContext context) async {
+    final lang = widget.lang;
+    final scope = await BackupScopeSheet.show(
+      context,
+      title: 'インポート範囲を選択'.tr(lang),
+    );
+    if (scope == null || !context.mounted) return;
+    if (scope == BackupScope.questionPromptsOnly) {
+      await importQuestionPromptsData(context);
+    } else {
+      await importGradusData(context);
+    }
   }
 
   @override
@@ -270,6 +318,14 @@ class _LaunchActionRowState extends State<_LaunchActionRow> {
           icon: Icons.space_dashboard_outlined,
           tooltip: 'ダッシュボード'.tr(lang),
           onTap: () => AppRoutes.openDashboard(context),
+        ),
+        _LaunchIconButton(
+          icon: Icons.list_alt_rounded,
+          tooltip: '問題文一覧'.tr(lang),
+          onTap: () => AppRoutes.openQuestionPromptOverview(
+            context,
+            onOpenLayer: widget.onOpenLayerInListMode,
+          ),
         ),
         _LaunchIconButton(
           key: _moreButtonKey,

@@ -55,10 +55,8 @@ class _Layer3ScreenState extends PracticeLayerScreenState<Layer3Screen>
     unawaited(playAlarmThenReturnToIdle());
   }
 
-  Future<void> _showAddChoice() => showTopicAddChoiceFlow(
-    context,
-    initialCategory: selectedCategory,
-  );
+  Future<void> _showAddChoice() =>
+      showTopicAddChoiceFlow(context, initialCategory: selectedCategory);
 
   /// 「＋」長押し：タイマー〜PREP各段階までのステップを表示する。
   void _showUsageHelp() {
@@ -121,6 +119,8 @@ class _Layer3ScreenState extends PracticeLayerScreenState<Layer3Screen>
                   onPresetTap: onPresetTap,
                   onAddTap: _showAddChoice,
                   onAddLongPress: _showUsageHelp,
+                  addHintTapText: 'お題の取り込み',
+                  addHintLongPressText: '操作方法',
                 ),
               ),
               const SizedBox(height: 4),
@@ -176,6 +176,7 @@ class _Layer3ScreenState extends PracticeLayerScreenState<Layer3Screen>
                   showReset: _showResetButton,
                   languageCode: lang,
                   onReset: resetAttempt,
+                  enableActionHints: true,
                 ),
               ),
             ],

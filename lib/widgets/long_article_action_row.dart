@@ -10,18 +10,17 @@ import 'transport_icon_button.dart';
 ///
 /// 左スロット:
 /// - 登録単語あり →「訳を付ける」（タップ＝選び直し、長押し＝自動送信）
-/// - 登録単語なし →「隠す」（単語帳ハイライトの表示切替）
+/// - 登録単語なし → 枠だけ確保して非表示（レイアウトを揃える）
 class LongArticleActionRow extends StatelessWidget {
   const LongArticleActionRow({
     super.key,
     required this.showEnrich,
     required this.onEnrich,
     this.onEnrichLongPress,
-    required this.highlightsVisible,
-    required this.onToggleHighlights,
     required this.onVocabulary,
     required this.onNext,
     this.languageCode = 'vi',
+    this.enableActionHints = false,
   });
 
   final bool showEnrich;
@@ -31,14 +30,16 @@ class LongArticleActionRow extends StatelessWidget {
   /// 「近道」用。
   final VoidCallback? onEnrichLongPress;
 
-  /// 単語帳ハイライトの表示状態（true=表示）。
-  final bool highlightsVisible;
-  final VoidCallback onToggleHighlights;
   final VoidCallback onVocabulary;
   final VoidCallback onNext;
 
   /// ツールチップ等の表示言語（`appSettings.language`）。
   final String languageCode;
+
+  /// trueの間、3ボタンすべてにダブルタップの機能ヒント（Step 7の
+  /// [ButtonActionHint]基盤）を付ける。ヒント文言は各ボタンの[tooltip]と
+  /// 同じ文言をそのまま使う。
+  final bool enableActionHints;
 
   @override
   Widget build(BuildContext context) {
@@ -46,24 +47,18 @@ class LongArticleActionRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: showEnrich
-              ? TransportIconButton(
-                  icon: Icons.translate_rounded,
-                  tooltip: '訳を付ける'.tr(lang),
-                  visible: true,
-                  onTap: onEnrich,
-                  onLongPress: onEnrichLongPress,
-                  borderless: true,
-                )
-              : TransportIconButton(
-                  icon: highlightsVisible
-                      ? Icons.visibility_off_rounded
-                      : Icons.visibility_rounded,
-                  tooltip: (highlightsVisible ? '隠す' : '表示').tr(lang),
-                  visible: true,
-                  onTap: onToggleHighlights,
-                  borderless: true,
-                ),
+          child: TransportIconButton(
+            icon: Icons.translate_rounded,
+            tooltip: '訳を付ける'.tr(lang),
+            visible: showEnrich,
+            onTap: onEnrich,
+            onLongPress: showEnrich ? onEnrichLongPress : null,
+            borderless: true,
+            hintTapText: enableActionHints ? '訳を付ける'.tr(lang) : null,
+            hintLongPressText: enableActionHints && showEnrich
+                ? 'ボタンヒント_訳付_長押し'.tr(lang)
+                : null,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -73,6 +68,7 @@ class LongArticleActionRow extends StatelessWidget {
             visible: true,
             onTap: onVocabulary,
             borderless: true,
+            hintTapText: enableActionHints ? '単語帳'.tr(lang) : null,
           ),
         ),
         const SizedBox(width: 12),
@@ -83,6 +79,7 @@ class LongArticleActionRow extends StatelessWidget {
             visible: true,
             onTap: onNext,
             borderless: true,
+            hintTapText: enableActionHints ? '次へ'.tr(lang) : null,
           ),
         ),
       ],

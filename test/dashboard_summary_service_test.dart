@@ -249,13 +249,54 @@ void main() {
       expect(summary.overallGrade, DashboardOverallGrade.a);
       expect(summary.overallGradeDisplay, 'A（4.2）');
     });
+
+    test('「問題文一覧から選ぶ」経由（questionPromptId付き）の結果も、'
+        '「ランダム」経由の結果と同じ重みで1件として平均に反映される（Step 8）', () {
+      // レイヤーⅣ「問題文一覧から選ぶ」経由の結果は、QuestionPromptService側の
+      // jsstScore/hitScore/prepScoreにもミラーされるが、それはStorage側の
+      // 結果を問題文一覧の進捗表示用に複製したキャッシュに過ぎない。
+      // DashboardSummaryServiceはScoringResultStorage/PronunciationCheckStorage
+      // だけを直接の入力とするため、questionPromptId付きの結果を渡しても
+      // 二重に数えられず、ちょうど1件として平均される。
+      final summary = DashboardSummaryService.build(
+        scoringResults: [
+          _scoringWithAiEval(
+            levelHint: _LevelHint.high,
+            hit: 4,
+            prep: 4,
+            questionPromptId: 'qp_1',
+            questionPromptBody: '好きな食べ物について話してください',
+          ),
+        ],
+        pronunciationChecks: [
+          _pronunciation(
+            score: 3,
+            questionPromptId: 'qp_1',
+            questionPromptBody: '好きな食べ物について話してください',
+          ),
+        ],
+        vocabularyChecks: [_vocabulary(score: 5)],
+      );
+
+      expect(summary.jsstSampleCount, 1);
+      expect(summary.hitSampleCount, 1);
+      expect(summary.prepSampleCount, 1);
+      expect(summary.pronunciationSampleCount, 1);
+      expect(summary.hitAverageScore, 4.0);
+      expect(summary.prepAverageScore, 4.0);
+      expect(summary.pronunciationAverageScore, 3.0);
+    });
   });
 }
 
 enum _LevelHint { low, midLow, midHigh, high }
 
 /// 参考レベルが出るよう、軸ごとに揃えたダミー採点結果を作る。
-SavedScoringResult _scoring({required _LevelHint levelHint}) {
+SavedScoringResult _scoring({
+  required _LevelHint levelHint,
+  String? questionPromptId,
+  String? questionPromptBody,
+}) {
   final (
     keigoVariety,
     complexityRatio,
@@ -342,6 +383,8 @@ SavedScoringResult _scoring({required _LevelHint levelHint}) {
     id: 's_${levelHint.name}_${started.microsecondsSinceEpoch}_${_uniqueId++}',
     createdAt: started,
     result: result,
+    questionPromptId: questionPromptId,
+    questionPromptBody: questionPromptBody,
   );
 }
 
@@ -350,8 +393,14 @@ SavedScoringResult _scoringWithAiEval({
   required _LevelHint levelHint,
   required int hit,
   required int prep,
+  String? questionPromptId,
+  String? questionPromptBody,
 }) {
-  return _scoring(levelHint: levelHint).withAiEvaluation(
+  return _scoring(
+    levelHint: levelHint,
+    questionPromptId: questionPromptId,
+    questionPromptBody: questionPromptBody,
+  ).withAiEvaluation(
     prepStars: prep,
     hitStars: hit,
     prepAdvice: 'prep advice',
@@ -361,7 +410,11 @@ SavedScoringResult _scoringWithAiEval({
 
 int _uniqueId = 0;
 
-SavedPronunciationCheck _pronunciation({required int score}) {
+SavedPronunciationCheck _pronunciation({
+  required int score,
+  String? questionPromptId,
+  String? questionPromptBody,
+}) {
   final now = DateTime(2026, 2, 1);
   final evaluation = PronunciationEvaluation(
     categoryEvaluations: {
@@ -385,6 +438,9 @@ SavedPronunciationCheck _pronunciation({required int score}) {
     sessionId: 'session',
     questions: const [],
     evaluation: evaluation,
+    source: questionPromptId == null ? 'short' : 'questionPrompt',
+    questionPromptId: questionPromptId,
+    questionPromptBody: questionPromptBody,
   );
 }
 

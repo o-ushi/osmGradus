@@ -13,10 +13,13 @@ import 'package:osm_gradus/widgets/tappable_japanese_text.dart';
 
 String _t(String key) => key.tr(appSettings.language);
 
+/// 「次へ」等、ダブルタップの機能ヒントが付いたボタン（Step 7）は
+/// GestureDetector.onDoubleTapで単タップ判定を約300ms（kDoubleTapTimeout）
+/// 保留するため、単タップとして確定させるにはこの分だけ余分にpumpする。
+const _tapConfirmWait = Duration(milliseconds: 350);
+
 Future<void> _pumpListScreen(WidgetTester tester) async {
-  await tester.pumpWidget(
-    const MaterialApp(home: LongArticleListScreen()),
-  );
+  await tester.pumpWidget(const MaterialApp(home: LongArticleListScreen()));
   await tester.pump();
 }
 
@@ -37,9 +40,7 @@ void main() {
     expect(find.text(_t('長文読解_一覧が空です')), findsOneWidget);
   });
 
-  testWidgets('保存済みの長文をタイトル・抜粋・日時つきで一覧表示する', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('保存済みの長文をタイトル・抜粋・日時つきで一覧表示する', (WidgetTester tester) async {
     await LongArticleService().addArticle(body: '友達と公園へ行きました。', title: '旅行');
     await _pumpListScreen(tester);
 
@@ -50,9 +51,7 @@ void main() {
     expect(find.byIcon(Icons.star), findsNothing);
   });
 
-  testWidgets('★をタップするとお気に入りが切り替わり、永続化される', (
-    WidgetTester tester,
-  ) async {
+  testWidgets('★をタップするとお気に入りが切り替わり、永続化される', (WidgetTester tester) async {
     final added = await LongArticleService().addArticle(
       body: '友達と公園へ行きました。',
       title: '旅行',
@@ -64,7 +63,10 @@ void main() {
 
     expect(find.byIcon(Icons.star), findsOneWidget);
     final articles = await LongArticleService().loadArticles();
-    expect(articles.firstWhere((a) => a.id == added.single.id).isFavorite, isTrue);
+    expect(
+      articles.firstWhere((a) => a.id == added.single.id).isFavorite,
+      isTrue,
+    );
   });
 
   testWidgets('削除アイコン→キャンセルでは削除されず、削除確定で一覧・永続化から消える', (
@@ -112,6 +114,7 @@ void main() {
     );
 
     await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
 
     // 一覧画面に戻り、長文は複製されず1件のまま。

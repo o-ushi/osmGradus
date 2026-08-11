@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../data/vocabulary_ai_prompt_template.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings, topicSpeechReader;
+import '../../models/question_prompt.dart';
 import '../../models/recording_mode.dart';
 import '../../models/saved_vocabulary_check.dart';
 import '../../models/vocab_answer_mode.dart';
@@ -16,9 +17,11 @@ import '../../models/vocabulary_level.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/jlpt_vocab_bank_service.dart';
 import '../../services/learner_answer_language.dart';
+import '../../services/question_prompt_service.dart';
 import '../../services/recording_stt_service.dart';
 import '../../services/vocabulary_ai_response_parser.dart';
 import '../../services/vocabulary_check_storage.dart';
+import '../../services/vocabulary_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
 import '../../widgets/dice_action_row.dart';
@@ -30,6 +33,7 @@ import '../../widgets/prep_label_row.dart';
 import '../../widgets/pronunciation_mic_button.dart';
 import '../../widgets/reset_button_visibility_mixin.dart';
 import '../../widgets/speech_processing_consent_dialog.dart';
+import '../../widgets/swipe_to_close_wrapper.dart';
 import '../../widgets/vocab_countdown_button.dart';
 import '../../widgets/vocabulary_sheet.dart';
 import 'vocabulary_check_history_screen.dart';
@@ -113,10 +117,66 @@ class _Layer1LevelSelection {
 ///   次の問題（2問目以降）と同時に、TTS読み上げ・録音まで自動的に始まる。
 ///   そのまま10問目まで進み続ける。
 class Layer1VocabScreen extends StatefulWidget {
-  const Layer1VocabScreen({super.key, this.onBackToModeSelect});
+  const Layer1VocabScreen({
+    super.key,
+    this.onBackToModeSelect,
+    this.fixedEntries,
+    this.sourcePromptId,
+    this.sourcePromptBody,
+    this.gradedPrompt,
+  });
 
   /// レイヤーⅠの2択（語彙／耳慣れ）へ戻る。未指定なら戻るボタンを出さない。
   final VoidCallback? onBackToModeSelect;
+
+  /// 非nullの場合、総評画面の「分からなかった単語だけテスト」経由（Step 7）、
+  /// またはレイヤーⅠ詳細「問題作成」経由（Step 3）。レベル選択・プールからの
+  /// 抽選をスキップし、この語だけで1試験を組み立てる（[Layer4Screen.fixedPrompt]
+  /// と同じ「固定入力で通常フローを流用する」設計）。
+  final List<VocabularyEntry>? fixedEntries;
+
+  /// [fixedEntries]が非nullのときの、出題元の[QuestionPrompt.id]。
+  /// 保存する[SavedVocabularyCheck.questionPromptId]にそのまま渡す。
+  final String? sourcePromptId;
+
+  /// [fixedEntries]が非nullのときの、出題元の問題文本文（保存時点の複製）。
+  final String? sourcePromptBody;
+
+  /// Step 3: 非nullの場合、レイヤーⅠ詳細「問題作成」で抽出した単語
+  /// （[QuestionPrompt.vocabTestWords]）による語彙テストとして扱い、
+  /// Chrome AI評価が届いて保存できたタイミングで、正解率をこの問題文に
+  /// 保存し（[QuestionPrompt.isLayer1Done]が立つ）、不正解語を
+  /// [VocabularyService]へ自動登録する（[_gradeQuestionPrompt]）。
+  /// 「分からなかった単語だけテスト」（総評画面、Step 7）はこれを渡さない
+  /// （既存の単語帳エントリの再テストであり、問題文への正解率保存は対象外）。
+  final QuestionPrompt? gradedPrompt;
+
+  /// 総評画面などから、通常のレイヤーⅠモード選択の外で単独の画面として開く
+  /// （[fixedEntries]で「分からなかった単語」だけに絞ったテストを想定）。
+  /// 他の詳細画面と同じくスワイプで閉じる（[SwipeToCloseWrapper]）。
+  static Future<void> push(
+    BuildContext context, {
+    List<VocabularyEntry>? fixedEntries,
+    String? sourcePromptId,
+    String? sourcePromptBody,
+    QuestionPrompt? gradedPrompt,
+  }) {
+    return Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => SwipeToCloseWrapper(
+          child: Scaffold(
+            backgroundColor: AppColors.current.scene,
+            body: Layer1VocabScreen(
+              fixedEntries: fixedEntries,
+              sourcePromptId: sourcePromptId,
+              sourcePromptBody: sourcePromptBody,
+              gradedPrompt: gradedPrompt,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   State<Layer1VocabScreen> createState() => Layer1VocabScreenState();
@@ -132,6 +192,8 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
   final _bankService = JlptVocabBankService();
   final _recordingService = RecordingSttService();
   final _storage = VocabularyCheckStorage();
+  final _vocabularyService = VocabularyService();
+  final _questionPromptService = QuestionPromptService();
   final _random = Random();
   final _answerController = TextEditingController();
   late final FocusNode _answerFocusNode;
@@ -140,11 +202,27 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
   });
   bool _wordVisible = true;
 
-  /// 学習者が口頭回答する言語（🇻🇳/🇺🇸/🇯🇵トグル）。既定はベトナム語。
+  /// 学習者が口頭回答する言語（🇻🇳/🇺🇸/🇯🇵トグル）。既定は表示言語
+  /// （[appSettings.language]）に合わせる。ユーザーが一度でも切り替えたら
+  /// [AppSettings.vocabAnswerLanguageCode]へ保存し、以後（単体版・総評画面
+  /// 経由の両方）はその選択を表示言語より優先する（[_initialAnswerLanguage]）。
   /// 試験途中で切り替えても構わない（次に録音を止めた問題からその言語で
   /// 文字起こしされる）ため、リセット・レベル変更では初期化しない。
   /// キーボード入力では自動判定を使い、この値は音声モード専用。
-  LearnerAnswerLanguage _answerLanguage = LearnerAnswerLanguage.vi;
+  late LearnerAnswerLanguage _answerLanguage;
+
+  /// [_answerLanguage]の初期値を決める：ユーザーが過去に選んだ言語
+  /// （[AppSettings.vocabAnswerLanguageCode]）があればそれを、無ければ
+  /// 表示言語（[appSettings.language]）を対応する[LearnerAnswerLanguage]に
+  /// 変換して使う（表示言語がja/en/vi以外を返すことは無いが、念のため
+  /// フォールバックとしてベトナム語にする）。
+  LearnerAnswerLanguage _initialAnswerLanguage() {
+    final saved = appSettings.vocabAnswerLanguageCode;
+    final fromSaved = LearnerAnswerLanguageDetector.fromCode(saved);
+    if (fromSaved != null) return fromSaved;
+    return LearnerAnswerLanguageDetector.fromCode(appSettings.language) ??
+        LearnerAnswerLanguage.vi;
+  }
 
   /// 入力モード切替の検知用（[_onSettingsChanged]）。
   late VocabAnswerMode _lastVocabAnswerMode;
@@ -248,6 +326,7 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
     // ままになる。appSettingsの変更を直接購読し、その場で再描画する。
     appSettings.addListener(_onSettingsChanged);
     _lastVocabAnswerMode = appSettings.vocabAnswerMode;
+    _answerLanguage = _initialAnswerLanguage();
     _sessionId = _newSessionId();
     unawaited(_loadHasSavedChecks());
     // キーボード入力モードでも、初回描画ではレベル選択・単語帳・サイコロの
@@ -587,8 +666,14 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
 
   void _toggleWordVisible() => setState(() => _wordVisible = !_wordVisible);
 
-  void _toggleAnswerLanguage() =>
-      setState(() => _answerLanguage = _answerLanguage.next);
+  /// 回答言語ボタンをタップして次の言語へ進める。ユーザーの明示的な選択と
+  /// して[AppSettings.vocabAnswerLanguageCode]へ保存し、以後は表示言語を
+  /// 変えてもこの選択を上書きしない（単体版・総評画面経由の両方に効く）。
+  void _toggleAnswerLanguage() {
+    final next = _answerLanguage.next;
+    setState(() => _answerLanguage = next);
+    appSettings.vocabAnswerLanguageCode = next.code;
+  }
 
   /// 回答言語ボタン長押し：キーボード入力／音声入力を切り替える。
   Future<void> _showInputModePicker() async {
@@ -773,7 +858,8 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
   /// 選択レベルのプールから重複なく最大10問を抽選し、新しいセッションを
   /// 組み立てて[_session]にセットする（同一試験内の重複を避けるため
   /// シャッフルしたプールの先頭から取る）。プールが空なら案内を出して
-  /// nullを返す。
+  /// nullを返す。[widget.fixedEntries]が非nullの場合はプール抽選をスキップし、
+  /// 渡された語だけ（シャッフルせず全件）でセッションを組み立てる。
   ///
   /// 開始時に余分な setState をすると、キーボード入力中にソフトキーボードが
   /// 閉じることがあるため、[_actionInFlight]の立て下げは必要最小限にする。
@@ -781,7 +867,8 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
     if (_actionInFlight) return null;
     _actionInFlight = true;
     try {
-      final pool = await _poolForLevel(_levelSelection);
+      final fixedEntries = widget.fixedEntries;
+      final pool = fixedEntries ?? await _poolForLevel(_levelSelection);
       if (!mounted) return null;
       if (pool.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -789,10 +876,12 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
         );
         return null;
       }
-      final shuffled = List<VocabularyEntry>.of(pool)..shuffle(_random);
+      final ordered = fixedEntries != null
+          ? pool
+          : (List<VocabularyEntry>.of(pool)..shuffle(_random));
       final session = VocabTestSession(
         questions: [
-          for (final entry in shuffled.take(10))
+          for (final entry in fixedEntries != null ? ordered : ordered.take(10))
             VocabTestQuestion(entry: entry),
         ],
       );
@@ -992,6 +1081,8 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
           session: session,
           evaluation: null,
           unparsedResponse: text,
+          questionPromptId: widget.sourcePromptId,
+          questionPromptBody: widget.sourcePromptBody,
         );
         await _storage.save(saved);
         if (!mounted) return;
@@ -1010,6 +1101,8 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
         session: session,
         evaluation: parseResult.evaluation,
         unparsedResponse: null,
+        questionPromptId: widget.sourcePromptId,
+        questionPromptBody: widget.sourcePromptBody,
       );
       await _storage.save(saved);
       if (!mounted) return;
@@ -1020,9 +1113,68 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
       clearChromeAiPendingState();
       final evaluation = parseResult.evaluation;
       if (evaluation != null) {
+        await _gradeQuestionPrompt(session, evaluation);
+        if (!mounted) return;
         unawaited(_showResultDialog(evaluation));
       }
     });
+  }
+
+  /// Step 3: [widget.gradedPrompt]が非nullのとき、この試験の正解率を
+  /// 問題文へ保存し（[QuestionPrompt.isLayer1Done]が立つ）、不正解語を
+  /// [VocabularyService]へ自動登録する。読み・訳・例文はレイヤーⅠ「問題作成」
+  /// （Step 2）でChrome AIが作成済みの[widget.fixedEntries]をそのまま使い、
+  /// 追加のAI往復はしない。単語帳に同じ表記が既にあれば二重登録せず、
+  /// そのIDを流用する（[TappableJapaneseTextState._registerWord]の
+  /// 「表記の一致」判定と同じ考え方）。
+  Future<void> _gradeQuestionPrompt(
+    VocabTestSession session,
+    VocabularyEvaluation evaluation,
+  ) async {
+    final gradedPrompt = widget.gradedPrompt;
+    if (gradedPrompt == null) return;
+    final current = await _questionPromptService.loadById(gradedPrompt.id);
+    if (current == null) return;
+
+    final existingEntries = await _vocabularyService.loadEntries();
+    final byWord = {for (final entry in existingEntries) entry.word: entry};
+    final registeredIds = <String>[];
+
+    for (var i = 0; i < session.questions.length; i++) {
+      final correct =
+          i < evaluation.questionEvaluations.length &&
+          evaluation.questionEvaluations[i].correct;
+      if (correct) continue;
+
+      final missed = session.questions[i].entry;
+      final existing = byWord[missed.word];
+      if (existing != null) {
+        registeredIds.add(existing.id);
+        continue;
+      }
+      final updatedEntries = await _vocabularyService.addEntry(
+        missed.word,
+        missed.translation,
+        reading: missed.reading,
+        exampleSentence: missed.exampleSentence,
+        translationLang: missed.translationLang,
+        level: VocabularyLevel.other,
+      );
+      final added = updatedEntries.first;
+      byWord[added.word] = added;
+      registeredIds.add(added.id);
+    }
+
+    await _questionPromptService.update(
+      current.copyWith(
+        vocabTestCorrectCount: evaluation.correctCount,
+        vocabTestQuestionCount: session.questions.length,
+        registeredWordIds: {
+          ...current.registeredWordIds,
+          ...registeredIds,
+        }.toList(),
+      ),
+    );
   }
 
   Future<void> _onSubmitTap() => chromeAiOnSubmitTap(
@@ -1187,6 +1339,12 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
                         fortyFiveHorizontalPadding: 0,
                         fortyFiveIconSize: 48,
                         onFortyFiveTap: _toggleRecordingMode,
+                        fortyFiveHintTapText:
+                            switch (appSettings.vocabRecordingMode) {
+                              RecordingMode.intermittent => '断続モード',
+                              RecordingMode.semiContinuous => '半連続モード',
+                              RecordingMode.continuous => '連続モード',
+                            },
                         // 問題表示/非表示トグル（旧「45」位置から移動）。国旗ボタンと
                         // 同じく、余白ゼロ・枠線なし・アイコン大。ON/OFFはアイコン
                         // 差し替えだけで伝え、active塗りは使わない（背景は常に
@@ -1199,6 +1357,7 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
                         sixtyHorizontalPadding: 0,
                         sixtyIconSize: 48,
                         onSixtyTap: _toggleWordVisible,
+                        sixtyHintTapText: 'レイヤーⅠ_語彙_単語表示切替',
                         // 口頭回答の言語トグル（🇻🇳→🇺🇸→🇯🇵）。長押しで
                         // キーボード入力／音声入力を切り替える。
                         fifteenSixtyLabel: _answerLanguage.flag,
@@ -1209,18 +1368,27 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
                         onFifteenSixtyTap: _toggleAnswerLanguage,
                         onFifteenSixtyLongPress: () =>
                             unawaited(_showInputModePicker()),
+                        fifteenSixtyHintTapText: 'レイヤーⅠ_語彙_回答言語切替',
+                        fifteenSixtyHintLongPressText: 'レイヤーⅠ_語彙_入力モード選択',
                         showAdd: true,
                         addIcon: Icons.add_rounded,
                         addTooltip: '語彙を追加',
                         onAddTap: _openVocabImport,
                         onAddLongPress: _showUsageHelp,
+                        addHintTapText: '語彙を追加',
+                        addHintLongPressText: '操作方法',
                       ),
                       const SizedBox(height: 4),
-                      _Layer1LevelField(
-                        selection: _levelSelection,
-                        onTap: _selectLevel,
-                      ),
-                      const SizedBox(height: 4),
+                      // 固定語リスト（総評画面の「分からなかった単語だけ
+                      // テスト」）ではプール抽選そのものを行わないため、
+                      // レベル選択を出しても意味を持たない。
+                      if (widget.fixedEntries == null) ...[
+                        _Layer1LevelField(
+                          selection: _levelSelection,
+                          onTap: _selectLevel,
+                        ),
+                        const SizedBox(height: 4),
+                      ],
                     ],
                   ),
                 ),
@@ -1398,6 +1566,7 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
                         onReset: _resetAttempt,
                         onDiagnose: submitEnabled ? _onSubmitTap : null,
                         languageCode: lang,
+                        enableActionHints: true,
                       ),
                     ],
                   ),

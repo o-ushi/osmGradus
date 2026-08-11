@@ -63,6 +63,15 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// レイヤーⅠ単語テストの回答言語のユーザー選択（未選択ならnull）。
+  String? get vocabAnswerLanguageCode => _prefs.vocabAnswerLanguageCode;
+
+  set vocabAnswerLanguageCode(String? value) {
+    if (_prefs.vocabAnswerLanguageCode == value) return;
+    _prefs.vocabAnswerLanguageCode = value;
+    notifyListeners();
+  }
+
   /// 長文読解の長押し＋ドラッグ単語選択のヒットテスト単位。
   LongArticleWordSelectionMode get longArticleWordSelectionMode =>
       _prefs.longArticleWordSelectionMode;
@@ -70,6 +79,26 @@ class AppSettings extends ChangeNotifier {
   set longArticleWordSelectionMode(LongArticleWordSelectionMode value) {
     if (_prefs.longArticleWordSelectionMode == value) return;
     _prefs.longArticleWordSelectionMode = value;
+    notifyListeners();
+  }
+
+  /// ダブルタップの機能ヒント（Step 7）を、時間ではなく次のアクションが
+  /// 入るまで表示し続けるか。
+  bool get buttonHintPersistUntilNextAction =>
+      _prefs.buttonHintPersistUntilNextAction;
+
+  set buttonHintPersistUntilNextAction(bool value) {
+    if (_prefs.buttonHintPersistUntilNextAction == value) return;
+    _prefs.buttonHintPersistUntilNextAction = value;
+    notifyListeners();
+  }
+
+  /// [buttonHintPersistUntilNextAction]がOFFのときの自動消去までの秒数。
+  int get buttonHintDisplaySeconds => _prefs.buttonHintDisplaySeconds;
+
+  set buttonHintDisplaySeconds(int value) {
+    if (_prefs.buttonHintDisplaySeconds == value) return;
+    _prefs.buttonHintDisplaySeconds = value;
     notifyListeners();
   }
 

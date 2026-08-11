@@ -30,6 +30,8 @@ class TopicSpeakerTimerButton extends StatelessWidget {
     this.isPaused = false,
     required this.onTap,
     this.size = 140,
+    this.idleIcon = Icons.casino,
+    this.idleTooltip,
   });
 
   /// ボタンの高さ（幅はこの2倍）。内側のアイコン/数字は余白ゼロで
@@ -47,6 +49,15 @@ class TopicSpeakerTimerButton extends StatelessWidget {
 
   final VoidCallback onTap;
 
+  /// phaseがidleのときのアイコン。既定はサイコロ。レイヤーⅣ「一覧から選ぶ」
+  /// （問題文が既に決まっている詳細画面）では、抽選ではなく開始を表す
+  /// アイコンに差し替える。
+  final IconData idleIcon;
+
+  /// idleIcon用のツールチップ。未指定ならツールチップなし（既定のサイコロと
+  /// 同じ、他レイヤーの見た目を変えないための挙動）。
+  final String? idleTooltip;
+
   static const double _baseCountingFontSize = 88;
 
   @override
@@ -61,7 +72,10 @@ class TopicSpeakerTimerButton extends StatelessWidget {
     final Widget content;
     switch (phase) {
       case TopicSpeakerTimerPhase.idle:
-        content = Icon(Icons.casino, size: iconSize, color: onAccent);
+        final idleIconWidget = Icon(idleIcon, size: iconSize, color: onAccent);
+        content = idleTooltip == null
+            ? idleIconWidget
+            : Tooltip(message: idleTooltip!, child: idleIconWidget);
       case TopicSpeakerTimerPhase.speaking:
         final speakingIcon = Icon(
           isPaused ? Icons.pause : Icons.volume_up,

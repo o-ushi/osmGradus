@@ -31,6 +31,8 @@ class DiceActionRow extends StatelessWidget {
     this.onPresetTap,
     required this.onAddTap,
     this.onAddLongPress,
+    this.addHintTapText,
+    this.addHintLongPressText,
     this.fortyFiveIcon,
     this.fortyFiveLabel,
     this.onFortyFiveTap,
@@ -42,6 +44,7 @@ class DiceActionRow extends StatelessWidget {
     this.fortyFiveHorizontalPadding = 18,
     this.fortyFiveIconSize = 24,
     this.fortyFiveLabelFontSize = 18,
+    this.fortyFiveHintTapText,
     this.sixtyLabel,
     this.sixtyIcon,
     this.sixtyActive = false,
@@ -51,6 +54,7 @@ class DiceActionRow extends StatelessWidget {
     this.sixtyHorizontalPadding = 18,
     this.sixtyLabelFontSize = 18,
     this.sixtyIconSize = 24,
+    this.sixtyHintTapText,
     this.fifteenSixtyLabel,
     this.fifteenSixtyIcon,
     this.onFifteenSixtyTap,
@@ -60,6 +64,8 @@ class DiceActionRow extends StatelessWidget {
     this.fifteenSixtyHorizontalPadding = 18,
     this.fifteenSixtyLabelFontSize = 18,
     this.fifteenSixtyIconSize = 24,
+    this.fifteenSixtyHintTapText,
+    this.fifteenSixtyHintLongPressText,
   });
 
   final bool show45;
@@ -79,6 +85,11 @@ class DiceActionRow extends StatelessWidget {
 
   /// 非nullの場合、「＋」の長押しで呼ぶ（レイヤーの使い方シートを開く導線）。
   final VoidCallback? onAddLongPress;
+
+  /// 非nullの場合、「＋」にダブルタップの機能ヒント（Step 7の
+  /// [ButtonActionHint]基盤、[GhostPill.hintTapText]と同じ）を付ける。
+  final String? addHintTapText;
+  final String? addHintLongPressText;
 
   /// 非nullの場合、「45」ピルをタイマープリセットではなく単なる
   /// アイコンボタンとして描画する（レイヤーⅤの断続/連続モード切り替え）。
@@ -101,6 +112,12 @@ class DiceActionRow extends StatelessWidget {
   final double fortyFiveIconSize;
   final double fortyFiveLabelFontSize;
 
+  /// 非nullの場合、[fortyFiveIcon]モード（タイマープリセットからの転用時）に
+  /// ダブルタップの機能ヒント（[GhostPill.hintTapText]）を付ける。タイマー
+  /// プリセットとして使うとき（[fortyFiveIcon]がnull）は連打する操作系
+  /// ボタンのため対象外（このフィールドは無視される）。
+  final String? fortyFiveHintTapText;
+
   /// 非nullの場合、「60」ピルをスピーチ時間プリセットではなく、単なる
   /// ラベル＋タップ操作のボタンとして描画する（[fortyFiveIcon]と同じ差し替え
   /// 方式。レイヤーⅠの単語テストで、回答言語トグル🇻🇳/🇺🇸/🇯🇵に使う）。
@@ -122,6 +139,11 @@ class DiceActionRow extends StatelessWidget {
   final bool sixtyActive;
   final double sixtyIconSize;
 
+  /// 非nullの場合、[sixtyLabel]/[sixtyIcon]モード（タイマープリセットからの
+  /// 転用時）にダブルタップの機能ヒントを付ける（[fortyFiveHintTapText]と
+  /// 同じ考え方）。
+  final String? sixtyHintTapText;
+
   /// 非nullの場合、「15+60」ピルをタイマープリセットではなく、単なるラベル＋
   /// タップ操作のボタンとして描画する（[sixtyLabel]と同じ差し替え方式。
   /// レイヤーⅠの単語テストで、回答言語トグル🇻🇳/🇺🇸/🇯🇵に使う）。
@@ -135,6 +157,12 @@ class DiceActionRow extends StatelessWidget {
   final double fifteenSixtyHorizontalPadding;
   final double fifteenSixtyLabelFontSize;
   final double fifteenSixtyIconSize;
+
+  /// 非nullの場合、[fifteenSixtyLabel]/[fifteenSixtyIcon]モード
+  /// （タイマープリセットからの転用時）にダブルタップの機能ヒントを付ける
+  /// （[fortyFiveHintTapText]と同じ考え方）。
+  final String? fifteenSixtyHintTapText;
+  final String? fifteenSixtyHintLongPressText;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +183,7 @@ class DiceActionRow extends StatelessWidget {
                   iconSize: fortyFiveIconSize,
                   onTap: onFortyFiveTap,
                   tooltip: fortyFiveTooltip?.tr(lang),
+                  hintTapText: fortyFiveHintTapText?.tr(lang),
                 )
               : GhostPill(
                   label: fortyFiveLabel ?? '45',
@@ -181,6 +210,9 @@ class DiceActionRow extends StatelessWidget {
                       : (onPresetTap == null
                             ? null
                             : () => onPresetTap!(NormalTimerOption.sec45)),
+                  hintTapText: fortyFiveLabel != null
+                      ? fortyFiveHintTapText?.tr(lang)
+                      : null,
                 ),
         ),
         const SizedBox(width: 8),
@@ -197,6 +229,7 @@ class DiceActionRow extends StatelessWidget {
                   iconSize: sixtyIconSize,
                   onTap: onSixtyTap,
                   tooltip: sixtyTooltip?.tr(lang),
+                  hintTapText: sixtyHintTapText?.tr(lang),
                 )
               : GhostPill(
                   label: sixtyLabel ?? '60',
@@ -206,8 +239,9 @@ class DiceActionRow extends StatelessWidget {
                       sixtyLabel == null &&
                       selectedOption == NormalTimerOption.sec60,
                   activeFill: sixtyLabel == null ? palette.accentColor : null,
-                  activeForeground:
-                      sixtyLabel == null ? palette.onAccent : null,
+                  activeForeground: sixtyLabel == null
+                      ? palette.onAccent
+                      : null,
                   showBorder: sixtyLabel != null ? sixtyShowBorder : true,
                   horizontalPadding: sixtyLabel != null
                       ? sixtyHorizontalPadding
@@ -218,6 +252,9 @@ class DiceActionRow extends StatelessWidget {
                       : (onPresetTap == null
                             ? null
                             : () => onPresetTap!(NormalTimerOption.sec60)),
+                  hintTapText: sixtyLabel != null
+                      ? sixtyHintTapText?.tr(lang)
+                      : null,
                 ),
         ),
         const SizedBox(width: 8),
@@ -232,6 +269,8 @@ class DiceActionRow extends StatelessWidget {
                   onTap: onFifteenSixtyTap,
                   onLongPress: onFifteenSixtyLongPress,
                   tooltip: fifteenSixtyTooltip?.tr(lang),
+                  hintTapText: fifteenSixtyHintTapText?.tr(lang),
+                  hintLongPressText: fifteenSixtyHintLongPressText?.tr(lang),
                 )
               : GhostPill(
                   label: fifteenSixtyLabel ?? '15+60',
@@ -242,10 +281,12 @@ class DiceActionRow extends StatelessWidget {
                   active:
                       fifteenSixtyLabel == null &&
                       selectedOption == NormalTimerOption.prep15speaking60,
-                  activeFill:
-                      fifteenSixtyLabel == null ? palette.accentColor : null,
-                  activeForeground:
-                      fifteenSixtyLabel == null ? palette.onAccent : null,
+                  activeFill: fifteenSixtyLabel == null
+                      ? palette.accentColor
+                      : null,
+                  activeForeground: fifteenSixtyLabel == null
+                      ? palette.onAccent
+                      : null,
                   showBorder: fifteenSixtyLabel != null
                       ? fifteenSixtyShowBorder
                       : true,
@@ -267,6 +308,12 @@ class DiceActionRow extends StatelessWidget {
                   onLongPress: fifteenSixtyLabel != null
                       ? onFifteenSixtyLongPress
                       : null,
+                  hintTapText: fifteenSixtyLabel != null
+                      ? fifteenSixtyHintTapText?.tr(lang)
+                      : null,
+                  hintLongPressText: fifteenSixtyLabel != null
+                      ? fifteenSixtyHintLongPressText?.tr(lang)
+                      : null,
                 ),
         ),
         const SizedBox(width: 8),
@@ -281,6 +328,8 @@ class DiceActionRow extends StatelessWidget {
             visible: showAdd,
             showBorder: false,
             horizontalPadding: 0,
+            hintTapText: addHintTapText?.tr(lang),
+            hintLongPressText: addHintLongPressText?.tr(lang),
           ),
         ),
       ],

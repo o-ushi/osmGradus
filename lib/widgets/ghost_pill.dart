@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import 'button_action_hint.dart';
 
 /// 位置・サイズは確保したまま、`visible: false`のときは背景色に同化させて
 /// 実質非表示にし、タップにも反応しないようにするピル型ボタン。
@@ -11,6 +12,7 @@ class GhostPill extends StatelessWidget {
     super.key,
     this.label,
     this.icon,
+    this.child,
     this.onTap,
     this.onLongPress,
     this.tooltip,
@@ -24,10 +26,18 @@ class GhostPill extends StatelessWidget {
     this.iconSize = 24,
     this.height = 56,
     this.enabled = true,
+    this.hintTapText,
+    this.hintLongPressText,
   });
 
   final String? label;
   final IconData? icon;
+
+  /// 非nullの場合、[icon]・[label]より優先してこの内容を描画する
+  /// （呼び出し側が既に配色済みの、単色アイコンでは表現できない見た目
+  /// （例：色付き丸＋白いチェック）を差し込みたいときに使う）。
+  final Widget? child;
+
   final VoidCallback? onTap;
 
   /// 非nullの場合、長押しでこれを呼ぶ（例：使い方シートを開く）。
@@ -70,6 +80,23 @@ class GhostPill extends StatelessWidget {
   /// 半透明で無効状態を示す。
   final bool enabled;
 
+  /// 非nullの場合、ダブルタップで「タップ：[hintTapText]／長押し：
+  /// [hintLongPressText]（未指定なら「なし」）」のヒントを表示する
+  /// （Step 7の[ButtonActionHint]基盤）。[onTap]と同じ[GestureDetector]に
+  /// [GestureDetector.onDoubleTap]として載せるため、指定した場合のみ単タップの
+  /// 発火がFlutter既定のダブルタップ判定分（約300ms）遅れる。
+  ///
+  /// これは意図的なトレードオフ：多くの対象ボタン（「問題作成」＝ダイアログ
+  /// 表示、「訳を付ける」「単語帳」「II」＝画面遷移）は[onTap]自体が
+  /// ダイアログ表示・画面遷移などボタンを画面から消す動作のため、もし単タップ
+  /// を即座に発火させてしまうと1回目のタップでボタンが消え、2回目のタップが
+  /// 同じボタンへ絶対に届かずダブルタップが検出できなくなる
+  /// （実際にこの問題が起きたため、自前の「即座に発火＋事後判定」方式から
+  /// 変更した）。[hintTapText]が[null]のボタンは従来どおり[onDoubleTap]が
+  /// 付かず、単タップの反応速度は変わらない。
+  final String? hintTapText;
+  final String? hintLongPressText;
+
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.current;
@@ -96,38 +123,42 @@ class GhostPill extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: showBorder ? fill : (active && visible ? fill : Colors.transparent),
+        color: showBorder
+            ? fill
+            : (active && visible ? fill : Colors.transparent),
         borderRadius: BorderRadius.circular(28),
         border: Border.all(
           color: borderColor,
           width: showBorder && visible ? 1.5 : 0,
         ),
       ),
-      child: icon != null
-          ? (!showBorder && horizontalPadding == 0
-                ? SizedBox(
-                    height: height,
-                    width: double.infinity,
-                    child: FittedBox(
-                      fit: BoxFit.contain,
-                      child: Icon(icon, size: height, color: foreground),
+      child:
+          child ??
+          (icon != null
+              ? (!showBorder && horizontalPadding == 0
+                    ? SizedBox(
+                        height: height,
+                        width: double.infinity,
+                        child: FittedBox(
+                          fit: BoxFit.contain,
+                          child: Icon(icon, size: height, color: foreground),
+                        ),
+                      )
+                    : Icon(icon, size: iconSize, color: foreground))
+              : FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label!,
+                    maxLines: 1,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontSize: labelFontSize,
+                      fontWeight: FontWeight.bold,
+                      color: foreground,
+                      height: 1,
                     ),
-                  )
-                : Icon(icon, size: iconSize, color: foreground))
-          : FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label!,
-                maxLines: 1,
-                softWrap: false,
-                style: TextStyle(
-                  fontSize: labelFontSize,
-                  fontWeight: FontWeight.bold,
-                  color: foreground,
-                  height: 1,
-                ),
-              ),
-            ),
+                  ),
+                )),
     );
     final pill = IgnorePointer(
       ignoring: !visible || !enabled,
@@ -138,6 +169,13 @@ class GhostPill extends StatelessWidget {
           child: GestureDetector(
             onTap: onTap,
             onLongPress: onLongPress,
+            onDoubleTap: hintTapText == null
+                ? null
+                : () => ButtonActionHint.show(
+                    context,
+                    tapText: hintTapText!,
+                    longPressText: hintLongPressText,
+                  ),
             child: content,
           ),
         ),

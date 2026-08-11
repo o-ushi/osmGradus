@@ -21,11 +21,22 @@ class SavedScoringResult {
     this.prepAdvice,
     this.hitAdvice,
     this.aiEvaluationUnparsedResponse,
+    this.questionPromptId,
+    this.questionPromptBody,
   });
 
   final String id;
   final DateTime createdAt;
   final ScoringResult result;
+
+  /// レイヤーⅣ「問題文一覧から選ぶ」（[Layer4Screen.fixedPrompt]）経由で
+  /// 採点した場合の対象[QuestionPrompt.id]。「ランダム」経由（抽選のお題）は
+  /// 問題文エンティティに紐付かないためnull。対象の問題文が後で削除されても
+  /// 記録自体は残るため、削除後もnullに戻さず削除前のIDのまま残り続ける。
+  final String? questionPromptId;
+
+  /// [questionPromptId]が非nullのときの問題文本文（保存時点の複製）。
+  final String? questionPromptBody;
 
   /// Chrome AIによる「結論→理由→例」（PREP）の型への一致度、1〜5点。
   /// 未送信・旧データ（Step 8以前）ではnull。
@@ -66,6 +77,8 @@ class SavedScoringResult {
     prepAdvice: prepAdvice,
     hitAdvice: hitAdvice,
     aiEvaluationUnparsedResponse: aiEvaluationUnparsedResponse,
+    questionPromptId: questionPromptId,
+    questionPromptBody: questionPromptBody,
   );
 
   Map<String, dynamic> toJson() => {
@@ -122,6 +135,8 @@ class SavedScoringResult {
     if (hitAdvice != null) 'hitAdvice': hitAdvice,
     if (aiEvaluationUnparsedResponse != null)
       'aiEvaluationUnparsedResponse': aiEvaluationUnparsedResponse,
+    if (questionPromptId != null) 'questionPromptId': questionPromptId,
+    if (questionPromptBody != null) 'questionPromptBody': questionPromptBody,
   };
 
   factory SavedScoringResult.fromJson(Map<String, dynamic> json) {
@@ -209,6 +224,8 @@ class SavedScoringResult {
       hitAdvice: json['hitAdvice'] as String?,
       aiEvaluationUnparsedResponse:
           json['aiEvaluationUnparsedResponse'] as String?,
+      questionPromptId: json['questionPromptId'] as String?,
+      questionPromptBody: json['questionPromptBody'] as String?,
     );
   }
 }

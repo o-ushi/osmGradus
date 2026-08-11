@@ -62,6 +62,7 @@ void main() {
       'help.gradus.dashboard.tip1',
       'help.gradus.dashboard.tip2',
       'help.gradus.dashboard.tip3',
+      'help.gradus.dashboard.tip4',
       'help.gradus.vocabulary.title',
       'help.gradus.vocabulary.summary',
       'help.gradus.vocabulary.tip1',
@@ -78,15 +79,18 @@ void main() {
       'help.gradus.backup.tip1',
       'help.gradus.backup.tip2',
       'help.gradus.backup.tip3',
+      'help.gradus.backup.tip4',
       'help.gradus.settings.title',
       'help.gradus.settings.summary',
       'help.gradus.settings.tip1',
       'help.gradus.settings.tip2',
       'help.gradus.settings.tip3',
+      'help.gradus.settings.tip4',
       'help.gradus.gesture.title',
       'help.gradus.gesture.summary',
       'help.gradus.gesture.tip1',
       'help.gradus.gesture.tip2',
+      'help.gradus.gesture.tip3',
     ];
 
     // レイヤーⅠ〜Ⅴのヒント（＋使い方シートと共有）も同じ辞書から引く。

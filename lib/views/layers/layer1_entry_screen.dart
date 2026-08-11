@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
@@ -5,27 +7,51 @@ import '../../main.dart' show appSettings;
 import '../../models/long_article.dart';
 import '../../services/long_article_service.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/mode_list_tile.dart';
+import 'layer1_question_prompt_detail_screen.dart';
+import 'layer1_question_prompt_screen.dart';
 import 'layer1_screen.dart';
 import 'layer1_vocab_screen.dart';
 import 'long_article_flow_screen.dart';
 import 'long_article_list_screen.dart';
 import 'long_article_start_choice_sheet.dart';
 
-enum Layer1Mode { longReading, vocab, podcast }
+enum Layer1Mode { longReading, vocab, podcast, questionPrompt }
 
-/// レイヤーⅠの入口。「語彙を増やす（長文読解／語彙テスト）」/「日本語に耳を
-/// 慣らす」の3択を出し、選択後にそれぞれの画面（[Layer1LongReadingScreen]、
+/// レイヤーⅠの入口。「語彙を増やす」（問題文解析／長文読解／語彙テスト）と
+/// 「日本語に耳を慣らす」から選び、選択後にそれぞれの画面
+/// （[Layer1QuestionPromptScreen]、[Layer1LongReadingScreen]、
 /// [Layer1VocabScreen]、[Layer1Screen]）へ切り替える。
 ///
 /// モードの保持:
 /// - ヘッダーで他レイヤーへ移って戻っても、同じモードを維持する
-/// - スタート画面へスワイプで閉じると[resetMode]で3択に戻る
-/// - 画面内の「戻る」またはヘッダー「Ⅰ」の再タップでも3択に戻れる
+/// - スタート画面へスワイプで閉じると[resetMode]で選択画面に戻る
+/// - 画面内の「戻る」またはヘッダー「Ⅰ」の再タップでも選択画面に戻れる
 class Layer1EntryScreen extends StatefulWidget {
-  const Layer1EntryScreen({super.key, this.onModeChanged});
+  const Layer1EntryScreen({
+    super.key,
+    this.onModeChanged,
+    this.onOpenPromptDetail,
+    this.onSelectLayer,
+    this.onGoToStart,
+  });
 
   /// モード選択／解除のたびに呼ぶ（[MainShell]がMiniPlayer表示を切り替える用）。
   final VoidCallback? onModeChanged;
+
+  /// 「問題文解析」詳細画面のII/III/IV/Vボタンから
+  /// [MainShellState.openPromptDetailInLayer]へ転送する（Step 2〜）。
+  /// 対象レイヤーのトップ・一覧をスキップし、同じ問題文の詳細を直接開く。
+  final void Function(int layerIndex, String promptId)? onOpenPromptDetail;
+
+  /// 「問題文解析」詳細画面の常設[AppHeader]から[MainShellState.selectLayer]
+  /// 相当へ転送する。
+  final ValueChanged<int>? onSelectLayer;
+
+  /// 「問題文解析」詳細画面の常設[AppHeader]のいずれかのボタン長押しから、
+  /// スタート画面（起動画面）へジャンプする導線として転送する
+  /// （[MainShellState]の「下/右スワイプで閉じる」と同じ着地）。
+  final VoidCallback? onGoToStart;
 
   @override
   State<Layer1EntryScreen> createState() => Layer1EntryScreenState();
@@ -35,6 +61,7 @@ class Layer1EntryScreenState extends State<Layer1EntryScreen> {
   Layer1Mode? _mode;
   final _podcastKey = GlobalKey<Layer1ScreenState>();
   final _vocabKey = GlobalKey<Layer1VocabScreenState>();
+  final _questionPromptKey = GlobalKey<Layer1QuestionPromptScreenState>();
 
   /// 「一覧から選ぶ」で長文一覧から選んだ長文。[Layer1LongReadingScreen]に
   /// 渡し、キーワード入力・生成をスキップしていきなり読解画面から始める。
@@ -91,6 +118,33 @@ class Layer1EntryScreenState extends State<Layer1EntryScreen> {
     widget.onModeChanged?.call();
   }
 
+  /// 詳細画面の常設[AppHeader]「Ⅰ」タップや、起動画面の横断一覧ヘッダーから
+  /// 呼ぶ。現在のモードに関わらず、問題文解析一覧へ切り替える。
+  void selectQuestionPromptMode() {
+    setState(() => _mode = Layer1Mode.questionPrompt);
+    widget.onModeChanged?.call();
+  }
+
+  /// 起動画面の横断一覧などから呼ばれる。トップ・一覧をスキップし、指定した
+  /// 問題文のⅠ詳細を直接開く（[Layer2EntryScreenState.openPromptDetail]と同じ設計）。
+  void openPromptDetail(String promptId) {
+    setState(() => _mode = Layer1Mode.questionPrompt);
+    widget.onModeChanged?.call();
+    unawaited(_pushPromptDetail(promptId));
+  }
+
+  Future<void> _pushPromptDetail(String promptId) async {
+    await Layer1QuestionPromptDetailScreen.push(
+      context,
+      promptIds: [promptId],
+      initialIndex: 0,
+      onOpenPromptDetail: widget.onOpenPromptDetail,
+      onSelectLayer: widget.onSelectLayer,
+      onGoToStart: widget.onGoToStart,
+    );
+    await _questionPromptKey.currentState?.reload();
+  }
+
   /// 「長文読解」タップ時の入口。長文一覧が空ならそのままキーワード入力画面
   /// （動線①）を開く。1件以上あれば「一覧から選ぶ／新規作成」を選んでもらい、
   /// 「一覧から選ぶ」なら長文一覧から選んだ長文で（動線②をスキップして）
@@ -138,16 +192,22 @@ class Layer1EntryScreenState extends State<Layer1EntryScreen> {
         onBackToModeSelect: resetMode,
         initialArticle: _initialLongArticle,
       ),
+      Layer1Mode.questionPrompt => Layer1QuestionPromptScreen(
+        key: _questionPromptKey,
+        onOpenPromptDetail: widget.onOpenPromptDetail,
+        onSelectLayer: widget.onSelectLayer,
+        onGoToStart: widget.onGoToStart,
+      ),
     };
   }
 }
 
-/// レイヤーⅠの3択画面。起動画面（[LaunchScreen]）と同じトーンで、
+/// レイヤーⅠのモード選択画面。起動画面（[LaunchScreen]）と同じトーンで、
 /// カードの塗りは持たず、シーンの青地に白いアイコン・文字だけを浮かせる。
 ///
-/// 上段は「語彙を増やす」を見出しとし、その下に「長文読解」「語彙テスト」の
-/// 選択可能な子を横に並べる。下段は従来どおり「日本語に耳を慣らす」
-/// （Podcast）の単独選択肢。
+/// 「語彙を増やす」見出しの下に「問題文解析」「長文読解」「語彙テスト」、
+/// 「日本語に耳を慣らす」見出しの下に「ポッドキャスト」を、それぞれ
+/// アイコン＋ラベルの行として縦に並べる（Step 2で「問題文解析」を追加）。
 class _Layer1ModeSelect extends StatelessWidget {
   const _Layer1ModeSelect({
     required this.onSelect,
@@ -157,7 +217,7 @@ class _Layer1ModeSelect extends StatelessWidget {
   final ValueChanged<Layer1Mode> onSelect;
 
   /// 「長文読解」タップ専用（長文一覧の有無で選択シートを挟むかを非同期で
-  /// 判定するため、他の2択と違い[onSelect]を直接は使わない）。
+  /// 判定するため、他の項目と違い[onSelect]を直接は使わない）。
   final VoidCallback onLongReadingTap;
 
   @override
@@ -167,108 +227,31 @@ class _Layer1ModeSelect extends StatelessWidget {
     return Container(
       color: palette.scene,
       child: SafeArea(
-        child: Column(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
           children: [
-            Expanded(
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      '語彙を増やす'.tr(lang),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: palette.textOnSceneSecondary,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: _Layer1ModeOption(
-                            icon: Icons.article_rounded,
-                            label: '長文読解'.tr(lang),
-                            iconSize: 72,
-                            fontSize: 18,
-                            onTap: onLongReadingTap,
-                          ),
-                        ),
-                        Container(
-                          width: 1,
-                          color: palette.textOnSceneSecondary.withValues(
-                            alpha: 0.2,
-                          ),
-                        ),
-                        Expanded(
-                          child: _Layer1ModeOption(
-                            icon: Icons.style_rounded,
-                            label: '語彙テスト'.tr(lang),
-                            iconSize: 72,
-                            fontSize: 18,
-                            onTap: () => onSelect(Layer1Mode.vocab),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            ModeSectionHeading(text: '語彙を増やす'.tr(lang)),
+            ModeListTile(
+              icon: Icons.assignment_rounded,
+              label: '問題文解析'.tr(lang),
+              onTap: () => onSelect(Layer1Mode.questionPrompt),
             ),
-            Container(
-              height: 1,
-              color: palette.textOnSceneSecondary.withValues(alpha: 0.2),
+            ModeListTile(
+              icon: Icons.article_rounded,
+              label: '長文読解'.tr(lang),
+              onTap: onLongReadingTap,
             ),
-            Expanded(
-              child: _Layer1ModeOption(
-                icon: Icons.headphones_rounded,
-                label: '日本語に耳を慣らす'.tr(lang),
-                onTap: () => onSelect(Layer1Mode.podcast),
-              ),
+            ModeListTile(
+              icon: Icons.style_rounded,
+              label: '語彙テスト'.tr(lang),
+              onTap: () => onSelect(Layer1Mode.vocab),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Layer1ModeOption extends StatelessWidget {
-  const _Layer1ModeOption({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.iconSize = 128,
-    this.fontSize = 22,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final double iconSize;
-  final double fontSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppColors.current;
-    return InkWell(
-      onTap: onTap,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: iconSize, color: palette.textOnScenePrimary),
-            const SizedBox(height: 20),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w600,
-                color: palette.textOnScenePrimary,
-              ),
+            const SizedBox(height: 32),
+            ModeSectionHeading(text: '日本語に耳を慣らす'.tr(lang)),
+            ModeListTile(
+              icon: Icons.headphones_rounded,
+              label: 'ポッドキャスト'.tr(lang),
+              onTap: () => onSelect(Layer1Mode.podcast),
             ),
           ],
         ),

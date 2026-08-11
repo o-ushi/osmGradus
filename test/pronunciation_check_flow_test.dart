@@ -25,6 +25,11 @@ const _lang = 'vi';
 String _t(String key) => key.tr(_lang);
 String _tFmt(String key, List<String> args) => key.trFmt(_lang, args);
 
+/// 「送信」「貼り付け」等、ダブルタップの機能ヒントが付いたボタン（Step 7）
+/// はGestureDetector.onDoubleTapで単タップ判定を約300ms（kDoubleTapTimeout）
+/// 保留するため、単タップとして確定させるにはこの分だけ余分にpumpする。
+const _tapConfirmWait = Duration(milliseconds: 350);
+
 /// tsu=1点（最低）、sokuon=2点（次点）で、5カテゴリすべて異なるスコアの
 /// 妥当なChrome AI回答例。「改善の重点」は「つ」になる想定。
 const _validEvaluationJson = '''
@@ -128,6 +133,7 @@ Future<void> _sendToChromeAi(
 ) async {
   await _completeAllQuestions(tester, state);
   await tester.tap(find.byIcon(Icons.send_rounded));
+  await tester.pump(_tapConfirmWait);
   await tester.pump();
   await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
   await tester.pump();
@@ -299,6 +305,7 @@ void main() {
       final state = tester.state<Layer5ScreenState>(find.byType(Layer5Screen));
       await _completeAllQuestions(tester, state);
       await tester.tap(find.byIcon(Icons.send_rounded));
+      await tester.pump(_tapConfirmWait);
       await tester.pump();
 
       expect(find.text(_t('Google送信確認_本文')), findsOneWidget);
@@ -324,6 +331,7 @@ void main() {
 
       await Clipboard.setData(const ClipboardData(text: _validEvaluationJson));
       await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+      await tester.pump(_tapConfirmWait);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -361,6 +369,7 @@ void main() {
       // 英語の翻訳文で「送信」ボタンを探す。
       await _completeAllQuestions(tester, state);
       await tester.tap(find.byIcon(Icons.send_rounded));
+      await tester.pump(_tapConfirmWait);
       await tester.pump();
       await tester.tap(
         find.widgetWithText(
@@ -375,6 +384,7 @@ void main() {
         const ClipboardData(text: _validEnglishEvaluationJson),
       );
       await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+      await tester.pump(_tapConfirmWait);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -387,9 +397,18 @@ void main() {
         'The tsu sound is a bit weak.',
       );
       // v1形式のように日本語・ベトナム語のフィードバックが併記されることはない。
-      expect(evaluation.categoryEvaluations[PronunciationCategory.tsu]!.feedbackJa, isNull);
-      expect(evaluation.categoryEvaluations[PronunciationCategory.tsu]!.feedbackVi, isNull);
-      expect(evaluation.displaySummary('en'), 'Overall, you are practicing well.');
+      expect(
+        evaluation.categoryEvaluations[PronunciationCategory.tsu]!.feedbackJa,
+        isNull,
+      );
+      expect(
+        evaluation.categoryEvaluations[PronunciationCategory.tsu]!.feedbackVi,
+        isNull,
+      );
+      expect(
+        evaluation.displaySummary('en'),
+        'Overall, you are practicing well.',
+      );
     });
 
     testWidgets('Chromeから戻ったときクリップボードが送信プロンプトのままなら'
@@ -421,9 +440,7 @@ void main() {
 
   group('レイヤーⅤ：解析失敗時の保存', () {
     testWidgets('回答をAIが解析できない形式で返しても、AI回答原文つきで保存され'
-        '（結果ダイアログは出さない）、履歴一覧・詳細画面に「未解析」と原文が表示される', (
-      WidgetTester tester,
-    ) async {
+        '（結果ダイアログは出さない）、履歴一覧・詳細画面に「未解析」と原文が表示される', (WidgetTester tester) async {
       final originalUrlLauncher = UrlLauncherPlatform.instance;
       UrlLauncherPlatform.instance = _FakeUrlLauncherPlatform();
       addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
@@ -443,6 +460,7 @@ void main() {
       const garbledText = 'JSONではない、ただの説明文だけの回答です。';
       await Clipboard.setData(const ClipboardData(text: garbledText));
       await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+      await tester.pump(_tapConfirmWait);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -509,6 +527,7 @@ void main() {
       await _sendToChromeAi(tester, state);
       await Clipboard.setData(const ClipboardData(text: _validEvaluationJson));
       await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+      await tester.pump(_tapConfirmWait);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       // 貼り付け後は結果概要ダイアログが出るため、履歴画面検証へ進む前に閉じる。

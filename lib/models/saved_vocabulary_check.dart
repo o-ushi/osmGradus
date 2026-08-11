@@ -59,6 +59,8 @@ class SavedVocabularyCheck {
     required this.questions,
     this.evaluation,
     this.unparsedResponse,
+    this.questionPromptId,
+    this.questionPromptBody,
   });
 
   final String id;
@@ -75,6 +77,15 @@ class SavedVocabularyCheck {
   /// 評価の解析に失敗した場合の、Chrome AIの回答原文。
   final String? unparsedResponse;
 
+  /// 総評画面の「分からなかった単語だけテスト」（[Layer1VocabScreen.fixedEntries]）
+  /// 経由で実施した場合の対象[QuestionPrompt.id]（[SavedScoringResult.questionPromptId]
+  /// と同じ考え方）。通常の（プールから抽選する）単語テストはnull。対象の
+  /// 問題文が後で削除されても記録自体は残るため、削除後もnullに戻さない。
+  final String? questionPromptId;
+
+  /// [questionPromptId]が非nullのときの問題文本文（保存時点の複製）。
+  final String? questionPromptBody;
+
   /// [session]の出題内容と回答状態、[evaluation]から1件分のレコードを
   /// 組み立てる。解析に失敗した場合は[unparsedResponse]に原文を渡す。
   factory SavedVocabularyCheck.fromSession({
@@ -84,6 +95,8 @@ class SavedVocabularyCheck {
     required VocabTestSession session,
     VocabularyEvaluation? evaluation,
     String? unparsedResponse,
+    String? questionPromptId,
+    String? questionPromptBody,
   }) {
     return SavedVocabularyCheck(
       id: id,
@@ -101,6 +114,8 @@ class SavedVocabularyCheck {
       ],
       evaluation: evaluation,
       unparsedResponse: unparsedResponse,
+      questionPromptId: questionPromptId,
+      questionPromptBody: questionPromptBody,
     );
   }
 
@@ -111,6 +126,8 @@ class SavedVocabularyCheck {
     'questions': questions.map((q) => q.toJson()).toList(),
     if (evaluation != null) 'evaluation': evaluation!.toJson(),
     if (unparsedResponse != null) 'unparsedResponse': unparsedResponse,
+    if (questionPromptId != null) 'questionPromptId': questionPromptId,
+    if (questionPromptBody != null) 'questionPromptBody': questionPromptBody,
   };
 
   factory SavedVocabularyCheck.fromJson(Map<String, dynamic> json) {
@@ -121,6 +138,8 @@ class SavedVocabularyCheck {
       questions: _parseQuestions(json['questions']),
       evaluation: _parseEvaluation(json['evaluation']),
       unparsedResponse: json['unparsedResponse'] as String?,
+      questionPromptId: json['questionPromptId'] as String?,
+      questionPromptBody: json['questionPromptBody'] as String?,
     );
   }
 

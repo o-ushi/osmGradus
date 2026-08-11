@@ -48,6 +48,18 @@ class _AppRootShellState extends State<AppRootShell> {
     setState(() => _showingMainShell = true);
   }
 
+  /// 横断問題文一覧の詳細ヘッダーから。入口の2/3択を飛ばして問題文一覧を開く。
+  void _openLayerInListMode(int index) {
+    if (!_mainShellCreated) {
+      _mainShellCreated = true;
+      _initialLayerIndex = index;
+    }
+    setState(() => _showingMainShell = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mainShellKey.currentState?.openPromptListInLayer(index);
+    });
+  }
+
   void _backToStart() {
     setState(() => _showingMainShell = false);
   }
@@ -86,6 +98,7 @@ class _AppRootShellState extends State<AppRootShell> {
         if (!_showingMainShell && !_showingStartup)
           LaunchScreen(
             onOpenLayer: _openLayer,
+            onOpenLayerInListMode: _openLayerInListMode,
             onShowStartup: _showStartup,
             onResume: _mainShellCreated ? _resumeMainShell : null,
           ),

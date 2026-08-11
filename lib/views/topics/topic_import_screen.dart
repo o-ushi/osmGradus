@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../data/ai_prompt_template.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
+import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
 import '../../services/topic_service.dart';
 import '../../theme/app_colors.dart';
@@ -83,7 +84,9 @@ class _TopicImportScreenState extends State<TopicImportScreen>
   }
 
   Future<void> _import() async {
-    final parsed = TopicImportParser.parseBatchImport(importTextController.text);
+    final parsed = TopicImportParser.parseBatchImport(
+      importTextController.text,
+    );
     final dailyParsed = parsed[TopicCategory.daily] ?? const [];
     final businessParsed = parsed[TopicCategory.business] ?? const [];
     final situationalParsed = parsed[TopicCategory.situational] ?? const [];
@@ -91,14 +94,17 @@ class _TopicImportScreenState extends State<TopicImportScreen>
     final dailyNew = await _service.importTopics(
       TopicCategory.daily,
       dailyParsed,
+      source: QuestionPromptSource.ai,
     );
     final businessNew = await _service.importTopics(
       TopicCategory.business,
       businessParsed,
+      source: QuestionPromptSource.ai,
     );
     final situationalNew = await _service.importTopics(
       TopicCategory.situational,
       situationalParsed,
+      source: QuestionPromptSource.ai,
     );
     final total = dailyNew + businessNew + situationalNew;
 
@@ -133,8 +139,7 @@ class _TopicImportScreenState extends State<TopicImportScreen>
       context: context,
       lang: lang,
       title: '取り込み済みお題をすべて削除'.tr(lang),
-      body: '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。'
-          .tr(lang),
+      body: '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。'.tr(lang),
     );
     if (!confirmed) return;
     await _service.clearAllImported();

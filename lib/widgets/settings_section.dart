@@ -178,15 +178,27 @@ class SettingsValueRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.onTap,
+    this.enabled = true,
   });
 
   final String label;
   final String value;
   final VoidCallback? onTap;
 
+  /// falseの間は[SettingsSwitchRow.enabled]と同じく淡色化し、タップも
+  /// 無効にする（例：「次のアクションまで表示」ONの間は表示期間が
+  /// 無関係になるため、行ごとグレーアウトする）。
+  final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.current;
+    final labelColor = enabled
+        ? palette.textOnCardPrimary
+        : palette.textOnCardPrimary.withValues(alpha: 0.4);
+    final valueColor = enabled
+        ? palette.textOnCardSecondary
+        : palette.textOnCardSecondary.withValues(alpha: 0.4);
     final child = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(
@@ -194,31 +206,24 @@ class SettingsValueRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(fontSize: 17, color: palette.textOnCardPrimary),
+              style: TextStyle(fontSize: 17, color: labelColor),
             ),
           ),
           Flexible(
             child: Text(
               value,
-              style: TextStyle(
-                color: palette.textOnCardSecondary,
-                fontSize: 17,
-              ),
+              style: TextStyle(color: valueColor, fontSize: 17),
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          if (onTap != null) ...[
+          if (onTap != null && enabled) ...[
             const SizedBox(width: 2),
-            Icon(
-              Icons.unfold_more,
-              size: 20,
-              color: palette.textOnCardSecondary,
-            ),
+            Icon(Icons.unfold_more, size: 20, color: valueColor),
           ],
         ],
       ),
     );
-    if (onTap == null) return child;
+    if (onTap == null || !enabled) return child;
     return InkWell(onTap: onTap, child: child);
   }
 }
@@ -321,19 +326,13 @@ class SettingsSwitchRow extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 17,
-                      color: labelColor,
-                    ),
+                    style: TextStyle(fontSize: 17, color: labelColor),
                   ),
                   if (subtitle != null) ...[
                     const SizedBox(height: 2),
                     Text(
                       subtitle!,
-                      style: TextStyle(
-                        color: subtitleColor,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: subtitleColor, fontSize: 13),
                     ),
                   ],
                 ],

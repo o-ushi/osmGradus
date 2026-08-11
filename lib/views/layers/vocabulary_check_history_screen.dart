@@ -45,6 +45,8 @@ class VocabularyCheckHistoryScreen extends StatelessWidget {
         badges: [
           if (saved.evaluation == null)
             HistoryFormatBadge(label: '未解析'.tr(lang)),
+          if (saved.questionPromptId != null)
+            HistoryFormatBadge(label: 'レイヤーⅠ_語彙_問題文の見直し'.tr(lang)),
         ],
         children: _buildCardBody(palette, lang, saved),
       ),

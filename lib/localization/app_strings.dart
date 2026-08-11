@@ -59,9 +59,9 @@ abstract final class AppStrings {
     'Chrome AI で開く': 'Chrome AI で開く',
     'Chrome AI を開きました': 'Chrome AI を開きました',
     'クリップボードから読み込む': 'クリップボードから読み込む',
-    '取り込み済みのお題': '取り込み済みのお題',
-    '取り込み済みお題をすべて削除': '取り込み済みお題をすべて削除',
-    '取り込み済みのお題をすべて削除しました。': '取り込み済みのお題をすべて削除しました。',
+    '取り込み済みのお題': '取り込み済みの問題文',
+    '取り込み済みお題をすべて削除': '取り込み済み問題文をすべて削除',
+    '取り込み済みのお題をすべて削除しました。': '取り込み済みの問題文をすべて削除しました。',
     'Chrome AI 用プロンプト': 'Chrome AI 用プロンプト',
     'AI の出力（確認・編集）': 'AI の出力（確認・編集）',
     '秒': '秒',
@@ -72,10 +72,10 @@ abstract final class AppStrings {
     'クリップボードに AI の回答が見つかりませんでした。Chrome で回答を長押し→すべて選択→コピー してから再度お試しください。':
         'クリップボードに AI の回答が見つかりませんでした。Chrome で回答を長押し→すべて選択→コピー してから再度お試しください。',
     'クリップボードから読み込みました。内容を確認して「お題を取り込む」を押してください。':
-        'クリップボードから読み込みました。内容を確認して「お題を取り込む」を押してください。',
+        'クリップボードから読み込みました。内容を確認して「問題文を取り込む」を押してください。',
     'お題を読み取れませんでした。【日常の身近な話題】【ビジネスシーン】【シチュエーション】の見出し付きで貼り付けてください。':
-        'お題を読み取れませんでした。【日常の身近な話題】【ビジネスシーン】【シチュエーション】の見出し付きで貼り付けてください。',
-    '新しいお題はありませんでした（すべて重複しています）。': '新しいお題はありませんでした（すべて重複しています）。',
+        '問題文を読み取れませんでした。【日常の身近な話題】【ビジネスシーン】【シチュエーション】の見出し付きで貼り付けてください。',
+    '新しいお題はありませんでした（すべて重複しています）。': '新しい問題文はありませんでした（すべて重複しています）。',
     '日常の身近な話題 %lld 件、ビジネスシーン %lld 件、シチュエーション %lld 件を追加しました。':
         '日常の身近な話題 %1件、ビジネスシーン %2件、シチュエーション %3件を追加しました。',
     'Chrome AI で開く → 回答をコピー → 自動読み込み → 取り込む':
@@ -211,9 +211,9 @@ abstract final class AppStrings {
     'Chrome AI で開く': 'Open Chrome AI',
     'Chrome AI を開きました': 'Chrome AI opened',
     'クリップボードから読み込む': 'Load from Clipboard',
-    '取り込み済みのお題': 'Imported Topics',
-    '取り込み済みお題をすべて削除': 'Delete All Imported Topics',
-    '取り込み済みのお題をすべて削除しました。': 'All imported topics have been deleted.',
+    '取り込み済みのお題': 'Imported Prompts',
+    '取り込み済みお題をすべて削除': 'Delete All Imported Prompts',
+    '取り込み済みのお題をすべて削除しました。': 'All imported prompts have been deleted.',
     'Chrome AI 用プロンプト': 'Chrome AI Prompt',
     'AI の出力（確認・編集）': 'AI Output (Review & Edit)',
     '秒': 'sec',
@@ -224,12 +224,12 @@ abstract final class AppStrings {
     'クリップボードに AI の回答が見つかりませんでした。Chrome で回答を長押し→すべて選択→コピー してから再度お試しください。':
         'No AI answer on clipboard. Long-press in Chrome → Select All → Copy.',
     'クリップボードから読み込みました。内容を確認して「お題を取り込む」を押してください。':
-        'Loaded from clipboard. Review then tap Import Topics.',
+        'Loaded from clipboard. Review then tap Import Prompts.',
     'お題を読み取れませんでした。【日常の身近な話題】【ビジネスシーン】【シチュエーション】の見出し付きで貼り付けてください。':
-        'Could not read topics. Paste with section headers.',
-    '新しいお題はありませんでした（すべて重複しています）。': 'No new topics (all duplicates).',
+        'Could not read prompts. Paste with section headers.',
+    '新しいお題はありませんでした（すべて重複しています）。': 'No new prompts (all duplicates).',
     '日常の身近な話題 %lld 件、ビジネスシーン %lld 件、シチュエーション %lld 件を追加しました。':
-        'Added %1 Daily, %2 Business, %3 Situation topics.',
+        'Added %1 Daily, %2 Business, %3 Situation prompts.',
     'Chrome AI で開く → 回答をコピー → 自動読み込み → 取り込む':
         'Open Chrome AI → copy → auto-load → import',
     '操作方法': 'How to use',
@@ -369,9 +369,9 @@ abstract final class AppStrings {
     'Chrome AI で開く': 'Mở Chrome AI',
     'Chrome AI を開きました': 'Đã mở Chrome AI',
     'クリップボードから読み込む': 'Tải từ bộ nhớ tạm',
-    '取り込み済みのお題': 'Chủ đề đã nhập',
-    '取り込み済みお題をすべて削除': 'Xóa tất cả chủ đề đã nhập',
-    '取り込み済みのお題をすべて削除しました。': 'Đã xóa tất cả chủ đề đã nhập.',
+    '取り込み済みのお題': 'Đề bài đã nhập',
+    '取り込み済みお題をすべて削除': 'Xóa tất cả đề bài đã nhập',
+    '取り込み済みのお題をすべて削除しました。': 'Đã xóa tất cả đề bài đã nhập.',
     'Chrome AI 用プロンプト': 'Prompt cho Chrome AI',
     'AI の出力（確認・編集）': 'Kết quả AI (xem & chỉnh sửa)',
     '秒': 'giây',
@@ -382,10 +382,10 @@ abstract final class AppStrings {
     'クリップボードに AI の回答が見つかりませんでした。Chrome で回答を長押し→すべて選択→コピー してから再度お試しください。':
         'Không tìm thấy câu trả lời AI. Nhấn giữ trong Chrome → Chọn tất cả → Sao chép.',
     'クリップボードから読み込みました。内容を確認して「お題を取り込む」を押してください。':
-        'Đã tải từ bộ nhớ tạm. Kiểm tra rồi nhấn Nhập chủ đề.',
+        'Đã tải từ bộ nhớ tạm. Kiểm tra rồi nhấn Nhập đề bài.',
     'お題を読み取れませんでした。【日常の身近な話題】【ビジネスシーン】【シチュエーション】の見出し付きで貼り付けてください。':
-        'Không đọc được chủ đề. Dán văn bản có tiêu đề phần.',
-    '新しいお題はありませんでした（すべて重複しています）。': 'Không có chủ đề mới (trùng hết).',
+        'Không đọc được đề bài. Dán văn bản có tiêu đề phần.',
+    '新しいお題はありませんでした（すべて重複しています）。': 'Không có đề bài mới (trùng hết).',
     '日常の身近な話題 %lld 件、ビジネスシーン %lld 件、シチュエーション %lld 件を追加しました。':
         'Đã thêm %1 Hàng ngày, %2 Công việc, %3 Tình huống.',
     'Chrome AI で開く → 回答をコピー → 自動読み込み → 取り込む':

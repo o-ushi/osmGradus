@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../main.dart' show appSettings;
 import '../../models/saved_scoring_result.dart';
+import '../../services/question_prompt_service.dart';
 import '../../services/scoring_result_storage.dart';
 import '../../widgets/history_list_scaffold.dart';
 import '../../widgets/scoring_result_card.dart';
@@ -30,7 +31,7 @@ class ScoringHistoryScreen extends StatelessWidget {
       emptyMessage: 'まだ採点結果がありません',
       languageCode: lang,
       loadAll: storage.loadAll,
-      delete: (item) => storage.delete(item.id),
+      delete: (item) => _deleteAndResync(storage, item),
       itemId: (item) => item.id,
       onItemTap: (context, saved) => Navigator.of(context).push(
         MaterialPageRoute<void>(
@@ -45,4 +46,18 @@ class ScoringHistoryScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// [item]を削除したあと、[item.questionPromptId]が紐づく問題文があれば
+/// jsstScore/hitScore/prepScoreを残りの結果から再計算する（問題文一覧の
+/// 実施状況が、削除済みの結果のまま古くなって残るのを防ぐ）。
+Future<void> _deleteAndResync(
+  ScoringResultStorage storage,
+  SavedScoringResult item,
+) async {
+  await storage.delete(item.id);
+  final promptId = item.questionPromptId;
+  if (promptId == null) return;
+  final remaining = await storage.loadAll();
+  await QuestionPromptService().resyncJsstScores(promptId, remaining);
 }

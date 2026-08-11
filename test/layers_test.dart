@@ -51,6 +51,12 @@ import 'package:osm_gradus/views/podcast/mini_player_bar.dart';
 const _lang = 'vi';
 String _t(String key) => key.tr(_lang);
 
+/// 「送信」「リセット」「貼り付け」「総評」等、ダブルタップの機能ヒントが
+/// 付いたボタン（Step 7）はGestureDetector.onDoubleTapで単タップ判定を
+/// 約300ms（kDoubleTapTimeout）保留するため、単タップとして確定させるには
+/// この分だけ余分にpumpする。
+const _tapConfirmWait = Duration(milliseconds: 350);
+
 /// 使い方シートの1行で`{{icon}}`より後ろの断片（[LayerHelpLine]のアイコン付き行は
 /// アイコンの前後でTextウィジェットが分かれるため、後半だけで照合する）。
 String _afterIcon(String key) => _t(key).split('{{icon}}').last;
@@ -139,7 +145,7 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
 
     expect(find.text(_t('番組を登録してください')), findsOneWidget);
@@ -150,7 +156,7 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
 
     await tester.longPress(find.byIcon(Icons.add_rounded));
@@ -176,11 +182,12 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
 
     // 空状態でも常に表示される上段右の「＋」から追加画面を開く。
     await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
@@ -204,9 +211,10 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     expect(find.text(_t('番組を追加')), findsOneWidget);
 
@@ -240,9 +248,10 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     expect(find.text(_t('番組を追加')), findsOneWidget);
 
@@ -281,9 +290,10 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     expect(find.text(_t('番組を追加')), findsOneWidget);
 
@@ -342,7 +352,7 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     // ネットワーク取得は失敗する（テスト環境ではHTTPが常に400になる）ため、
     // pumpAndSettleではなく明示的なpumpでキャッシュ済みデータの描画を待つ。
     for (var i = 0; i < 5; i++) {
@@ -386,7 +396,7 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
@@ -402,6 +412,7 @@ void main() {
 
     // 並べ替えアイコンをタップしてシートを開き、「名前」＋「昇順」に変更する。
     await tester.tap(find.byIcon(Icons.swap_vert));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     expect(find.text(_t('並べ替え')), findsOneWidget);
 
@@ -463,7 +474,7 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
@@ -517,7 +528,7 @@ void main() {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
@@ -547,6 +558,10 @@ void main() {
 
     // ヘッダーの「Ⅱ」をタップしてレイヤーⅡへ即時切り替え。
     await tester.tap(find.text('Ⅱ'));
+    await tester.pumpAndSettle();
+    // Step 3: レイヤーⅡ入口の2択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
     await tester.pumpAndSettle();
 
     // Ⅱ画面では「45」「60」「15+60」は枠自体は残るが背景色に同化して実質非表示になり、
@@ -631,6 +646,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅱ'));
     await tester.pumpAndSettle();
+    // Step 3: レイヤーⅡ入口の2択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
+    await tester.pumpAndSettle();
 
     // お題を引く前のサイコロボタンのY座標を記録する。
     final initialY = tester.getTopLeft(find.byIcon(Icons.casino)).dy;
@@ -666,6 +685,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅱ'));
     await tester.pumpAndSettle();
+    // Step 3: レイヤーⅡ入口の2択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('🌐'));
     await tester.pumpAndSettle();
@@ -681,6 +704,10 @@ void main() {
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅱ'));
+    await tester.pumpAndSettle();
+    // Step 3: レイヤーⅡ入口の2択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
     await tester.pumpAndSettle();
 
     await tester.longPress(find.byIcon(Icons.add_rounded));
@@ -713,6 +740,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅱ'));
     await tester.pumpAndSettle();
+    // Step 3: レイヤーⅡ入口の2択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
+    await tester.pumpAndSettle();
 
     expect(find.text(_t('なんて回答するかイメージして')), findsOneWidget);
 
@@ -727,6 +758,140 @@ void main() {
 
     appSettings.language = 'vi';
     await tester.pump();
+  });
+
+  testWidgets('レイヤーⅡ「ランダム」画面はサイコロで問題文をランダムに引ける。'
+      '45/60/15+60は隠れたまま、カテゴリに「ランダム」は選べない', (WidgetTester tester) async {
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ⅱ'));
+    await tester.pumpAndSettle();
+    // Step 3拡張: レイヤーⅡ入口の3択から「ランダム」を選ぶと、
+    // [Layer2RandomScreen]（QuestionPromptServiceから1件引く）が開く。
+    await tester.tap(find.text(_t('ランダム')));
+    await tester.pumpAndSettle();
+
+    // 45/60/15+60は枠自体は残るが背景色に同化して実質非表示になり、
+    // タップにも反応しない（[Layer2Screen]の「話題を増やす」と同じ扱い）。
+    for (final label in ['45', '60', '15+60']) {
+      final finder = find.text(label);
+      expect(finder, findsOneWidget);
+      final ignorePointer = tester.widget<IgnorePointer>(
+        find.ancestor(of: finder, matching: find.byType(IgnorePointer)).first,
+      );
+      expect(ignorePointer.ignoring, isTrue);
+    }
+
+    expect(find.text(_t('日常の身近な話題')), findsOneWidget);
+    expect(find.byIcon(Icons.casino), findsOneWidget);
+    expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
+    expect(find.text(_t('どんな回答をするか想像して')), findsOneWidget);
+
+    // QuestionPrompt.fieldはrandomを取らないため、この画面のカテゴリ一覧には
+    // 「ランダム」が出ない（「話題を増やす」のTopicCategoryとは異なるプールを
+    // 使う回帰確認）。
+    await tester.tap(find.text(_t('日常の身近な話題')));
+    await tester.pumpAndSettle();
+    expect(find.text(_t('ビジネスシーン')), findsOneWidget);
+    expect(find.text(_t('シチュエーション')), findsOneWidget);
+    expect(find.text(_t('ランダム')), findsNothing);
+    await tester.tap(find.text(_t('ビジネスシーン')));
+    await tester.pumpAndSettle();
+    expect(find.text(_t('ビジネスシーン')), findsOneWidget);
+
+    // ダイスタップ中は不確定なCircularProgressIndicatorが一瞬表示されるため、
+    // pumpAndSettleではなく明示的なpumpで非同期処理の完了を待つ。
+    await tester.tap(find.byIcon(Icons.casino));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text(_t('ボタンを押してお題を引いてください')), findsNothing);
+  });
+
+  testWidgets('レイヤーⅡ「ランダム」画面：リセットで問題文をプレースホルダーに戻せる', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ⅱ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('ランダム')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.casino));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text(_t('ボタンを押してお題を引いてください')), findsNothing);
+
+    // 「リセット」にはダブルタップの機能ヒント（Step 7）が付いており、単タップ
+    // 判定を約300ms（kDoubleTapTimeout）保留するため、確定するまで余分にpumpする。
+    await tester.tap(find.byIcon(Icons.refresh_rounded));
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+    expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
+  });
+
+  testWidgets('レイヤーⅡ「ランダム」画面：＋長押しで実際の挙動に合った使い方シートが開き、'
+      'リセットのダブルタップは機能ヒントを出すだけで単タップの動作は実行されない。'
+      'サイコロはヒント対象外（連打できる）', (WidgetTester tester) async {
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ⅱ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('ランダム')));
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byIcon(Icons.add_rounded));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.text(_t('操作方法')), findsOneWidget);
+    expect(
+      find.text(_withoutBadge('レイヤーⅡ_ランダム_使い方_分野'), findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.text(_afterIcon('レイヤーⅡ_ランダム_使い方_サイコロ'), findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.text(_withoutBadge('レイヤーⅡ_ランダム_使い方_イメージ'), findRichText: true),
+      findsOneWidget,
+    );
+    // ＋の長押しはタップと違って取り込み画面を開かない。
+    expect(find.text(_t('お題の取り込み')), findsNothing);
+
+    // シートを閉じる。
+    await tester.tapAt(const Offset(5, 5));
+    await tester.pumpAndSettle();
+
+    // 引いておく（リセットの単タップ効果と区別するため）。
+    await tester.tap(find.byIcon(Icons.casino));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(find.text(_t('ボタンを押してお題を引いてください')), findsNothing);
+
+    Future<void> doubleTap(Finder finder) async {
+      await tester.tap(finder);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(finder);
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    await doubleTap(find.byIcon(Icons.refresh_rounded));
+    expect(find.textContaining(_t('リセット')), findsWidgets);
+    // ダブルタップはヒントを出すだけで、単タップの「リセット」は実行されない
+    // （引いた問題文がまだ表示されたまま）。
+    expect(find.text(_t('ボタンを押してお題を引いてください')), findsNothing);
+
+    // サイコロはダブルタップの対象外（連打する操作系ボタンのため、
+    // [PronunciationMicButton]・他レイヤーのサイコロと同じくヒント無し）。
+    await tester.tap(find.byIcon(Icons.casino));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('レイヤーⅤ画面の「＋」を長押しすると使い方シートが開く', (WidgetTester tester) async {
@@ -765,8 +930,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅱ'));
     await tester.pumpAndSettle();
+    // Step 3: レイヤーⅡ入口の2択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
+    await tester.pumpAndSettle();
 
+    // 「＋」にはダブルタップの機能ヒント（Step 7）が付いており、単タップ判定を
+    // 約300ms（kDoubleTapTimeout）保留するため、確定するまで余分にpumpする。
     await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.pumpAndSettle();
 
     // 「＋」はまず「AIで追加」「自分で追加」の選択シートを開く。
@@ -831,6 +1003,10 @@ void main() {
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅲ'));
+    await tester.pumpAndSettle();
+    // Step 4: レイヤーⅢ入口の2択から「ランダム」を選ぶと、既存の
+    // サイコロ画面（Layer3Screen）が開く。
+    await tester.tap(find.text(_t('ランダム')));
     // レイヤーⅢのPREPガイドは常時点滅する（無限に繰り返す）AnimationControllerを
     // 持つため、pumpAndSettle()は永久に終わらない。以降は明示的なpump()を使う。
     await tester.pump();
@@ -941,6 +1117,7 @@ void main() {
     // 持つ。pumpAndSettle()はPREPガイドの無限アニメーションで使えないため、
     // フェイククロックをタイムアウト分だけ一度に進めて解決させる。
     await tester.tap(find.byIcon(Icons.refresh_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump(const Duration(seconds: 4));
     expect(tester.takeException(), isNull);
     expect(find.byIcon(Icons.casino), findsOneWidget);
@@ -951,12 +1128,19 @@ void main() {
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅲ'));
+    await tester.pumpAndSettle();
+    // Step 4: レイヤーⅢ入口の2択から「ランダム」を選ぶと、既存の
+    // サイコロ画面（Layer3Screen）が開く。
+    await tester.tap(find.text(_t('ランダム')));
     // レイヤーⅢのPREPガイドは常時点滅する（無限に繰り返す）AnimationControllerを
     // 持つため、pumpAndSettle()は使わない。
     await tester.pump();
 
     // タップは「AIで追加」「自分で追加」の選択シートを開く（お題の取り込み導線）。
+    // 「＋」にはダブルタップの機能ヒント（Step 7）が付いており、単タップ判定を
+    // 約300ms（kDoubleTapTimeout）保留するため、確定するまで余分にpumpする。
     await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.pump();
 
     expect(tester.takeException(), isNull);
@@ -997,6 +1181,8 @@ void main() {
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅳ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('ランダム')));
     // レイヤーⅢと同じく（PrepStageRowの点滅アニメーション自体は常駐するため）
     // pumpAndSettle()は使わない。
     await tester.pump();
@@ -1084,6 +1270,7 @@ void main() {
     // 一度に進めて解決させる（残存タイマーがあると後続テストの
     // 「pending timer」検証に失敗するため）。
     await tester.tap(find.byIcon(Icons.refresh_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump(const Duration(seconds: 4));
     expect(tester.takeException(), isNull);
   });
@@ -1093,6 +1280,8 @@ void main() {
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Ⅳ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('ランダム')));
     await tester.pump();
 
     await tester.longPress(find.byIcon(Icons.add_rounded));
@@ -1456,6 +1645,7 @@ void main() {
     await _completeAllQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -1486,6 +1676,7 @@ void main() {
     await _completeAllQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -1495,14 +1686,13 @@ void main() {
 
     expect(find.byIcon(Icons.content_paste_go_rounded), findsOneWidget);
 
-    // 「貼り付け」を連続でタップしても、chromeAiActionInFlightガードにより
-    // 2件目の保存処理は開始されない（1回目のタップ直後に無効化されるため、
-    // 2回目はヒットテストに失敗しうる＝それ自体が二重処理防止の証拠）。
+    // 「貼り付け」の連続タップ二重保存防止（Step 7以前）：素早い連続タップは
+    // 今はダブルタップの機能ヒント（Step 7）として扱われ、本来の貼り付け動作は
+    // 一度も呼ばれない（GhostPill等と同じ、ダブルタップ確定では単タップの
+    // 動作を実行しない方式）。そのため二重保存はUIタップ経由では構造的に
+    // 起こり得ず、単タップ（確定待ち後）で1件だけ保存されることを確認する。
     await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
-    await tester.tap(
-      find.byIcon(Icons.content_paste_go_rounded),
-      warnIfMissed: false,
-    );
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -1652,13 +1842,32 @@ void main() {
     expect(find.byType(LaunchScreen), findsOneWidget);
   });
 
+  testWidgets('AppHeaderのⅠ〜Ⅴいずれかのボタンを長押しすると、スタート画面へジャンプする', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    await _openLayer5(tester);
+
+    // 現在Ⅴを表示中でも、長押しはどのボタンでも同じくスタート画面へ戻る
+    // ことを確認するため、あえて別のⅢを長押しする。
+    final longPressTarget = find.descendant(
+      of: find.byType(AppHeader),
+      matching: find.text('Ⅲ'),
+    );
+    await tester.longPress(longPressTarget);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 4));
+
+    expect(find.byType(LaunchScreen), findsOneWidget);
+  });
+
   testWidgets('レイヤーⅠでモードを選んだあとに右スワイプすると、3択画面を経由せず'
       '直接スタート画面へ戻り、タイルのタップで選んでいたモードに再開する', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
 
     // ポッドキャスト画面（Layer1Screen）が開いていること。
@@ -1695,7 +1904,7 @@ void main() {
     expect(find.text('Làm quen với tiếng Nhật'), findsOneWidget);
     expect(find.text(_t('語彙を増やす')), findsOneWidget);
 
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
     expect(find.text(_t('番組を登録してください')), findsOneWidget);
 
@@ -1743,7 +1952,7 @@ void main() {
 
     await tester.tap(find.text('Ⅰ'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Làm quen với tiếng Nhật'));
+    await tester.tap(find.text('Podcast'));
     await tester.pumpAndSettle();
     expect(find.byType(MiniPlayerBar), findsOneWidget);
   });
@@ -1783,81 +1992,73 @@ void main() {
     expect(find.text(_t('長文読解')), findsOneWidget);
   });
 
-  testWidgets(
-    'レイヤーⅠ長文読解：保存済みの長文があるときは選択シートが出て、'
-    '「一覧から選ぶ」で一覧画面を開ける',
-    (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await LongArticleService().addArticle(body: '友達と公園へ行きました。', title: '旅行');
+  testWidgets('レイヤーⅠ長文読解：保存済みの長文があるときは選択シートが出て、'
+      '「一覧から選ぶ」で一覧画面を開ける', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await LongArticleService().addArticle(body: '友達と公園へ行きました。', title: '旅行');
 
-      await tester.pumpWidget(const OsmGradusApp());
-      await tester.tap(find.text('Tầng I'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(_t('長文読解')));
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解')));
+    await tester.pumpAndSettle();
 
-      // キーワード画面へ直行せず、まず選択シートが出る。
-      expect(find.text(_t('長文読解_開始選択_タイトル')), findsOneWidget);
-      expect(find.text(_t('長文読解_JLPTレベル')), findsNothing);
+    // キーワード画面へ直行せず、まず選択シートが出る。
+    expect(find.text(_t('長文読解_開始選択_タイトル')), findsOneWidget);
+    expect(find.text(_t('長文読解_JLPTレベル')), findsNothing);
 
-      await tester.tap(find.text(_t('長文読解_開始選択_一覧から選ぶ')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解_開始選択_一覧から選ぶ')));
+    await tester.pumpAndSettle();
 
-      expect(find.byType(LongArticleListScreen), findsOneWidget);
-      expect(find.text('旅行'), findsOneWidget);
-    },
-  );
+    expect(find.byType(LongArticleListScreen), findsOneWidget);
+    expect(find.text('旅行'), findsOneWidget);
+  });
 
-  testWidgets(
-    'レイヤーⅠ長文読解：一覧から選ぶと、その長文でいきなり読解画面が開き、'
-    '「次へ」で複製せず3択へ戻る',
-    (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await LongArticleService().addArticle(body: '友達と公園へ行きました。', title: '旅行');
+  testWidgets('レイヤーⅠ長文読解：一覧から選ぶと、その長文でいきなり読解画面が開き、'
+      '「次へ」で複製せず3択へ戻る', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await LongArticleService().addArticle(body: '友達と公園へ行きました。', title: '旅行');
 
-      await tester.pumpWidget(const OsmGradusApp());
-      await tester.tap(find.text('Tầng I'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(_t('長文読解')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(_t('長文読解_開始選択_一覧から選ぶ')));
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解_開始選択_一覧から選ぶ')));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('旅行'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('旅行'));
+    await tester.pumpAndSettle();
 
-      // キーワード・生成画面を経由せず、いきなり読解画面が開く。
-      expect(find.byType(TappableJapaneseText), findsOneWidget);
-      expect(find.textContaining('友達と公園へ行きました'), findsWidgets);
+    // キーワード・生成画面を経由せず、いきなり読解画面が開く。
+    expect(find.byType(TappableJapaneseText), findsOneWidget);
+    expect(find.textContaining('友達と公園へ行きました'), findsWidgets);
 
-      await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pumpAndSettle();
 
-      // 3択画面へ戻り、長文は複製されず1件のまま。
-      expect(find.text(_t('語彙を増やす')), findsOneWidget);
-      expect(await LongArticleService().loadArticles(), hasLength(1));
-    },
-  );
+    // 3択画面へ戻り、長文は複製されず1件のまま。
+    expect(find.text(_t('語彙を増やす')), findsOneWidget);
+    expect(await LongArticleService().loadArticles(), hasLength(1));
+  });
 
-  testWidgets(
-    'レイヤーⅠ長文読解：保存済みの長文があっても「新規作成」を選べば'
-    'キーワード画面から始まる',
-    (WidgetTester tester) async {
-      SharedPreferences.setMockInitialValues({});
-      await LongArticleService().addArticle(body: '友達と公園へ行きました。', title: '旅行');
+  testWidgets('レイヤーⅠ長文読解：保存済みの長文があっても「新規作成」を選べば'
+      'キーワード画面から始まる', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await LongArticleService().addArticle(body: '友達と公園へ行きました。', title: '旅行');
 
-      await tester.pumpWidget(const OsmGradusApp());
-      await tester.tap(find.text('Tầng I'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(_t('長文読解')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(_t('長文読解_開始選択_新規作成')));
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解_開始選択_新規作成')));
+    await tester.pumpAndSettle();
 
-      expect(find.text(_t('キーワード')), findsOneWidget);
-      expect(find.text(_t('長文読解_JLPTレベル')), findsOneWidget);
-    },
-  );
+    expect(find.text(_t('キーワード')), findsOneWidget);
+    expect(find.text(_t('長文読解_JLPTレベル')), findsOneWidget);
+  });
 
   testWidgets('レイヤーⅠ長文読解：おまかせで候補が入力され、'
       '入力欄は編集不可になる', (WidgetTester tester) async {
@@ -1943,10 +2144,10 @@ void main() {
 
     // 手動の「使う」確認は無く、パース成功でそのまま読解画面へ進む。
     // 操作バーはGenkiTransportRowと同じ枠（アイコンのみ・余白ゼロ）。
-    // 登録単語が無い間は「隠す」が表示され、「訳を付ける」は出ない。
+    // 登録単語が無い間は「訳を付ける」は非表示（枠だけ確保）。
     expect(find.byType(TappableJapaneseText), findsOneWidget);
-    expect(find.byIcon(Icons.visibility_off_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.translate_rounded), findsNothing);
+    expect(find.byIcon(Icons.translate_rounded), findsOneWidget);
+    expect(_enrichButton(tester).visible, isFalse);
     expect(_vocabularyButton(tester).visible, isTrue);
     expect(_nextButton(tester).visible, isTrue);
 
@@ -1967,8 +2168,7 @@ void main() {
     await tester.longPressAt(firstWordOffset);
     await tester.pump();
     expect(await VocabularyService().loadEntries(), isEmpty);
-    expect(find.byIcon(Icons.translate_rounded), findsNothing);
-    expect(find.byIcon(Icons.visibility_off_rounded), findsOneWidget);
+    expect(_enrichButton(tester).visible, isFalse);
 
     // もう一度タップして登録し直す。
     await tester.tapAt(firstWordOffset);
@@ -2014,12 +2214,14 @@ void main() {
     // Tooltipのレイアウトサロゲート越しだと座標がずれるため、アイコン自体を
     // タップする。
     await tester.tap(find.byIcon(Icons.style_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     expect(find.byType(VocabularySheet), findsOneWidget);
     await tester.tap(find.byIcon(Icons.close_rounded));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
 
     // 長文が永続化され、3択画面へ戻る。
@@ -2217,13 +2419,17 @@ void main() {
     expect(find.text(_t('長文読解')), findsOneWidget);
   });
 
-  testWidgets('レイヤーⅡ：スタート画面のタイルはタップで引いたお題を保持し、長押しするとサイコロ前に戻る', (
+  testWidgets('レイヤーⅡ：スタート画面のタイルはタップで「話題を増やす」の状態を保持し、長押しすると3択に戻る', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng II'));
     await tester.pumpAndSettle();
 
+    // Step 3: レイヤーⅡ入口の3択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
+    await tester.pumpAndSettle();
     expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
     await tester.tap(find.byIcon(Icons.casino));
     await tester.pump();
@@ -2235,7 +2441,7 @@ void main() {
     await tester.pump(const Duration(seconds: 4));
     expect(find.byType(LaunchScreen), findsOneWidget);
 
-    // タップは引いたお題を保持したまま再開する。
+    // タップは「話題を増やす」・引いたお題を保持したまま再開する。
     await tester.tap(find.text('Tầng II'));
     await tester.pumpAndSettle();
     expect(find.text(_t('ボタンを押してお題を引いてください')), findsNothing);
@@ -2245,10 +2451,12 @@ void main() {
     await tester.pump(const Duration(seconds: 4));
     expect(find.byType(LaunchScreen), findsOneWidget);
 
-    // 長押しは引いたお題をクリアし、サイコロを押す前の状態に戻す。
+    // 長押しは選択済みモード・引いたお題をクリアし、3択画面に戻す。
     await tester.longPress(find.text('Tầng II'));
     await tester.pumpAndSettle();
-    expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
+    expect(find.text(_t('話題を増やす')), findsOneWidget);
+    expect(find.text(_t('問題文一覧から選ぶ')), findsOneWidget);
+    expect(find.text(_t('ランダム')), findsOneWidget);
   });
 
   testWidgets('レイヤーⅠで「語彙テスト」を選ぶと、II〜Vと同型の単語テスト画面シェルが開く', (
@@ -2292,6 +2500,7 @@ void main() {
     // 単語表示on/offトグル：既定はon（目のアイコン）で、タップで切り替わる。
     expect(find.byIcon(Icons.visibility_rounded), findsOneWidget);
     await tester.tap(find.byIcon(Icons.visibility_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     expect(find.byIcon(Icons.visibility_off_rounded), findsOneWidget);
 
@@ -2306,6 +2515,7 @@ void main() {
 
     // マイク状態に切り替わったあと、表示を戻してから単語帳を開く。
     await tester.tap(find.byIcon(Icons.visibility_off_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     expect(find.byIcon(Icons.visibility_rounded), findsOneWidget);
 
@@ -2395,7 +2605,10 @@ void main() {
     await tester.tap(find.text('Kiểm tra từ vựng'));
     await tester.pumpAndSettle();
 
+    // 「＋」にはダブルタップの機能ヒント（Step 7）が付いており、単タップ判定を
+    // 約300ms（kDoubleTapTimeout）保留するため、確定するまで余分にpumpする。
     await tester.tap(find.byIcon(Icons.add_rounded));
+    await tester.pump(const Duration(milliseconds: 350));
     await tester.pumpAndSettle();
 
     expect(find.text(_t('語彙の取り込み')), findsWidgets);
@@ -2438,6 +2651,7 @@ void main() {
     // 単語表示offにすると、文字は消えて非表示プレースホルダになる
     // （カード枠自体は残る＝ヒアリングのみのモード）。
     await tester.tap(find.byIcon(Icons.visibility_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     expect(find.text('単語'), findsNothing);
     expect(find.text('たんご'), findsNothing);
@@ -2455,14 +2669,17 @@ void main() {
     expect(find.text('🇯🇵'), findsNothing);
 
     await tester.tap(find.text('🇻🇳'));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     expect(find.text('🇺🇸'), findsOneWidget);
 
     await tester.tap(find.text('🇺🇸'));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     expect(find.text('🇯🇵'), findsOneWidget);
 
     await tester.tap(find.text('🇯🇵'));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     expect(find.text('🇻🇳'), findsOneWidget);
   });
@@ -2851,6 +3068,7 @@ void main() {
     // RecordingSttService.cancel()の3秒タイムアウトをフェイククロックで
     // 進めて解決させる（レイヤーⅤのresetAttempt回帰テストと同じ理由）。
     await tester.tap(find.byIcon(Icons.refresh_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump(const Duration(seconds: 4));
 
     expect(tester.takeException(), isNull);
@@ -2961,6 +3179,7 @@ void main() {
     expect(find.text(_t('レベル')), findsOneWidget);
 
     await tester.tap(find.byIcon(Icons.refresh_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump(const Duration(seconds: 4));
 
     expect(tester.takeException(), isNull);
@@ -2992,6 +3211,7 @@ void main() {
       find.byType(Layer1VocabScreen),
     );
     await tester.tap(find.text('🇻🇳'));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     expect(find.text('🇺🇸'), findsOneWidget);
     expect(state.debugAnswerLanguageCode, 'en');
@@ -3277,6 +3497,7 @@ void main() {
     await _completeAllVocabQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -3286,6 +3507,7 @@ void main() {
       const ClipboardData(text: _validVocabAiEvaluationJson),
     );
     await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -3361,6 +3583,7 @@ void main() {
     await _pumpLayer1VocabStandalone(tester);
 
     await tester.tap(find.byIcon(Icons.visibility_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
 
     final state = tester.state<Layer1VocabScreenState>(
@@ -3406,6 +3629,7 @@ void main() {
     await _completeAllVocabQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -3445,6 +3669,7 @@ void main() {
     await _completeAllVocabQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -3494,6 +3719,7 @@ void main() {
     await _completeAllVocabQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -3505,13 +3731,10 @@ void main() {
 
     expect(find.byIcon(Icons.content_paste_go_rounded), findsOneWidget);
 
-    // 「貼り付け」を連続でタップしても、chromeAiActionInFlightガードにより
-    // 2件目の保存処理は開始されない（レイヤーⅤの同種テストと同じ理由）。
+    // レイヤーⅤの同種テストと同じ理由（ダブルタップは今、機能ヒントに
+    // 使われるため連続タップでの二重保存はUIタップ経由では起こり得ない）。
     await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
-    await tester.tap(
-      find.byIcon(Icons.content_paste_go_rounded),
-      warnIfMissed: false,
-    );
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -3549,6 +3772,7 @@ void main() {
     await _completeAllVocabQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -3557,6 +3781,7 @@ void main() {
     const garbledText = 'JSONではない、ただの説明文だけの回答です。';
     await Clipboard.setData(const ClipboardData(text: garbledText));
     await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -3598,6 +3823,7 @@ void main() {
     await _completeAllVocabQuestions(tester, state);
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -3608,6 +3834,7 @@ void main() {
     // RecordingSttService.cancel()の3秒タイムアウトをフェイククロックで
     // 進めて解決させる（他のリセット回帰テストと同じ理由）。
     await tester.tap(find.byIcon(Icons.refresh_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump(const Duration(seconds: 4));
 
     expect(tester.takeException(), isNull);
@@ -3647,9 +3874,17 @@ void main() {
 
     await tester.tap(find.text('Ⅱ'));
     await tester.pumpAndSettle();
+    // Step 3: レイヤーⅡ入口の2択から「話題を増やす」を選ぶと、既存の
+    // サイコロ画面（Layer2Screen）が開く。
+    await tester.tap(find.text(_t('話題を増やす')));
+    await tester.pumpAndSettle();
     final layer2DiceY = tester.getTopLeft(_vocabDiceButton).dy;
 
     await tester.tap(find.text('Ⅳ'));
+    await tester.pumpAndSettle();
+    // Step 5: レイヤーⅣ入口の2択から「ランダム」を選ぶと、既存の
+    // サイコロ画面（Layer4Screen）が開く。
+    await tester.tap(find.text(_t('ランダム')));
     await tester.pumpAndSettle();
     final layer4DiceY = tester.getTopLeft(_vocabDiceButton).dy;
 
@@ -3733,7 +3968,7 @@ Future<void> _pumpLayer1VocabStandalone(WidgetTester tester) async {
 
 /// 長文読解の操作バー（[LongArticleActionRow]）の各ボタンは
 /// [TransportIconButton]として表示される。「訳を付ける」は登録単語があるとき
-/// だけ現れ、無いときは「隠す」に差し替わる。
+/// だけ visible になり、無いときは枠だけ残して非表示になる。
 TransportIconButton _transportButtonWithTooltip(
   WidgetTester tester,
   String tooltip,

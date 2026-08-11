@@ -7,11 +7,11 @@ import '../theme/app_colors.dart';
 import '../widgets/app_header.dart';
 import '../widgets/swipe_to_close_wrapper.dart';
 import 'layers/layer1_entry_screen.dart';
-import 'layers/layer2_screen.dart';
-import 'layers/layer3_screen.dart';
-import 'layers/layer4_screen.dart';
+import 'layers/layer2_entry_screen.dart';
+import 'layers/layer3_entry_screen.dart';
+import 'layers/layer4_entry_screen.dart';
 import 'layers/layer5_entry_screen.dart';
-import 'layers/practice_layer_screen.dart';
+import 'layers/question_prompt_summary_screen.dart';
 import 'podcast/mini_player_bar.dart';
 
 /// レイヤーⅠ〜Ⅴを内包するメインシェル。
@@ -41,9 +41,9 @@ class MainShellState extends State<MainShell> {
   late int _currentIndex;
 
   final _layer1Key = GlobalKey<Layer1EntryScreenState>();
-  final _layer2Key = GlobalKey<Layer2ScreenState>();
-  final _layer3Key = GlobalKey<PracticeLayerScreenState<Layer3Screen>>();
-  final _layer4Key = GlobalKey<PracticeLayerScreenState<Layer4Screen>>();
+  final _layer2Key = GlobalKey<Layer2EntryScreenState>();
+  final _layer3Key = GlobalKey<Layer3EntryScreenState>();
+  final _layer4Key = GlobalKey<Layer4EntryScreenState>();
   final _layer5Key = GlobalKey<Layer5EntryScreenState>();
 
   late final List<Widget> _layerScreens;
@@ -53,11 +53,38 @@ class MainShellState extends State<MainShell> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _layerScreens = [
-      Layer1EntryScreen(key: _layer1Key, onModeChanged: _onLayer1ModeChanged),
-      Layer2Screen(key: _layer2Key),
-      Layer3Screen(key: _layer3Key),
-      Layer4Screen(key: _layer4Key),
-      Layer5EntryScreen(key: _layer5Key),
+      Layer1EntryScreen(
+        key: _layer1Key,
+        onModeChanged: _onLayer1ModeChanged,
+        onOpenPromptDetail: openPromptDetailInLayer,
+        onSelectLayer: _headerSelectLayer,
+        onGoToStart: _handleSwipeClose,
+      ),
+      Layer2EntryScreen(
+        key: _layer2Key,
+        onOpenPromptDetail: openPromptDetailInLayer,
+        onSelectLayer: _headerSelectLayer,
+        onGoToStart: _handleSwipeClose,
+      ),
+      Layer3EntryScreen(
+        key: _layer3Key,
+        onOpenPromptDetail: openPromptDetailInLayer,
+        onSelectLayer: _headerSelectLayer,
+        onGoToStart: _handleSwipeClose,
+      ),
+      Layer4EntryScreen(
+        key: _layer4Key,
+        onOpenPromptDetail: openPromptDetailInLayer,
+        onSelectLayer: _headerSelectLayer,
+        onGoToStart: _handleSwipeClose,
+      ),
+      Layer5EntryScreen(
+        key: _layer5Key,
+        onOpenPromptDetail: openPromptDetailInLayer,
+        onSelectLayer: _headerSelectLayer,
+        onGoToStart: _handleSwipeClose,
+        onGoToSummary: _goToSummary,
+      ),
     ];
     // [AppRootShell]に一度生成されたら破棄されずキャッシュされ続けるため、
     // 設定画面で言語を変えて戻ってきただけでは再構築されず、下端の
@@ -107,6 +134,82 @@ class MainShellState extends State<MainShell> {
     }
   }
 
+  /// 問題文詳細画面のII〜Vボタン、および起動画面の横断一覧のⅠ〜Ⅴアイコンから
+  /// 呼ぶ。[index]のレイヤーへ切り替えつつ、そのレイヤーのトップ・一覧を
+  /// スキップして[promptId]の詳細を直接開く（Step 3〜6・Step 9）。
+  ///
+  /// [fromStartScreen]をtrueにすると、既に同じレイヤーを表示中でも
+  /// モード選択へ戻さない（横断一覧から「続きの詳細」を開きたいとき用）。
+  void openPromptDetailInLayer(
+    int index,
+    String promptId, {
+    bool fromStartScreen = false,
+  }) {
+    _selectLayer(index, fromStartScreen: fromStartScreen);
+    switch (index) {
+      case 0:
+        _layer1Key.currentState?.openPromptDetail(promptId);
+      case 1:
+        _layer2Key.currentState?.openPromptDetail(promptId);
+      case 2:
+        _layer3Key.currentState?.openPromptDetail(promptId);
+      case 3:
+        _layer4Key.currentState?.openPromptDetail(promptId);
+      case 4:
+        _layer5Key.currentState?.openPromptDetail(promptId);
+    }
+  }
+
+  /// 起動画面の横断一覧の詳細ヘッダー「Ⅰ」〜「Ⅴ」から呼ぶ。
+  /// 入口の2/3択を飛ばして、問題文一覧モードを直接開く
+  /// （[_headerSelectLayer]と同じ着地）。
+  void openPromptListInLayer(int index) {
+    _selectLayer(index, fromStartScreen: true);
+    switch (index) {
+      case 0:
+        _layer1Key.currentState?.selectQuestionPromptMode();
+      case 1:
+        _layer2Key.currentState?.selectListMode();
+      case 2:
+        _layer3Key.currentState?.selectListMode();
+      case 3:
+        _layer4Key.currentState?.selectListMode();
+      case 4:
+        _layer5Key.currentState?.selectListMode();
+    }
+  }
+
+  /// レイヤーⅤ「問題文一覧から選ぶ」詳細画面の「総評」タップから呼ぶ
+  /// （Step 7）。[QuestionPromptSummaryScreen]をpushするだけで、レイヤーの
+  /// 切り替えは行わない（[DashboardScreen]と同じ、通常のpush遷移）。
+  void _goToSummary(String promptId) {
+    unawaited(QuestionPromptSummaryScreen.push(context, promptId: promptId));
+  }
+
+  /// 問題文詳細画面の常設[AppHeader]「Ⅰ」〜「Ⅴ」タップから呼ぶ。詳細画面は
+  /// 自身をpopしてから呼ぶため、まず通常のヘッダータップ（[AppHeader.onSelect]）
+  /// と同じ[_selectLayer]でレイヤーを切り替える。
+  ///
+  /// レイヤーⅡ・Ⅲは2択（問題文一覧／レガシー画面）の入口を持ち、[_selectLayer]
+  /// だけでは前回のモード（未訪問なら2択画面のまま）に戻ってしまい、一覧に
+  /// 直接飛べない。詳細画面のヘッダーから来た場合は「常に問題文一覧を見せる」
+  /// 方が分かりやすいため、[Layer2EntryScreenState.selectListMode]等で
+  /// 明示的に一覧モードへ切り替える（レイヤーⅠは語彙／長文読解／Podcastの
+  /// 続きから再開する既存の「モード保持」方針を崩さないため、ここでは対象外）。
+  void _headerSelectLayer(int index) {
+    _selectLayer(index, fromStartScreen: false);
+    switch (index) {
+      case 1:
+        _layer2Key.currentState?.selectListMode();
+      case 2:
+        _layer3Key.currentState?.selectListMode();
+      case 3:
+        _layer4Key.currentState?.selectListMode();
+      case 4:
+        _layer5Key.currentState?.selectListMode();
+    }
+  }
+
   void _selectLayer(
     int index, {
     bool forceReset = false,
@@ -128,6 +231,15 @@ class MainShellState extends State<MainShell> {
         if (index == 0 &&
             _layer1Key.currentState?.mode != Layer1Mode.longReading) {
           _layer1Key.currentState?.resetMode();
+          setState(() {});
+        } else if (index == 1) {
+          _layer2Key.currentState?.resetMode();
+          setState(() {});
+        } else if (index == 2) {
+          _layer3Key.currentState?.resetMode();
+          setState(() {});
+        } else if (index == 3) {
+          _layer4Key.currentState?.resetMode();
           setState(() {});
         } else if (index == 4) {
           _layer5Key.currentState?.resetMode();
@@ -169,11 +281,11 @@ class MainShellState extends State<MainShell> {
       case 0:
         _layer1Key.currentState?.resetMode();
       case 1:
-        _layer2Key.currentState?.resetDrawnTopic();
+        _layer2Key.currentState?.resetMode();
       case 2:
-        unawaited(_layer3Key.currentState?.resetAttempt());
+        _layer3Key.currentState?.resetMode();
       case 3:
-        unawaited(_layer4Key.currentState?.resetAttempt());
+        _layer4Key.currentState?.resetMode();
       case 4:
         unawaited(_layer5Key.currentState?.resetToFresh());
     }
@@ -195,7 +307,11 @@ class MainShellState extends State<MainShell> {
       child: Scaffold(
         backgroundColor: palette.scene,
         resizeToAvoidBottomInset: true,
-        appBar: AppHeader(currentIndex: _currentIndex, onSelect: _selectLayer),
+        appBar: AppHeader(
+          currentIndex: _currentIndex,
+          onSelect: _selectLayer,
+          onLongPress: _handleSwipeClose,
+        ),
         body: Builder(
           builder: (bodyContext) {
             final bodyMediaQuery = MediaQuery.of(bodyContext);

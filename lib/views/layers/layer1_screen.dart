@@ -308,6 +308,7 @@ class Layer1ScreenState extends State<Layer1Screen> {
                       onAddShow: _openShowPicker,
                       onAddShowLongPress: _showUsageHelp,
                       showPlaybackControls: _registeredShows.isNotEmpty,
+                      enableActionHints: true,
                     ),
                   ),
                   if (AppLogger.instance.developerModeEnabled) ...[

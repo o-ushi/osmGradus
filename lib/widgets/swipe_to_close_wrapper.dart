@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 ///
 /// 閉じる判定の要点:
 /// - 内側の[Scrollable]に触れた指の動き（実スクロール・端のオーバースクロール）では
-///   **下スワイプでは**閉じない。スクロールと「下スワイプで閉じる」の取り違えを防ぐ。
+///   閉じない。スクロールと「下スワイプで閉じる」の取り違えを防ぐ。
 /// - 右スワイプは画面左端付近から始めたときだけ有効（親指弧の誤検出防止）。
 ///   スクロール中に閉じたいときは左端からの右スワイプを使う（スクロール拒否の対象外）。
 /// - Androidのジェスチャーナビ / iPadOSの端ジェスチャは左端ポインタを
@@ -146,8 +146,9 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
 
   void _onPointerDown(PointerDownEvent event) {
     _scrollInteracted = false;
-    (_trackers[event.pointer] = VelocityTracker.withKind(event.kind))
-        .addPosition(event.timeStamp, event.position);
+    (_trackers[event.pointer] = VelocityTracker.withKind(
+      event.kind,
+    )).addPosition(event.timeStamp, event.position);
     _downPositions[event.pointer] = event.position;
     _lastPositions[event.pointer] = event.position;
     _horizontalTravel[event.pointer] = 0;
@@ -171,7 +172,6 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
     required int pointer,
     required Duration timeStamp,
     required Offset position,
-    required bool allowDownSwipe,
   }) {
     final tracker = _trackers.remove(pointer);
     final downPosition = _downPositions.remove(pointer);
@@ -192,14 +192,13 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
       verticalTravel: verticalTravel,
       velocity: velocity,
     );
-    final isDown = allowDownSwipe &&
-        _isDownSwipe(
-          downPosition: downPosition,
-          upPosition: position,
-          horizontalTravel: horizontalTravel,
-          verticalTravel: verticalTravel,
-          velocity: velocity,
-        );
+    final isDown = _isDownSwipe(
+      downPosition: downPosition,
+      upPosition: position,
+      horizontalTravel: horizontalTravel,
+      verticalTravel: verticalTravel,
+      velocity: velocity,
+    );
 
     if (isRight || isDown) {
       _handleClose();
@@ -211,7 +210,6 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
       pointer: event.pointer,
       timeStamp: event.timeStamp,
       position: event.position,
-      allowDownSwipe: true,
     );
   }
 
@@ -224,8 +222,7 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
     // それ以外は次フレームでまだ pop 可能なら閉じる。
     final tracker = _trackers.remove(event.pointer);
     final downPosition = _downPositions.remove(event.pointer);
-    final lastPosition =
-        _lastPositions.remove(event.pointer) ?? event.position;
+    final lastPosition = _lastPositions.remove(event.pointer) ?? event.position;
     final horizontalTravel = _horizontalTravel.remove(event.pointer) ?? 0;
     final verticalTravel = _verticalTravel.remove(event.pointer) ?? 0;
 
@@ -263,6 +260,17 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
     // 実スクロール、または端でのオーバースクロール（先頭での下フリックなど）の
     // どちらも「スクロール操作」とみなして下スワイプでは閉じない。
     // 右スワイプ（左端スタート）はスクロール中の「戻る」手段なので対象外。
+    //
+    // ただし、中身が画面に収まっていてスクロール可能範囲が無い
+    // （maxScrollExtent <= minScrollExtent）Scrollableは対象外にする。
+    // BouncingScrollPhysics等では、スクロール範囲が無くても指を動かすと
+    // ラバーバンド分のOverscrollNotificationが飛んでしまい、実際には
+    // 何もスクロールしていないのに「スクロール操作」とみなされて下スワイプ
+    // での閉じる判定が誤って無効化される（本文が短く、SingleChildScrollView
+    // が実質スクロール不要なケースで頻発する）。
+    final metrics = notification.metrics;
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) return false;
+
     if (notification is ScrollUpdateNotification &&
         notification.dragDetails != null &&
         (notification.scrollDelta?.abs() ?? 0) > 0) {

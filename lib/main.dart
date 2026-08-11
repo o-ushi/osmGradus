@@ -15,6 +15,7 @@ import 'services/topic_speech_reader.dart';
 import 'services/tts_settings_service.dart';
 import 'theme/app_theme.dart';
 import 'views/app_root_shell.dart';
+import 'widgets/button_action_hint.dart';
 
 late final PodcastAudioHandler audioHandler;
 late final TtsSettingsService ttsSettings;
@@ -123,6 +124,15 @@ class _OsmGradusAppState extends State<OsmGradusApp> {
     );
   }
 
+  // ダブルタップの機能ヒント（Step 7）は、どの画面からでも同じ1枚のオーバー
+  // レイに浮かべたいため、Navigator（＝home以下のルート群）を丸ごと包む
+  // MaterialApp.builderの位置に置く。
+  Widget _wrapWithChrome(BuildContext context, Widget? child) {
+    return ButtonActionHintOverlay(
+      child: _applyMinimumTextScale(context, child),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -133,7 +143,8 @@ class _OsmGradusAppState extends State<OsmGradusApp> {
           debugShowCheckedModeBanner: false,
           locale: _locale,
           theme: AppTheme.light(),
-          builder: _applyMinimumTextScale,
+          builder: _wrapWithChrome,
+          navigatorObservers: [ButtonActionHintNavigatorObserver()],
           home: const AppRootShell(),
         );
       },

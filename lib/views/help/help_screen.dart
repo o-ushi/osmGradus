@@ -77,6 +77,7 @@ class _HelpScreenState extends State<HelpScreen> {
         'help.gradus.settings.tip1',
         'help.gradus.settings.tip2',
         'help.gradus.settings.tip3',
+        'help.gradus.settings.tip4',
       ],
     ),
     _HelpSectionSpec(
@@ -86,6 +87,7 @@ class _HelpScreenState extends State<HelpScreen> {
       tipKeys: [
         'help.gradus.gesture.tip1',
         'help.gradus.gesture.tip2',
+        'help.gradus.gesture.tip3',
       ],
     ),
   ];
@@ -407,10 +409,7 @@ class _HelpSectionCard extends StatelessWidget {
 }
 
 class _HelpSectionCardShell extends StatelessWidget {
-  const _HelpSectionCardShell({
-    required this.accentColor,
-    required this.child,
-  });
+  const _HelpSectionCardShell({required this.accentColor, required this.child});
 
   final Color accentColor;
   final Widget child;
@@ -433,10 +432,7 @@ class _HelpSectionCardShell extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Theme(
-                  data: SurfaceTheme.card(context),
-                  child: child,
-                ),
+                child: Theme(data: SurfaceTheme.card(context), child: child),
               ),
             ),
           ],
@@ -447,10 +443,7 @@ class _HelpSectionCardShell extends StatelessWidget {
 }
 
 class _HelpBulletList extends StatelessWidget {
-  const _HelpBulletList({
-    required this.tips,
-    this.bulletColor,
-  });
+  const _HelpBulletList({required this.tips, this.bulletColor});
 
   final List<String> tips;
   final Color? bulletColor;

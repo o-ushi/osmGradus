@@ -8,6 +8,18 @@ import 'google_ai_search.dart';
 
 /// ダッシュボード用：直近のレイヤーⅠ・Ⅳ・Ⅴ履歴から総合アドバイスを依頼する
 /// Chrome AIプロンプト。
+///
+/// [scoringResults]・[pronunciationChecks]は、レイヤーⅣ・Ⅴの「ランダム」
+/// （Ⅳはサイコロ抽選、Ⅴは10問セッション）と「問題文一覧から選ぶ」の両方の
+/// 結果を区別せず含む
+/// （両モードとも同じ[ScoringResultStorage]/[PronunciationCheckStorage]に
+/// 保存されるため。Step 8）。「問題文一覧から選ぶ」経由の結果は
+/// [SavedScoringResult.questionPromptBody]/[SavedPronunciationCheck.questionPromptBody]
+/// を持つため、[_questionField]でどの問題文への回答かをプロンプトにも
+/// 反映する。[QuestionPrompt]エンティティ側のjsstScore/hitScore/prepScore/
+/// pronunciationScoresは、これら保存済み結果を問題文一覧の進捗表示用に
+/// ミラーしたキャッシュに過ぎず元データではないため、ダッシュボードの
+/// 入力としては別途参照しない（二重計上を避けるため）。
 abstract final class DashboardAiPromptTemplate {
   static const recentLimit = DashboardSummaryService.recentLimit;
 
@@ -88,6 +100,24 @@ abstract final class DashboardAiPromptTemplate {
     return GoogleAiSearch.buildUrl(query);
   }
 
+  /// プロンプトに埋め込む問題文本文の上限文字数
+  /// （[QuestionPromptPronunciationAiPromptTemplate.maxQuestionExcerptChars]
+  /// と同じ考え方）。
+  static const _maxQuestionExcerptChars = 100;
+
+  /// [SavedScoringResult.questionPromptBody]/[SavedPronunciationCheck.questionPromptBody]
+  /// が非nullのときだけ「question: ...」の行を差し込む（「問題文一覧から選ぶ」
+  /// 経由の結果か、「ランダム」経由かをAIにも伝え、質問内容に即した
+  /// アドバイスを引き出しやすくする。Step 8）。
+  static String _questionField(String? questionPromptBody) {
+    if (questionPromptBody == null || questionPromptBody.isEmpty) return '';
+    final trimmed = questionPromptBody.trim();
+    final excerpt = trimmed.length > _maxQuestionExcerptChars
+        ? '${trimmed.substring(0, _maxQuestionExcerptChars)}…'
+        : trimmed;
+    return 'question: $excerpt / ';
+  }
+
   static String _scoringLine(int number, SavedScoringResult saved) {
     final result = saved.result;
     final level = JsstScoringService.combinedReferenceLevel(result);
@@ -101,6 +131,7 @@ abstract final class DashboardAiPromptTemplate {
     final hitStars = saved.hasAiEvaluation ? '${saved.hitStars}/5' : '(none)';
     final prepStars = saved.hasAiEvaluation ? '${saved.prepStars}/5' : '(none)';
     return '$number. date: ${saved.createdAt.toIso8601String()} / '
+        '${_questionField(saved.questionPromptBody)}'
         'approxLevel: $levelLabel / '
         'keigoVariety: ${result.keigo.varietyScore} / '
         'complexityRatio: ${result.complexity.complexityRatio.toStringAsFixed(2)} / '
@@ -119,6 +150,7 @@ abstract final class DashboardAiPromptTemplate {
     if (evaluation == null) {
       final legacy = check.transcript.trim();
       return '$number. date: ${check.createdAt.toIso8601String()} / '
+          '${_questionField(check.questionPromptBody)}'
           'evaluation: (none) / '
           'legacyNote: ${legacy.isEmpty ? '(empty)' : legacy}';
     }
@@ -128,6 +160,7 @@ abstract final class DashboardAiPromptTemplate {
         .join(', ');
     final summary = evaluation.displaySummary(lang).trim();
     return '$number. date: ${check.createdAt.toIso8601String()} / '
+        '${_questionField(check.questionPromptBody)}'
         'scores: [$scores] / '
         'summary: ${summary.isEmpty ? '(none)' : summary}';
   }

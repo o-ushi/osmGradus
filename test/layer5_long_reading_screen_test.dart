@@ -18,6 +18,11 @@ import 'package:osm_gradus/views/layers/layer5_long_reading_screen.dart';
 const _lang = 'vi';
 String _t(String key) => key.tr(_lang);
 
+/// 「送信」「リセット」等、ダブルタップの機能ヒントが付いたボタン（Step 7）
+/// はGestureDetector.onDoubleTapで単タップ判定を約300ms（kDoubleTapTimeout）
+/// 保留するため、単タップとして確定させるにはこの分だけ余分にpumpする。
+const _tapConfirmWait = Duration(milliseconds: 350);
+
 final _article = LongArticle(
   id: 'article_1',
   title: '旅行',
@@ -132,6 +137,7 @@ void main() {
     expect(state.debugTranscript, '友達と一緒に旅行に行きました');
 
     await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
     await tester.pump();
@@ -142,6 +148,7 @@ void main() {
 
     await Clipboard.setData(const ClipboardData(text: _validEvaluationJson));
     await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+    await tester.pump(_tapConfirmWait);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 

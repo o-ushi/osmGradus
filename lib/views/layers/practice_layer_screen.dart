@@ -143,8 +143,15 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
     }
   }
 
+  /// 実際にどのお題を読み上げるかを決める。既定はサイコロ抽選
+  /// （[TopicService.drawRandom]）。レイヤーⅣの「一覧から選ぶ」経由
+  /// （特定の[QuestionPrompt]に固定された詳細画面）はこれをオーバーライドし、
+  /// 抽選をスキップして固定の問題文をそのまま返す
+  /// （録音・タイマー・採点のエンジン自体は共通のまま再利用するため）。
+  Future<DrawnTopic> pickTopic() => topicService.drawRandom(selectedCategory);
+
   Future<void> drawAndSpeak() async {
-    final topic = await topicService.drawRandom(selectedCategory);
+    final topic = await pickTopic();
     if (!mounted) return;
     topicSpeechReader.clearGenderLock();
     // タイマー開始（onStarted）を待たず、サイコロを引いた瞬間に

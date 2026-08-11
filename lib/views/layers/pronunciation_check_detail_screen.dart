@@ -39,6 +39,7 @@ class PronunciationCheckDetailScreen extends StatelessWidget {
               if (!check.isLegacyFormat && check.evaluation == null)
                 '未解析'.tr(lang),
               if (check.source == 'long') '長文音読'.tr(lang),
+              if (check.source == 'questionPrompt') '問題文回答'.tr(lang),
             ],
           ),
           const SizedBox(height: 12),
@@ -76,6 +77,22 @@ class PronunciationCheckDetailScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _longReadingCard(palette, lang),
+        const SizedBox(height: 16),
+      ]);
+    }
+
+    if (check.source == 'questionPrompt') {
+      widgets.addAll([
+        Text(
+          '回答した問題文'.tr(lang),
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.bold,
+            color: palette.textOnSubpagePrimary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        _questionPromptCard(palette, lang),
         const SizedBox(height: 16),
       ]);
     }
@@ -170,6 +187,41 @@ class PronunciationCheckDetailScreen extends StatelessWidget {
         children: [
           Text(
             check.longArticleTitle ?? '',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: palette.textOnCardSecondary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          SelectableText(
+            check.transcript.isEmpty
+                ? '（発話が認識できませんでした）'.tr(lang)
+                : check.transcript,
+            style: TextStyle(fontSize: 15, color: palette.textOnCardPrimary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 対象の問題文の本文と、端末STTで文字起こしした発話
+  /// （[SavedPronunciationCheck.transcript]）を表示する（[check.source]が
+  /// `'questionPrompt'`のときのみ）。
+  Widget _questionPromptCard(AppPalette palette, String lang) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.cardFill,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.cardBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            check.questionPromptBody ?? '',
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,

@@ -8,6 +8,7 @@ import '../models/long_article.dart';
 import '../models/podcast_episode.dart';
 import '../models/podcast_show.dart';
 import '../models/pronunciation_exercise.dart';
+import '../models/question_prompt.dart';
 import '../models/saved_pronunciation_check.dart';
 import '../models/saved_scoring_result.dart';
 import '../models/saved_vocabulary_check.dart';
@@ -18,6 +19,7 @@ import '../services/long_article_service.dart';
 import '../services/podcast_library_service.dart';
 import '../services/pronunciation_check_storage.dart';
 import '../services/pronunciation_exercise_service.dart';
+import '../services/question_prompt_service.dart';
 import '../services/scoring_result_storage.dart';
 import '../services/topic_service.dart';
 import '../services/vocabulary_check_storage.dart';
@@ -44,6 +46,7 @@ Set<String> get _explicitlyMergedPrefKeys => {
   'layer1Vocab.checks',
   'dashboard.advice',
   'longArticles.entries',
+  'questionPrompts.entries',
   for (final category in _backedUpTopicCategories)
     'topics.imported.${category.storageKey}',
   for (final category in PronunciationCategory.values)
@@ -61,9 +64,14 @@ abstract final class GradusBackup {
   /// 総合アドバイス）を追加。
   /// version 4: longArticles（レイヤーⅠ「長文読解」で作成した長文一覧。
   /// osmCogitoからの機能移植の基盤データ）を追加。
+  /// version 5: questionPrompts（[QuestionPrompt]。理解・要約・PREP・スコア・
+  /// 単語登録参照を含む問題文一式）を専用節として追加。従来はこの節を持たず、
+  /// 生の`questionPrompts.entries`キーが`preferences`欄経由でエクスポートされ、
+  /// インポート時は他の全データと違いID単位のマージではなく無条件の
+  /// 上書きになっていた（[_explicitlyMergedPrefKeys]未登録のバグ）。
   /// フィールドはすべて追加のみで既存フィールドの意味は変えていないため、
   /// 旧バージョンのバックアップもそのまま読み込める。
-  static const formatVersion = 4;
+  static const formatVersion = 5;
   static const filePrefix = 'osmGradus_backup_';
 
   static Future<int> itemCount() async {
@@ -77,6 +85,7 @@ abstract final class GradusBackup {
         .loadAllImported();
     final advice = await DashboardAdviceStorage().load();
     final longArticles = await LongArticleService().loadArticles();
+    final questionPrompts = await _backedUpQuestionPrompts();
     final topicCount = topics.values.fold(0, (sum, list) => sum + list.length);
     return scoring.length +
         pronunciation.length +
@@ -86,7 +95,8 @@ abstract final class GradusBackup {
         topicCount +
         pronunciationExercises.length +
         (advice == null ? 0 : 1) +
-        longArticles.length;
+        longArticles.length +
+        questionPrompts.length;
   }
 
   static Future<Map<String, List<String>>> _loadImportedTopics() async {
@@ -95,6 +105,13 @@ abstract final class GradusBackup {
       for (final category in _backedUpTopicCategories)
         category.storageKey: await service.loadImported(category),
     };
+  }
+
+  /// 未使用の組み込み問題文（[QuestionPrompt.hasUserData]がfalse）は
+  /// [TopicBank]が既に静的に持つ内容と重複するため対象外とする。
+  static Future<List<QuestionPrompt>> _backedUpQuestionPrompts() async {
+    final all = await QuestionPromptService().loadAll();
+    return all.where((p) => p.hasUserData).toList();
   }
 
   static Future<String> buildExportJson() async {
@@ -111,6 +128,7 @@ abstract final class GradusBackup {
         .loadAllImported();
     final advice = await DashboardAdviceStorage().load();
     final longArticles = await LongArticleService().loadArticles();
+    final questionPrompts = await _backedUpQuestionPrompts();
     final bundle = {
       'version': formatVersion,
       'exportDate': DateTime.now().toUtc().toIso8601String(),
@@ -134,6 +152,8 @@ abstract final class GradusBackup {
       'dashboardAdvice': ?advice,
       // レイヤーⅠ「長文読解」で作成した長文一覧。
       'longArticles': longArticles.map((e) => e.toJson()).toList(),
+      // レイヤーⅠ〜Ⅴ横断の問題文一式（理解・要約・PREP・スコア・単語登録参照を含む）。
+      'questionPrompts': questionPrompts.map((e) => e.toJson()).toList(),
       'preferences': Map<String, Object?>.from(
         prefs
             .getKeys()
@@ -261,6 +281,13 @@ abstract final class GradusBackup {
     final longArticleList = decoded['longArticles'];
     if (longArticleList is List) {
       final tally = await _mergeLongArticles(longArticleList);
+      added += tally.added;
+      skipped += tally.skipped;
+    }
+
+    final questionPromptList = decoded['questionPrompts'];
+    if (questionPromptList is List) {
+      final tally = await _mergeQuestionPrompts(questionPromptList);
       added += tally.added;
       skipped += tally.skipped;
     }
@@ -465,6 +492,25 @@ Future<_Tally> _mergeTopics(Map<dynamic, dynamic> raw) async {
     skipped += topics.length - addedCount;
   }
   return _Tally(added: added, skipped: skipped);
+}
+
+Future<_Tally> _mergeQuestionPrompts(List<dynamic> jsonList) async {
+  final service = QuestionPromptService();
+  final parsed = <QuestionPrompt>[];
+  var skipped = 0;
+  for (final item in jsonList) {
+    if (item is! Map) {
+      skipped++;
+      continue;
+    }
+    try {
+      parsed.add(QuestionPrompt.fromJson(Map<String, dynamic>.from(item)));
+    } catch (_) {
+      skipped++;
+    }
+  }
+  final tally = await service.importPrompts(parsed);
+  return _Tally(added: tally.added, skipped: tally.skipped + skipped);
 }
 
 Future<_Tally> _mergePronunciationExercises(List<dynamic> jsonList) async {

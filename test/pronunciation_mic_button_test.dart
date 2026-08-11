@@ -10,10 +10,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: PronunciationMicButton(
-            armed: true,
-            onTap: () => tapCount++,
-          ),
+          child: PronunciationMicButton(armed: true, onTap: () => tapCount++),
         ),
       ),
     );
@@ -44,7 +41,10 @@ void main() {
           onVerticalDragEnd: (_) => outerDragEnded = true,
           onHorizontalDragEnd: (_) => outerDragEnded = true,
           child: Center(
-            child: PronunciationMicButton(armed: true, onTap: () => tapped = true),
+            child: PronunciationMicButton(
+              armed: true,
+              onTap: () => tapped = true,
+            ),
           ),
         ),
       ),
@@ -71,7 +71,10 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
-          child: PronunciationMicButton(armed: true, onTap: () => tapped = true),
+          child: PronunciationMicButton(
+            armed: true,
+            onTap: () => tapped = true,
+          ),
         ),
       ),
     );
@@ -88,9 +91,7 @@ void main() {
   testWidgets('armedに応じてサイコロ/マイクのアイコンが切り替わる', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: Center(
-          child: PronunciationMicButton(armed: false, onTap: () {}),
-        ),
+        home: Center(child: PronunciationMicButton(armed: false, onTap: () {})),
       ),
     );
     expect(find.byIcon(Icons.casino), findsOneWidget);
@@ -98,9 +99,7 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
-        home: Center(
-          child: PronunciationMicButton(armed: true, onTap: () {}),
-        ),
+        home: Center(child: PronunciationMicButton(armed: true, onTap: () {})),
       ),
     );
     expect(find.byIcon(Icons.mic_rounded), findsOneWidget);
@@ -125,5 +124,29 @@ void main() {
     );
     final decoration = container.decoration! as BoxDecoration;
     expect(decoration.color, Colors.redAccent);
+  });
+
+  testWidgets('remainingSecondsを指定した固定秒数カウントダウン中は、recordingがtrueでも背景は透明のまま', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: PronunciationMicButton(
+            armed: true,
+            recording: true,
+            remainingSeconds: 10,
+            onTap: () {},
+          ),
+        ),
+      ),
+    );
+
+    final container = tester.widget<AnimatedContainer>(
+      find.byType(AnimatedContainer),
+    );
+    final decoration = container.decoration! as BoxDecoration;
+    expect(decoration.color, Colors.transparent);
+    expect(find.text('10'), findsOneWidget);
   });
 }

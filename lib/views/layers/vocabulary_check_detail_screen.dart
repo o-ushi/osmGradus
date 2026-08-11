@@ -34,8 +34,16 @@ class VocabularyCheckDetailScreen extends StatelessWidget {
             languageCode: lang,
             badgeLabels: [
               if (check.evaluation == null) '未解析'.tr(lang),
+              if (check.questionPromptId != null) 'レイヤーⅠ_語彙_問題文の見直し'.tr(lang),
             ],
           ),
+          if (check.questionPromptId != null) ...[
+            const SizedBox(height: 12),
+            _QuestionPromptCard(
+              body: check.questionPromptBody ?? '',
+              lang: lang,
+            ),
+          ],
           const SizedBox(height: 12),
           ..._buildBody(palette, lang),
         ],
@@ -138,6 +146,48 @@ class VocabularyCheckDetailScreen extends StatelessWidget {
     }
 
     return widgets;
+  }
+}
+
+/// 「分からなかった単語だけテスト」（総評画面）経由の記録で、出題元の
+/// 問題文本文を表示する（[PronunciationCheckDetailScreen._questionPromptCard]
+/// と同じ構成）。
+class _QuestionPromptCard extends StatelessWidget {
+  const _QuestionPromptCard({required this.body, required this.lang});
+
+  final String body;
+  final String lang;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppColors.current;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.cardFill,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.cardBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'レイヤーⅠ_語彙_問題文の見直し'.tr(lang),
+            style: TextStyle(fontSize: 12, color: palette.textOnCardSecondary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            body,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: palette.textOnCardPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
