@@ -11,6 +11,7 @@ import 'package:osm_gradus/services/dashboard_advice_storage.dart';
 import 'package:osm_gradus/services/gradus_backup.dart';
 import 'package:osm_gradus/services/long_article_service.dart';
 import 'package:osm_gradus/services/pronunciation_exercise_service.dart';
+import 'package:osm_gradus/services/thinking_matrix_service.dart';
 import 'package:osm_gradus/services/topic_service.dart';
 import 'package:osm_gradus/services/vocabulary_check_storage.dart';
 import 'package:osm_gradus/services/vocabulary_service.dart';
@@ -26,7 +27,10 @@ void main() {
     await prefs.setDouble('osm_gradus.tts.speechRate', 0.6);
     await prefs.setBool('someFeature.enabled', true);
     await prefs.setInt('layer4.calibration.sampleCount', 3);
-    await prefs.setStringList('topics.imported.daily', ['お題A', 'お題B']);
+    // 「topics.imported.*」は[_explicitlyMergedPrefKeys]対象（現行storageKeyの
+    // 場合はマージ処理側で、旧storageKeyの場合はTopicServiceの移行処理で扱う）
+    // のため、汎用preferencesロールトリップの例には無関係なキーを使う。
+    await prefs.setStringList('someFeature.list', ['お題A', 'お題B']);
 
     final exported = await GradusBackup.buildExportJson();
 
@@ -40,7 +44,7 @@ void main() {
     expect(restored.getDouble('osm_gradus.tts.speechRate'), 0.6);
     expect(restored.getBool('someFeature.enabled'), true);
     expect(restored.getInt('layer4.calibration.sampleCount'), 3);
-    expect(restored.getStringList('topics.imported.daily'), ['お題A', 'お題B']);
+    expect(restored.getStringList('someFeature.list'), ['お題A', 'お題B']);
   });
 
   test('単語帳エントリのlevelを保ったままエクスポート/インポートできる', () async {
@@ -239,4 +243,169 @@ void main() {
         .toSet();
     expect(titles, {'A', 'B'});
   });
+
+  test('レイヤーⅡ「25マス思考」のセットをキーワード込みでエクスポート/インポートできる', () async {
+    final service = ThinkingMatrixService();
+    final created = await service.createSet(
+      title: 'セット1',
+      themeNames: ['メロンパン', 'カフェのバイト', '猫', '旅行', '資格試験'],
+    );
+    await service.upsertCellLayer2(
+      setId: created.id,
+      themeId: created.themes.first.id,
+      columnId: 'time',
+      keyword: '海老名SAのメロンパン',
+    );
+
+    final exported = await GradusBackup.buildExportJson();
+    final decoded = jsonDecode(exported) as Map<String, dynamic>;
+    final sets = decoded['thinkingMatrixSets'] as List<dynamic>;
+    expect(sets, hasLength(1));
+
+    SharedPreferences.setMockInitialValues({});
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await ThinkingMatrixService().loadAll();
+    expect(restored, hasLength(1));
+    expect(restored.single.title, 'セット1');
+    expect(restored.single.category, isNull);
+    expect(
+      restored.single.themes.map((t) => t.name),
+      ['メロンパン', 'カフェのバイト', '猫', '旅行', '資格試験'],
+    );
+    final restoredCell = restored.single.cellFor(
+      restored.single.themes.first.id,
+      'time',
+    );
+    expect(restoredCell.keyword, '海老名SAのメロンパン');
+    expect(restoredCell.status.name, 'filled');
+  });
+
+  test('レイヤーⅢのPREP・60秒スピーチ完了もエクスポート/インポートで往復する', () async {
+    final service = ThinkingMatrixService();
+    final created = await service.createFromPreset(
+      TopicCategory.business,
+      title: 'セット1',
+    );
+    await service.upsertCellLayer3(
+      setId: created.id,
+      themeId: created.themes.first.id,
+      columnId: 'time',
+      keyword: '海老名SAのメロンパン',
+      conclusion: '結論です',
+      reason: '理由です',
+      example: '具体例です',
+      speech60Done: true,
+    );
+
+    final exported = await GradusBackup.buildExportJson();
+    SharedPreferences.setMockInitialValues({});
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await ThinkingMatrixService().loadAll();
+    final restoredCell = restored.single.cellFor(
+      restored.single.themes.first.id,
+      'time',
+    );
+    expect(restoredCell.keyword, '海老名SAのメロンパン');
+    expect(restoredCell.conclusion, '結論です');
+    expect(restoredCell.reason, '理由です');
+    expect(restoredCell.example, '具体例です');
+    expect(restoredCell.speech60Done, isTrue);
+  });
+
+  test('インポート時、取り込み元には無いローカル限定の25マスセットは消えない', () async {
+    await ThinkingMatrixService().createSet(
+      title: '取り込み元セット',
+      themeNames: ['B1', 'B2', 'B3', 'B4', 'B5'],
+    );
+    final sourceExport = await GradusBackup.buildExportJson();
+
+    SharedPreferences.setMockInitialValues({});
+    await ThinkingMatrixService().createSet(
+      title: 'ローカル限定セット',
+      themeNames: ['A1', 'A2', 'A3', 'A4', 'A5'],
+    );
+
+    await GradusBackup.importFromContent(sourceExport);
+
+    final titles = (await ThinkingMatrixService().loadAll())
+        .map((e) => e.title)
+        .toSet();
+    expect(titles, {'取り込み元セット', 'ローカル限定セット'});
+  });
+
+  test('同じidの25マスセットをインポートすると内容が上書きされる（questionPromptsのスキップとは異なる仕様）', () async {
+    final service = ThinkingMatrixService();
+    final created = await service.createSet(
+      title: '旧タイトル',
+      themeNames: ['A1', 'A2', 'A3', 'A4', 'A5'],
+    );
+    final exported = await GradusBackup.buildExportJson();
+
+    // 端末側だけタイトルを変えてから、古い内容のバックアップを再インポートする。
+    await service.renameSet(created.id, 'ローカルで変えたタイトル');
+
+    await GradusBackup.importFromContent(exported);
+
+    final restored = await service.loadById(created.id);
+    expect(restored!.title, '旧タイトル');
+  });
+
+  test('旧バージョン（thinkingMatrixSets節が無い）バックアップでも例外を出さずインポートできる', () async {
+    final legacy = jsonEncode({'version': 5, 'scoringResults': <dynamic>[]});
+
+    await expectLater(GradusBackup.importFromContent(legacy), completes);
+    expect(await ThinkingMatrixService().loadAll(), isEmpty);
+  });
+
+  test(
+    '旧形式（netas/netaId/perspective、category・columns無し）の25マスセットを含む'
+    'バックアップ全体をインポートすると、新汎用5列のオリジナルとして復元される',
+    () async {
+      final now = DateTime.now().toIso8601String();
+      final legacyThemeId = 'tm_theme_legacy_1';
+      final legacy = jsonEncode({
+        'version': 5,
+        'thinkingMatrixSets': [
+          {
+            'id': 'tm_legacy_backup',
+            'title': '旧セット',
+            'netas': [
+              {'id': legacyThemeId, 'name': 'メロンパン'},
+              {'id': 'tm_theme_legacy_2', 'name': 'カフェのバイト'},
+              {'id': 'tm_theme_legacy_3', 'name': '猫'},
+              {'id': 'tm_theme_legacy_4', 'name': '旅行'},
+              {'id': 'tm_theme_legacy_5', 'name': '資格試験'},
+            ],
+            'cells': [
+              {
+                'netaId': legacyThemeId,
+                'perspective': 'stance',
+                'keyword': '立場のキーワード',
+                'status': 'filled',
+                'updatedAt': now,
+              },
+            ],
+            'createdAt': now,
+            'updatedAt': now,
+          },
+        ],
+      });
+
+      await GradusBackup.importFromContent(legacy);
+
+      final restored = await ThinkingMatrixService().loadAll();
+      expect(restored, hasLength(1));
+      expect(restored.single.category, isNull);
+      expect(restored.single.columns.map((c) => c.id), [
+        'time',
+        'view',
+        'compare',
+        'scale',
+        'reason',
+      ]);
+      expect(restored.single.cellFor(legacyThemeId, 'view').keyword, '立場のキーワード');
+    },
+  );
 }

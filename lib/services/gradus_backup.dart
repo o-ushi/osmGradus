@@ -12,6 +12,7 @@ import '../models/question_prompt.dart';
 import '../models/saved_pronunciation_check.dart';
 import '../models/saved_scoring_result.dart';
 import '../models/saved_vocabulary_check.dart';
+import '../models/thinking_matrix_set.dart';
 import '../models/topic_category.dart';
 import '../models/vocabulary_entry.dart';
 import '../services/dashboard_advice_storage.dart';
@@ -21,6 +22,7 @@ import '../services/pronunciation_check_storage.dart';
 import '../services/pronunciation_exercise_service.dart';
 import '../services/question_prompt_service.dart';
 import '../services/scoring_result_storage.dart';
+import '../services/thinking_matrix_service.dart';
 import '../services/topic_service.dart';
 import '../services/vocabulary_check_storage.dart';
 import '../services/vocabulary_service.dart';
@@ -47,6 +49,7 @@ Set<String> get _explicitlyMergedPrefKeys => {
   'dashboard.advice',
   'longArticles.entries',
   'questionPrompts.entries',
+  'thinkingMatrix.sets',
   for (final category in _backedUpTopicCategories)
     'topics.imported.${category.storageKey}',
   for (final category in PronunciationCategory.values)
@@ -69,9 +72,12 @@ abstract final class GradusBackup {
   /// 生の`questionPrompts.entries`キーが`preferences`欄経由でエクスポートされ、
   /// インポート時は他の全データと違いID単位のマージではなく無条件の
   /// 上書きになっていた（[_explicitlyMergedPrefKeys]未登録のバグ）。
+  /// version 6: thinkingMatrixSets（レイヤーⅡ「25マス思考」の[ThinkingMatrixSet]
+  /// 一式）を専用節として追加。「問題のみ」スコープ（[QuestionPromptJsonTransfer]）
+  /// は触らないため、このデータは「全て」バックアップにのみ含まれる。
   /// フィールドはすべて追加のみで既存フィールドの意味は変えていないため、
   /// 旧バージョンのバックアップもそのまま読み込める。
-  static const formatVersion = 5;
+  static const formatVersion = 6;
   static const filePrefix = 'osmGradus_backup_';
 
   static Future<int> itemCount() async {
@@ -86,6 +92,7 @@ abstract final class GradusBackup {
     final advice = await DashboardAdviceStorage().load();
     final longArticles = await LongArticleService().loadArticles();
     final questionPrompts = await _backedUpQuestionPrompts();
+    final thinkingMatrixSets = await ThinkingMatrixService().loadAll();
     final topicCount = topics.values.fold(0, (sum, list) => sum + list.length);
     return scoring.length +
         pronunciation.length +
@@ -96,7 +103,8 @@ abstract final class GradusBackup {
         pronunciationExercises.length +
         (advice == null ? 0 : 1) +
         longArticles.length +
-        questionPrompts.length;
+        questionPrompts.length +
+        thinkingMatrixSets.length;
   }
 
   static Future<Map<String, List<String>>> _loadImportedTopics() async {
@@ -129,6 +137,7 @@ abstract final class GradusBackup {
     final advice = await DashboardAdviceStorage().load();
     final longArticles = await LongArticleService().loadArticles();
     final questionPrompts = await _backedUpQuestionPrompts();
+    final thinkingMatrixSets = await ThinkingMatrixService().loadAll();
     final bundle = {
       'version': formatVersion,
       'exportDate': DateTime.now().toUtc().toIso8601String(),
@@ -154,6 +163,9 @@ abstract final class GradusBackup {
       'longArticles': longArticles.map((e) => e.toJson()).toList(),
       // レイヤーⅠ〜Ⅴ横断の問題文一式（理解・要約・PREP・スコア・単語登録参照を含む）。
       'questionPrompts': questionPrompts.map((e) => e.toJson()).toList(),
+      // レイヤーⅡ「25マス思考」のセット一式（テーマ・列・キーワード・
+      // 達成状況）。「問題のみ」スコープには含まれない。
+      'thinkingMatrixSets': thinkingMatrixSets.map((e) => e.toJson()).toList(),
       'preferences': Map<String, Object?>.from(
         prefs
             .getKeys()
@@ -288,6 +300,13 @@ abstract final class GradusBackup {
     final questionPromptList = decoded['questionPrompts'];
     if (questionPromptList is List) {
       final tally = await _mergeQuestionPrompts(questionPromptList);
+      added += tally.added;
+      skipped += tally.skipped;
+    }
+
+    final thinkingMatrixSetList = decoded['thinkingMatrixSets'];
+    if (thinkingMatrixSetList is List) {
+      final tally = await _mergeThinkingMatrixSets(thinkingMatrixSetList);
       added += tally.added;
       skipped += tally.skipped;
     }
@@ -443,6 +462,7 @@ Future<_Tally> _mergeLongArticles(List<dynamic> jsonList) async {
         generationKeyword: parsed.generationKeyword,
         generationJlptLevel: parsed.generationJlptLevel,
         generationLength: parsed.generationLength,
+        comprehensionCheck: parsed.comprehensionCheck,
       );
       keys.add(key);
       added++;
@@ -511,6 +531,31 @@ Future<_Tally> _mergeQuestionPrompts(List<dynamic> jsonList) async {
   }
   final tally = await service.importPrompts(parsed);
   return _Tally(added: tally.added, skipped: tally.skipped + skipped);
+}
+
+/// [QuestionPrompt]等の「同じidはスキップ」とは異なり、同じidは取り込み側で
+/// 上書きする（[ThinkingMatrixService.save]がid一致分を入れ替える仕様の
+/// ままそれに乗る）。無いidは新規追加として扱う。
+Future<_Tally> _mergeThinkingMatrixSets(List<dynamic> jsonList) async {
+  final service = ThinkingMatrixService();
+  var added = 0;
+  var skipped = 0;
+  for (final item in jsonList) {
+    if (item is! Map) {
+      skipped++;
+      continue;
+    }
+    try {
+      final parsed = ThinkingMatrixSet.fromJson(
+        Map<String, dynamic>.from(item),
+      );
+      await service.save(parsed);
+      added++;
+    } catch (_) {
+      skipped++;
+    }
+  }
+  return _Tally(added: added, skipped: skipped);
 }
 
 Future<_Tally> _mergePronunciationExercises(List<dynamic> jsonList) async {

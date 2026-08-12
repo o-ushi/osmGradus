@@ -4,18 +4,23 @@ import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
+import '../../models/thinking_matrix_layer.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/mode_list_tile.dart';
 import 'layer3_question_prompt_detail_screen.dart';
 import 'layer3_question_prompt_screen.dart';
 import 'layer3_screen.dart';
 import 'practice_layer_screen.dart';
+import 'thinking_matrix_screen.dart';
 
-enum Layer3Mode { selectFromList, random }
+enum Layer3Mode { selectFromList, random, thinkingMatrix }
 
-/// レイヤーⅢの入口（Step 4）。「問題文一覧から選ぶ（問題文一覧→PREP記入）」／
-/// 「ランダム」（既存の[Layer3Screen]：サイコロ抽選・タイマー・PREPガイド）
-/// の2択を出す。[Layer2EntryScreen]と同じモード保持・スキップ遷移の
+/// レイヤーⅢの入口（Step 4・layer2-3-thinking-matrix.md Step 3で3択化）。
+/// 「問題文一覧から選ぶ（問題文一覧→PREP記入）」／「ランダム」（既存の
+/// [Layer3Screen]：サイコロ抽選・タイマー・PREPガイド）／「25マスで考える」
+/// （[ThinkingMatrixScreen]：Ⅱと同じ盤面・同じ[ThinkingMatrixService]を
+/// [ThinkingMatrixLayer.layer3]として開き、キーワードに加えPREPまで書き込める）
+/// の3択を出す。[Layer2EntryScreen]と同じモード保持・スキップ遷移の
 /// 考え方を踏襲する。
 class Layer3EntryScreen extends StatefulWidget {
   const Layer3EntryScreen({
@@ -43,8 +48,27 @@ class Layer3EntryScreenState extends State<Layer3EntryScreen> {
   Layer3Mode? _mode;
   final _randomKey = GlobalKey<PracticeLayerScreenState<Layer3Screen>>();
   final _questionPromptKey = GlobalKey<Layer3QuestionPromptScreenState>();
+  final _thinkingMatrixKey = GlobalKey<ThinkingMatrixScreenState>();
 
   Layer3Mode? get mode => _mode;
+
+  @override
+  void initState() {
+    super.initState();
+    // [MainShell]に一度生成されたら破棄されずキャッシュされ続けるため、
+    // 設定画面で言語を変えて戻ってきただけでは再構築されず、3択画面が
+    // 古い言語のまま表示され続ける。appSettingsの変更を直接購読し、
+    // その場で再描画する（[Layer1EntryScreenState]と同じ理由）。
+    appSettings.addListener(_onSettingsChanged);
+  }
+
+  @override
+  void dispose() {
+    appSettings.removeListener(_onSettingsChanged);
+    super.dispose();
+  }
+
+  void _onSettingsChanged() => setState(() {});
 
   void _selectMode(Layer3Mode mode) {
     setState(() => _mode = mode);
@@ -55,7 +79,7 @@ class Layer3EntryScreenState extends State<Layer3EntryScreen> {
   /// と同じく、常に問題文一覧へ切り替える。
   void selectListMode() => _selectMode(Layer3Mode.selectFromList);
 
-  /// 選択済みのモードを解除し、2択画面へ戻す
+  /// 選択済みのモードを解除し、3択画面へ戻す
   /// （ヘッダー「Ⅲ」再タップ・「始めから始める」長押しから呼ぶ）。
   void resetMode() {
     if (!mounted || _mode == null) return;
@@ -99,6 +123,10 @@ class Layer3EntryScreenState extends State<Layer3EntryScreen> {
     return switch (_mode) {
       null => _Layer3ModeSelect(onSelect: _selectMode),
       Layer3Mode.random => Layer3Screen(key: _randomKey),
+      Layer3Mode.thinkingMatrix => ThinkingMatrixScreen(
+        key: _thinkingMatrixKey,
+        layer: ThinkingMatrixLayer.layer3,
+      ),
       Layer3Mode.selectFromList => Layer3QuestionPromptScreen(
         key: _questionPromptKey,
         onOpenPromptDetail: widget.onOpenPromptDetail,
@@ -109,7 +137,7 @@ class Layer3EntryScreenState extends State<Layer3EntryScreen> {
   }
 }
 
-/// レイヤーⅢの2択画面。[Layer2EntryScreen]の2択画面と同じ、シーンの青地に
+/// レイヤーⅢの3択画面。[Layer2EntryScreen]の4択画面と同じ、シーンの青地に
 /// アイコン＋ラベルの行を縦に並べるトーン。
 class _Layer3ModeSelect extends StatelessWidget {
   const _Layer3ModeSelect({required this.onSelect});
@@ -135,6 +163,11 @@ class _Layer3ModeSelect extends StatelessWidget {
               icon: Icons.casino_rounded,
               label: 'ランダム'.tr(lang),
               onTap: () => onSelect(Layer3Mode.random),
+            ),
+            ModeListTile(
+              icon: Icons.grid_view_rounded,
+              label: '25マスで考える'.tr(lang),
+              onTap: () => onSelect(Layer3Mode.thinkingMatrix),
             ),
           ],
         ),

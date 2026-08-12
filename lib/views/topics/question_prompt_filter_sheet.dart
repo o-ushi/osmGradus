@@ -7,7 +7,7 @@ import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
 import '../../theme/app_colors.dart';
 
-/// 問題文一覧のフィルタシート（入手元／分野／実施状況の3軸）。
+/// 問題文一覧のフィルタシート（入手元／カテゴリ／実施状況の3軸）。
 /// [CategorySelectSheet]と違い、3軸をまとめて1枚のシートで選ぶため、
 /// タップ即pop（単一選択のみ）ではなく「完了」で確定する。
 class QuestionPromptFilterSheet extends StatefulWidget {
@@ -116,25 +116,28 @@ class _QuestionPromptFilterSheetState extends State<QuestionPromptFilterSheet> {
                       ),
                       const SizedBox(height: 16),
                       _FilterSection(
-                        title: '分野'.tr(lang),
+                        title: 'カテゴリ'.tr(lang),
                         children: [
                           _FilterChip(
                             label: 'すべて'.tr(lang),
-                            selected: _draft.field == null,
+                            selected: _draft.category == null,
                             onTap: () => setState(
-                              () => _draft = _draft.copyWith(clearField: true),
+                              () =>
+                                  _draft = _draft.copyWith(clearCategory: true),
                             ),
                           ),
-                          for (final field in const [
+                          for (final category in const [
                             TopicCategory.daily,
                             TopicCategory.business,
                             TopicCategory.situational,
                           ])
                             _FilterChip(
-                              label: field.labelKey().tr(lang),
-                              selected: _draft.field == field,
+                              label: category.labelKey().tr(lang),
+                              selected: _draft.category == category,
                               onTap: () => setState(
-                                () => _draft = _draft.copyWith(field: field),
+                                () => _draft = _draft.copyWith(
+                                  category: category,
+                                ),
                               ),
                             ),
                         ],

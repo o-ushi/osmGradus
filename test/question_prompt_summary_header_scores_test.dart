@@ -15,7 +15,7 @@ QuestionPrompt _prompt({
   Map<PronunciationCategory, int> pronunciationScores = const {},
 }) =>
     QuestionPrompt.create(
-      field: TopicCategory.daily,
+      category: TopicCategory.daily,
       body: 'ヘッダー換算用',
       source: QuestionPromptSource.manual,
     ).copyWith(

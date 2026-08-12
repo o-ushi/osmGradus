@@ -17,14 +17,14 @@ import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/prep_label_row.dart';
 import '../topics/topic_add_flow.dart';
 
-/// レイヤーⅡ「ランダム」モード（Step 3拡張）。[Layer2Screen]（「話題を増やす」）
-/// と同じ「サイコロで即座に引く」見た目・操作感を踏襲しつつ、抽選元を
-/// [TopicService]の題材バンクではなく[QuestionPromptService]の問題文
+/// レイヤーⅡ「ランダム」モード（Step 3拡張）。旧「話題を増やす」画面
+/// （廃止済み）と同じ「サイコロで即座に引く」見た目・操作感を踏襲しつつ、
+/// 抽選元を[TopicService]の題材バンクではなく[QuestionPromptService]の問題文
 /// （＝「問題文一覧から選ぶ」と同じプール）にする。TTS読み上げ・タイマー・
 /// 録音は一切行わず、サイコロを引いたら即座に問題文を表示するだけの
 /// 軽量な画面（[PracticeLayerScreenState]は使わない）。
 ///
-/// [QuestionPrompt.field]は[TopicCategory.random]を取らないため、分野は
+/// [QuestionPrompt.category]は[TopicCategory.random]を取らないため、カテゴリは
 /// 日常/ビジネス/シチュエーションの3つに絞る。
 class Layer2RandomScreen extends StatefulWidget {
   const Layer2RandomScreen({super.key});
@@ -66,7 +66,7 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen> {
 
   Future<void> _drawPrompt() async {
     setState(() => _drawing = true);
-    final prompts = await _service.loadByField(_selectedCategory);
+    final prompts = await _service.loadByCategory(_selectedCategory);
     if (!mounted) return;
     if (prompts.isEmpty) {
       setState(() => _drawing = false);
@@ -87,14 +87,14 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen> {
   Future<void> _showAddChoice() =>
       showTopicAddChoiceFlow(context, initialCategory: _selectedCategory);
 
-  /// 「＋」長押し：分野選択・サイコロ・イメージの3ステップを表示する。
+  /// 「＋」長押し：カテゴリ選択・サイコロ・イメージの3ステップを表示する。
   void _showUsageHelp() {
     final lang = appSettings.language;
     LayerHelpSheet.show(
       context,
       title: '操作方法'.tr(lang),
       lines: [
-        LayerHelpLine(text: 'レイヤーⅡ_ランダム_使い方_分野'.tr(lang)),
+        LayerHelpLine(text: 'レイヤーⅡ_ランダム_使い方_カテゴリ'.tr(lang)),
         LayerHelpLine(text: 'レイヤーⅡ_ランダム_使い方_サイコロ'.tr(lang), icon: Icons.casino),
         LayerHelpLine(text: 'レイヤーⅡ_ランダム_使い方_イメージ'.tr(lang)),
         LayerHelpLine(text: 'レイヤーⅡ_ランダム_使い方_ノート'.tr(lang), indent: true),
@@ -106,7 +106,7 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen> {
     final prompt = _drawnPrompt;
     if (prompt == null) return null;
     return DrawnTopic(
-      category: prompt.field,
+      category: prompt.category,
       text: prompt.body,
       subtext: prompt.situationCondition,
     );

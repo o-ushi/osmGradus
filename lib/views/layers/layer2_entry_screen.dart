@@ -1,23 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
+import '../../models/thinking_matrix_layer.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/mode_list_tile.dart';
 import 'layer2_question_prompt_detail_screen.dart';
 import 'layer2_question_prompt_screen.dart';
 import 'layer2_random_screen.dart';
-import 'layer2_screen.dart';
+import 'thinking_matrix_screen.dart';
 
-enum Layer2Mode { selectFromList, random, increaseTopics }
+enum Layer2Mode { selectFromList, random, thinkingMatrix }
 
-/// レイヤーⅡの入口（Step 3）。「問題文一覧から選ぶ（問題文一覧→要約）」／
-/// 「ランダム」（[Layer2RandomScreen]：サイコロで問題文を1件引く）／
-/// 「話題を増やす」（既存の[Layer2Screen]：サイコロ抽選・🌐検索・＋取り込み）
-/// の3択を出す。[Layer1EntryScreen]・[Layer3EntryScreen]と同じモード保持の
-/// 考え方を踏襲する。
+/// レイヤーⅡの入口（Step 3・Step 2で4択化）。「問題文一覧から選ぶ（問題文
+/// 一覧→要約）」／「ランダム」（[Layer2RandomScreen]：サイコロで問題文を1件
+/// 引く）／「25マスで考える」（[ThinkingMatrixScreen]：テーマ×視点の
+/// 盤面。[ThinkingMatrixLayer.layer2]として開く）／「話題を増やす」
+/// （画面には遷移せず、タップで直接Google検索を外部ブラウザで開く）の4択を
+/// 出す。[Layer1EntryScreen]・[Layer3EntryScreen]と同じモード保持の考え方を
+/// 踏襲するが、「話題を増やす」だけは[_mode]を持たない一回きりの外部遷移。
 class Layer2EntryScreen extends StatefulWidget {
   const Layer2EntryScreen({
     super.key,
@@ -42,14 +46,43 @@ class Layer2EntryScreen extends StatefulWidget {
 
 class Layer2EntryScreenState extends State<Layer2EntryScreen> {
   Layer2Mode? _mode;
-  final _increaseTopicsKey = GlobalKey<Layer2ScreenState>();
   final _randomKey = GlobalKey<Layer2RandomScreenState>();
   final _questionPromptKey = GlobalKey<Layer2QuestionPromptScreenState>();
+  final _thinkingMatrixKey = GlobalKey<ThinkingMatrixScreenState>();
 
   Layer2Mode? get mode => _mode;
 
+  @override
+  void initState() {
+    super.initState();
+    // [MainShell]に一度生成されたら破棄されずキャッシュされ続けるため、
+    // 設定画面で言語を変えて戻ってきただけでは再構築されず、4択画面が
+    // 古い言語のまま表示され続ける（モードを選んでから離れて戻ると、その
+    // 遷移の再描画で偶然反映されてしまい気づきにくい）。appSettingsの変更を
+    // 直接購読し、その場で再描画する（[Layer1EntryScreenState]と同じ理由）。
+    appSettings.addListener(_onSettingsChanged);
+  }
+
+  @override
+  void dispose() {
+    appSettings.removeListener(_onSettingsChanged);
+    super.dispose();
+  }
+
+  void _onSettingsChanged() => setState(() {});
+
   void _selectMode(Layer2Mode mode) {
     setState(() => _mode = mode);
+  }
+
+  /// 「話題を増やす」タップ用。画面遷移はせず、外部ブラウザでGoogle検索を
+  /// 直接開く（旧「話題を増やす」画面のカテゴリ選択・サイコロ抽選・
+  /// ＋取り込みは廃止）。
+  Future<void> _openTopicSearch() async {
+    final url = Uri.https('www.google.com', '/search', {
+      'q': '日本語 スピーキング お題 一覧',
+    });
+    await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
   /// 詳細画面の常設[AppHeader]「Ⅱ」タップから呼ぶ
@@ -58,7 +91,7 @@ class Layer2EntryScreenState extends State<Layer2EntryScreen> {
   /// を選び直させず、常に一覧を見せるのが分かりやすいため）。
   void selectListMode() => _selectMode(Layer2Mode.selectFromList);
 
-  /// 選択済みのモードを解除し、3択画面へ戻す
+  /// 選択済みのモードを解除し、4択画面へ戻す
   /// （ヘッダー「Ⅱ」再タップ・「始めから始める」長押しから呼ぶ）。
   void resetMode() {
     if (!mounted || _mode == null) return;
@@ -93,9 +126,15 @@ class Layer2EntryScreenState extends State<Layer2EntryScreen> {
   @override
   Widget build(BuildContext context) {
     return switch (_mode) {
-      null => _Layer2ModeSelect(onSelect: _selectMode),
-      Layer2Mode.increaseTopics => Layer2Screen(key: _increaseTopicsKey),
+      null => _Layer2ModeSelect(
+        onSelect: _selectMode,
+        onOpenTopicSearch: _openTopicSearch,
+      ),
       Layer2Mode.random => Layer2RandomScreen(key: _randomKey),
+      Layer2Mode.thinkingMatrix => ThinkingMatrixScreen(
+        key: _thinkingMatrixKey,
+        layer: ThinkingMatrixLayer.layer2,
+      ),
       Layer2Mode.selectFromList => Layer2QuestionPromptScreen(
         key: _questionPromptKey,
         onOpenPromptDetail: widget.onOpenPromptDetail,
@@ -106,12 +145,19 @@ class Layer2EntryScreenState extends State<Layer2EntryScreen> {
   }
 }
 
-/// レイヤーⅡの3択画面。[Layer1EntryScreen]・[Layer3EntryScreen]の選択画面と
+/// レイヤーⅡの4択画面。[Layer1EntryScreen]・[Layer3EntryScreen]の選択画面と
 /// 同じ、シーンの青地にアイコン＋ラベルの行を縦に並べるトーン。
 class _Layer2ModeSelect extends StatelessWidget {
-  const _Layer2ModeSelect({required this.onSelect});
+  const _Layer2ModeSelect({
+    required this.onSelect,
+    required this.onOpenTopicSearch,
+  });
 
   final ValueChanged<Layer2Mode> onSelect;
+
+  /// 「話題を増やす」専用。他の3つと違い[Layer2Mode]を経由せず、直接
+  /// 外部ブラウザを開く。
+  final VoidCallback onOpenTopicSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +180,14 @@ class _Layer2ModeSelect extends StatelessWidget {
               onTap: () => onSelect(Layer2Mode.random),
             ),
             ModeListTile(
+              icon: Icons.grid_view_rounded,
+              label: '25マスで考える'.tr(lang),
+              onTap: () => onSelect(Layer2Mode.thinkingMatrix),
+            ),
+            ModeListTile(
               icon: Icons.public_rounded,
               label: '話題を増やす'.tr(lang),
-              onTap: () => onSelect(Layer2Mode.increaseTopics),
+              onTap: onOpenTopicSearch,
             ),
           ],
         ),

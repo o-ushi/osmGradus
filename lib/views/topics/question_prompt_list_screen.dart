@@ -144,7 +144,7 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
     final lang = appSettings.language;
     final palette = AppColors.current;
     final filtered = _service
-        .filter(_all, field: _filter.field, source: _filter.source)
+        .filter(_all, category: _filter.category, source: _filter.source)
         .where((p) => _filter.done == null || widget.isDone(p) == _filter.done)
         .toList();
     final doneCount = _all.where(widget.isDone).length;

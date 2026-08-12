@@ -58,7 +58,7 @@ class Layer4Screen extends StatefulWidget {
     this.onGoNext,
   });
 
-  /// 非nullなら「一覧から選ぶ」経由（Step 5）。抽選（サイコロ）・分野選択を
+  /// 非nullなら「一覧から選ぶ」経由（Step 5）。抽選（サイコロ）・カテゴリ選択を
   /// 隠し、この問題文で固定して録音・採点フローを進める。採点結果は
   /// [SavedScoringResult]としての保存に加え、この問題文の
   /// `jsstScore`/`hitScore`/`prepScore`にも反映する。
@@ -68,7 +68,7 @@ class Layer4Screen extends StatefulWidget {
   /// 「V」タップで呼ぶ（[MainShellState.openPromptDetailInLayer]への参照）。
   final VoidCallback? onGoToLayer5;
 
-  /// [fixedPrompt]がnullでないとき、隠された「分野」枠に前後の問題文へ
+  /// [fixedPrompt]がnullでないとき、隠された「カテゴリ」枠に前後の問題文へ
   /// 移動する▲▼ボタン（[QuestionPromptNavRow]）を表示するための状態。
   /// [Layer4QuestionPromptDetailScreen]から渡される
   /// （録音中などは呼び出し側の`_confirmCanNavigate`が移動を拒否する）。
@@ -125,7 +125,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     final fixedPrompt = widget.fixedPrompt;
-    if (fixedPrompt != null) selectedCategory = fixedPrompt.field;
+    if (fixedPrompt != null) selectedCategory = fixedPrompt.category;
     _loadSavedResults();
     initLastRecordingPlayback();
   }
@@ -141,19 +141,19 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
     super.didUpdateWidget(oldWidget);
     final newPrompt = widget.fixedPrompt;
     if (newPrompt != null && newPrompt.id != oldWidget.fixedPrompt?.id) {
-      selectedCategory = newPrompt.field;
+      selectedCategory = newPrompt.category;
       unawaited(resetAttempt());
     }
   }
 
   /// [fixedPrompt]モードでの抽選スキップ。固定の問題文をそのまま
-  /// [DrawnTopic]として返す（分野・シチュエーション条件も引き継ぐ）。
+  /// [DrawnTopic]として返す（カテゴリ・シチュエーション条件も引き継ぐ）。
   @override
   Future<DrawnTopic> pickTopic() async {
     final prompt = widget.fixedPrompt;
     if (prompt == null) return super.pickTopic();
     return DrawnTopic(
-      category: prompt.field,
+      category: prompt.category,
       text: prompt.body,
       subtext: prompt.situationCondition,
     );
@@ -168,7 +168,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
     final prompt = widget.fixedPrompt;
     if (prompt == null) return null;
     return DrawnTopic(
-      category: prompt.field,
+      category: prompt.category,
       text: prompt.body,
       subtext: prompt.situationCondition,
     );
@@ -439,7 +439,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
       showTopicAddChoiceFlow(context, initialCategory: selectedCategory);
 
   /// 「＋」長押し：タイマー〜採点結果確認までのステップを表示する。
-  /// [fixedPrompt]モードでは、分野選択・サイコロ抽選のステップの代わりに、
+  /// [fixedPrompt]モードでは、カテゴリ選択・サイコロ抽選のステップの代わりに、
   /// 開始ボタン・「Ⅴ」への遷移ステップを案内する。
   void _showUsageHelp() {
     final lang = appSettings.language;
@@ -464,7 +464,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
             ]
           : [
               LayerHelpLine(text: 'レイヤーⅣ_使い方_タイマー'.tr(lang)),
-              LayerHelpLine(text: 'レイヤーⅣ_使い方_分野'.tr(lang)),
+              LayerHelpLine(text: 'レイヤーⅣ_使い方_カテゴリ'.tr(lang)),
               LayerHelpLine(
                 text: 'レイヤーⅣ_使い方_サイコロ'.tr(lang),
                 icon: Icons.casino,
@@ -556,7 +556,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
                 ),
               ),
               const SizedBox(height: 4),
-              // 分野は一覧のフィルタで絞り込めるため、[fixedPrompt]モードの
+              // カテゴリは一覧のフィルタで絞り込めるため、[fixedPrompt]モードの
               // 詳細では表示せず、同じ枠に前後の問題文へ移動する▲▼ボタンを
               // 置く。
               fixedPrompt != null

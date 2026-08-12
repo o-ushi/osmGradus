@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../models/long_article.dart';
+import '../models/long_article_comprehension_check.dart';
 import 'json_list_store.dart';
 
 /// 長文読解（レイヤーⅠ「長文読解」）で作成した長文の一覧をローカル保持する。
@@ -34,6 +35,7 @@ class LongArticleService {
     String? generationKeyword,
     String? generationJlptLevel,
     int? generationLength,
+    LongArticleComprehensionCheck? comprehensionCheck,
   }) async {
     final articles = await loadArticles();
     final now = DateTime.now();
@@ -47,6 +49,7 @@ class LongArticleService {
       generationKeyword: generationKeyword,
       generationJlptLevel: generationJlptLevel,
       generationLength: generationLength,
+      comprehensionCheck: comprehensionCheck,
     );
     final updated = _normalize([article, ...articles]);
     await _store.saveAll(updated);

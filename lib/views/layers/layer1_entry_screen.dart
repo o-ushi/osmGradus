@@ -232,7 +232,7 @@ class _Layer1ModeSelect extends StatelessWidget {
           children: [
             ModeSectionHeading(text: '語彙を増やす'.tr(lang)),
             ModeListTile(
-              icon: Icons.assignment_rounded,
+              icon: Icons.checklist_rounded,
               label: '問題文解析'.tr(lang),
               onTap: () => onSelect(Layer1Mode.questionPrompt),
             ),

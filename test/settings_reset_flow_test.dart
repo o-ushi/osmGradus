@@ -55,7 +55,7 @@ void main() {
     (tester) async {
       // 事前に「使い込んだ」状態を作る：手入力問題文・単語帳エントリなど。
       await QuestionPromptService().recordImport(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         bodies: ['初期化前に追加した問題文'],
         source: QuestionPromptSource.manual,
       );

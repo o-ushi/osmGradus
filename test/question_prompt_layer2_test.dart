@@ -55,7 +55,9 @@ void main() {
     });
   });
 
-  testWidgets('レイヤーⅡの入口は「問題文一覧から選ぶ」「ランダム」「話題を増やす」の3択', (tester) async {
+  testWidgets('レイヤーⅡの入口は「問題文一覧から選ぶ」「ランダム」「25マスで考える」「話題を増やす」の4択', (
+    tester,
+  ) async {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
@@ -64,6 +66,7 @@ void main() {
 
     expect(find.text(_t('問題文一覧から選ぶ')), findsOneWidget);
     expect(find.text(_t('ランダム')), findsOneWidget);
+    expect(find.text(_t('25マスで考える')), findsOneWidget);
     expect(find.text(_t('話題を増やす')), findsOneWidget);
   });
 

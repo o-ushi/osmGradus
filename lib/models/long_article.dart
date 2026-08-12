@@ -1,3 +1,5 @@
+import 'long_article_comprehension_check.dart';
+
 /// 長文読解（レイヤーⅠ「長文読解」）で作成した長文1件。
 /// 一覧保存・Layer Ⅴのランダム音読の前提データ。
 class LongArticle {
@@ -12,6 +14,7 @@ class LongArticle {
     this.generationKeyword,
     this.generationJlptLevel,
     this.generationLength,
+    this.comprehensionCheck,
   });
 
   final String id;
@@ -36,6 +39,10 @@ class LongArticle {
   /// 生成時に指定した目安文字数（任意）。
   final int? generationLength;
 
+  /// 生成AIレスポンスに同梱された1秒チェック（任意。旧データ・手動作成では
+  /// null。nullならレイヤーⅠのクイズフェーズをスキップする）。
+  final LongArticleComprehensionCheck? comprehensionCheck;
+
   factory LongArticle.fromJson(Map<String, dynamic> json) => LongArticle(
     id: json['id'] as String,
     title: json['title'] as String? ?? '',
@@ -49,6 +56,11 @@ class LongArticle {
     generationKeyword: json['generationKeyword'] as String?,
     generationJlptLevel: json['generationJlptLevel'] as String?,
     generationLength: (json['generationLength'] as num?)?.toInt(),
+    comprehensionCheck: json['comprehensionCheck'] is Map
+        ? LongArticleComprehensionCheck.fromJson(
+            Map<String, dynamic>.from(json['comprehensionCheck'] as Map),
+          )
+        : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -62,6 +74,7 @@ class LongArticle {
     'generationKeyword': generationKeyword,
     'generationJlptLevel': generationJlptLevel,
     'generationLength': generationLength,
+    'comprehensionCheck': comprehensionCheck?.toJson(),
   };
 
   LongArticle copyWith({
@@ -73,6 +86,7 @@ class LongArticle {
     String? generationKeyword,
     String? generationJlptLevel,
     int? generationLength,
+    LongArticleComprehensionCheck? comprehensionCheck,
   }) => LongArticle(
     id: id,
     title: title ?? this.title,
@@ -84,5 +98,6 @@ class LongArticle {
     generationKeyword: generationKeyword ?? this.generationKeyword,
     generationJlptLevel: generationJlptLevel ?? this.generationJlptLevel,
     generationLength: generationLength ?? this.generationLength,
+    comprehensionCheck: comprehensionCheck ?? this.comprehensionCheck,
   );
 }

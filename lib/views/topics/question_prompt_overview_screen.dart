@@ -220,7 +220,7 @@ class _QuestionPromptOverviewScreenState
   }
 
   List<QuestionPrompt> get _filtered => _service
-      .filter(_all, field: _filter.field, source: _filter.source)
+      .filter(_all, category: _filter.category, source: _filter.source)
       .where(
         (p) =>
             _filter.done == null ||

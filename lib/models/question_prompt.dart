@@ -11,9 +11,9 @@ final _idRandom = Random();
 
 /// 「お題」を発展させた、レイヤーⅠ〜Ⅴを横断する問題文1件。
 ///
-/// [field]は既存[TopicCategory]のうち[TopicCategory.daily]/[TopicCategory.business]/
-/// [TopicCategory.situational]のみを取る（[TopicCategory.random]は分野を持たない
-/// 抽選専用カテゴリのため、問題文自体の属性にはならない）。
+/// [category]は既存[TopicCategory]のうち[TopicCategory.daily]/[TopicCategory.business]/
+/// [TopicCategory.situational]のみを取る（[TopicCategory.random]は問題文自体の
+/// カテゴリにはならない抽選専用カテゴリのため）。
 ///
 /// レイヤーⅣ・Ⅴの採点結果（[jsstScore]・[hitScore]・[prepScore]・
 /// [pronunciationScores]）は、Step 1時点では[ScoringResultStorage]・
@@ -26,7 +26,7 @@ class QuestionPrompt {
   const QuestionPrompt({
     required this.id,
     required this.source,
-    required this.field,
+    required this.category,
     required this.body,
     this.situationCondition,
     this.understood = false,
@@ -46,19 +46,19 @@ class QuestionPrompt {
     this.advice = '',
     required this.createdAt,
   }) : assert(
-         field != TopicCategory.random,
-         'QuestionPrompt.field はrandomを取らない（分野を持たない抽選専用カテゴリのため）',
+         category != TopicCategory.random,
+         'QuestionPrompt.category はrandomを取らない（問題文自体のカテゴリにはならない抽選専用カテゴリのため）',
        );
 
   final String id;
   final QuestionPromptSource source;
-  final TopicCategory field;
+  final TopicCategory category;
 
-  /// 問題文本文。[field]が[TopicCategory.situational]の場合は状況説明。
+  /// 問題文本文。[category]が[TopicCategory.situational]の場合は状況説明。
   final String body;
 
-  /// [field]が[TopicCategory.situational]のときのみ使う条件文。
-  /// それ以外の分野、または条件を持たない旧データではnull。
+  /// [category]が[TopicCategory.situational]のときのみ使う条件文。
+  /// それ以外のカテゴリ、または条件を持たない旧データではnull。
   final String? situationCondition;
 
   /// レイヤーⅠ旧「理解した」トグルの値。Step 1時点で[isLayer1Done]の判定からは
@@ -117,14 +117,14 @@ class QuestionPrompt {
   /// 新規問題文用のID・作成日時を割り当てて生成する
   /// （[QuestionPromptService]の取り込み・組み込みバンク以外の追加で使う）。
   factory QuestionPrompt.create({
-    required TopicCategory field,
+    required TopicCategory category,
     required String body,
     required QuestionPromptSource source,
     String? situationCondition,
   }) => QuestionPrompt(
     id: 'qp_${DateTime.now().microsecondsSinceEpoch}_${_idRandom.nextInt(1 << 32)}',
     source: source,
-    field: field,
+    category: category,
     body: body,
     situationCondition: situationCondition,
     createdAt: DateTime.now(),
@@ -154,7 +154,7 @@ class QuestionPrompt {
   }) => QuestionPrompt(
     id: id,
     source: source,
-    field: field,
+    category: category,
     body: body,
     situationCondition: situationCondition,
     understood: understood ?? this.understood,
@@ -263,7 +263,7 @@ class QuestionPrompt {
   factory QuestionPrompt.fromJson(Map<String, dynamic> json) => QuestionPrompt(
     id: json['id'] as String,
     source: QuestionPromptSourceLabel.fromStorageKey(json['source'] as String?),
-    field: _fieldFromJson(json['field']),
+    category: _categoryFromJson(json['category'] ?? json['field']),
     body: json['body'] as String? ?? '',
     situationCondition: json['situationCondition'] as String?,
     understood: json['understood'] as bool? ?? false,
@@ -295,7 +295,7 @@ class QuestionPrompt {
   Map<String, dynamic> toJson() => {
     'id': id,
     'source': source.storageKey,
-    'field': field.storageKey,
+    'category': category.storageKey,
     'body': body,
     if (situationCondition != null) 'situationCondition': situationCondition,
     'understood': understood,
@@ -326,7 +326,7 @@ class QuestionPrompt {
     'createdAt': createdAt.toIso8601String(),
   };
 
-  static TopicCategory _fieldFromJson(Object? raw) {
+  static TopicCategory _categoryFromJson(Object? raw) {
     if (raw is! String) return TopicCategory.daily;
     try {
       final category = TopicCategoryLabel.fromStorageKey(raw);

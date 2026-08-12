@@ -18,7 +18,7 @@ import '../topics/topic_add_flow.dart';
 import 'practice_layer_screen.dart';
 
 /// レイヤーⅢ：言いたいことはあるが言葉にできない。
-/// レイヤーⅡと同じ画面構成（分野リスト・お題カード・サイコロボタン）を
+/// レイヤーⅡと同じ画面構成（カテゴリリスト・お題カード・サイコロボタン）を
 /// ベースに、osmWashabeのタイマー・読み上げ（TTS）ロジックと、
 /// osmGradus独自の「結論→理由→例示」点滅ガイドを組み合わせる。
 /// サイコロボタンはosmGenkiのマイクボタンの見た目を借り、
@@ -66,7 +66,7 @@ class _Layer3ScreenState extends PracticeLayerScreenState<Layer3Screen>
       title: '操作方法'.tr(lang),
       lines: [
         LayerHelpLine(text: 'レイヤーⅢ_使い方_タイマー'.tr(lang)),
-        LayerHelpLine(text: 'レイヤーⅢ_使い方_分野'.tr(lang)),
+        LayerHelpLine(text: 'レイヤーⅢ_使い方_カテゴリ'.tr(lang)),
         LayerHelpLine(text: 'レイヤーⅢ_使い方_サイコロ'.tr(lang), icon: Icons.casino),
         LayerHelpLine(text: 'レイヤーⅢ_使い方_音声回答'.tr(lang)),
         LayerHelpLine(text: 'レイヤーⅢ_使い方_結論'.tr(lang)),

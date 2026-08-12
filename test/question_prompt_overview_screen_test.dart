@@ -50,7 +50,7 @@ void main() {
       '一覧ではなくスタート画面へジャンプする', (tester) async {
     await QuestionPromptService().importPrompts([
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '横断一覧テスト問題文',
         source: QuestionPromptSource.manual,
       ),

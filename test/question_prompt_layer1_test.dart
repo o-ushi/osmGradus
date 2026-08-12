@@ -216,7 +216,7 @@ void main() {
 
     final prompt =
         QuestionPrompt.create(
-          field: TopicCategory.daily,
+          category: TopicCategory.daily,
           body: 'Step3語彙テスト対象の問題文',
           source: QuestionPromptSource.manual,
         ).copyWith(
@@ -330,7 +330,7 @@ void main() {
       'ズレていた回帰）', (tester) async {
     final prompt =
         QuestionPrompt.create(
-          field: TopicCategory.daily,
+          category: TopicCategory.daily,
           body: 'ヒント確認用の問題文',
           source: QuestionPromptSource.manual,
         ).copyWith(
@@ -387,14 +387,14 @@ void main() {
     expect(all.where((p) => p.registeredWordIds.isNotEmpty), hasLength(1));
   });
 
-  testWidgets('フィルタシートで入手元・分野・語彙テスト実施状況を絞り込める', (tester) async {
+  testWidgets('フィルタシートで入手元・カテゴリ・語彙テスト実施状況を絞り込める', (tester) async {
     await _openQuestionPromptList(tester);
 
     await tester.tap(find.byIcon(Icons.filter_list));
     await tester.pumpAndSettle();
     expect(find.byType(QuestionPromptFilterSheet), findsOneWidget);
     expect(find.text(_t('入手元')), findsOneWidget);
-    expect(find.text(_t('分野')), findsOneWidget);
+    expect(find.text(_t('カテゴリ')), findsOneWidget);
     expect(find.text(_t('語彙テスト実施状況')), findsOneWidget);
 
     // 「済み」を選ぶ→組み込みは全件語彙テスト未実施なので0件になる。
@@ -497,7 +497,7 @@ void main() {
 
   testWidgets('手入力で追加した問題文は左スワイプ→確認で削除できる', (tester) async {
     await QuestionPromptService().recordImport(
-      field: TopicCategory.daily,
+      category: TopicCategory.daily,
       bodies: ['スワイプ削除テスト用の問題文'],
       source: QuestionPromptSource.manual,
     );

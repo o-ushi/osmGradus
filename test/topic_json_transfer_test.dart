@@ -27,8 +27,8 @@ void main() {
       expect(
         topics,
         containsAll([
-          {'category': 'daily', 'text': '取り込んだ日常お題'},
-          {'category': 'business', 'text': '取り込んだビジネスお題'},
+          {'category': '日常', 'text': '取り込んだ日常お題'},
+          {'category': 'ビジネス', 'text': '取り込んだビジネスお題'},
         ]),
       );
       // 組み込みバンク（TopicBank.dailyTopics等）の文言は含まれない。

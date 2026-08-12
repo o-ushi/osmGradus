@@ -94,7 +94,7 @@ void main() {
   testWidgets('未記入の問題文は各項目が「ー」になり、材料が無いので紙飛行機は出ない', (tester) async {
     final prompt = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '未記入テスト問題文',
         source: QuestionPromptSource.manual,
       ),
@@ -120,7 +120,7 @@ void main() {
 
     final prompt = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '記入済みテスト問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(
@@ -196,7 +196,7 @@ void main() {
   testWidgets('AI総評が既に保存されている問題文はアドバイス欄にそのまま表示される', (tester) async {
     final prompt = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: 'アドバイス済みテスト問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(advice: '既に保存済みのアドバイス文'),
@@ -210,7 +210,7 @@ void main() {
   testWidgets('紙飛行機をタップすると、Google送信の同意ダイアログが開く（二重ガード回帰）', (tester) async {
     final prompt = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '送信テスト問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(summary: '要約あり'),
@@ -240,7 +240,7 @@ void main() {
 
     final prompt = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '保持確認テスト問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(summary: '要約あり'),
@@ -287,7 +287,7 @@ void main() {
     final wordId = entries.first.id;
     final prompt = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '競合更新テスト問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(summary: '要約あり'),
@@ -332,7 +332,7 @@ void main() {
   ) async {
     final unfinished = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '語彙テスト未実施の問題文',
         source: QuestionPromptSource.manual,
       ),
@@ -353,7 +353,7 @@ void main() {
 
     final done = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '語彙テスト実施済みの問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(vocabTestQuestionCount: 4, vocabTestCorrectCount: 3),
@@ -385,7 +385,7 @@ void main() {
   testWidgets('総評ヘッダーは起動画面と同じⅠ〜Ⅴアイコンと換算点を並べる（Step 9）', (tester) async {
     final prompt = await _importPrompt(
       QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: 'ヘッダー表示テスト問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(

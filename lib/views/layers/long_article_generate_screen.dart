@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../data/long_article_ai_prompt.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
+import '../../models/long_article_generation_result.dart';
 import '../../models/long_article_generation_settings.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/long_article_response_parser.dart';
@@ -27,8 +28,8 @@ class LongArticleGenerateScreen extends StatefulWidget {
 
   final LongArticleGenerationSettings settings;
 
-  /// 生成された本文を確定し、読解画面へ進む。
-  final ValueChanged<String> onGenerated;
+  /// 生成された本文（+同梱されていれば1秒チェック）を確定し、読解画面へ進む。
+  final ValueChanged<LongArticleGenerationResult> onGenerated;
 
   @override
   State<LongArticleGenerateScreen> createState() =>
@@ -100,13 +101,13 @@ class _LongArticleGenerateScreenState extends State<LongArticleGenerateScreen>
       final text = await consumeChromeAiPasteText(lang);
       if (!mounted || text == null) return;
 
-      final body = LongArticleResponseParser.parse(text);
-      if (body == null) {
+      final result = LongArticleResponseParser.parseResult(text);
+      if (result == null) {
         showChromeAiMessage('長文読解_解析できません'.tr(lang));
         return;
       }
       clearChromeAiPendingState();
-      widget.onGenerated(body);
+      widget.onGenerated(result);
     });
   }
 

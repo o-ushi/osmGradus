@@ -126,10 +126,15 @@ abstract final class TopicJsonTransfer {
     return TopicJsonImportResult(added: added, skipped: skipped);
   }
 
-  static TopicCategory? _categoryFromStorageKey(String key) => switch (key) {
-    'daily' => TopicCategory.daily,
-    'business' => TopicCategory.business,
-    'situational' => TopicCategory.situational,
-    _ => null,
-  };
+  /// 新storageKey（日本語）に加え、旧英語storageKeyの取り込み済みJSONファイルも
+  /// 読める（[TopicCategoryLabel.fromStorageKey]に委譲）。`random`・未知の
+  /// キーはnull（このtransferの対象カテゴリではないため読み飛ばす）。
+  static TopicCategory? _categoryFromStorageKey(String key) {
+    try {
+      final category = TopicCategoryLabel.fromStorageKey(key);
+      return _categories.contains(category) ? category : null;
+    } on ArgumentError {
+      return null;
+    }
+  }
 }

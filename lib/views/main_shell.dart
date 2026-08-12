@@ -217,9 +217,8 @@ class MainShellState extends State<MainShell> {
   }) {
     // レイヤーⅠ・Ⅴでモード選択済みのとき、ヘッダーの同じタブを再タップすると
     // 選択画面へ戻る（レイヤーⅠ：語彙⇔長文読解⇔Podcast、レイヤーⅤ：
-    // 短文⇔長文の切替をスタート退出なしで行える）。レイヤーⅠの長文読解中は
-    // 解除しない（キーワード入力・Chrome AI生成・読解中の単語登録など、
-    // 選び直しでは復元できない進行中の作業があるため）。
+    // 短文⇔長文の切替をスタート退出なしで行える）。他レイヤーと動線を揃えるため、
+    // 長文読解中（キーワード入力・Chrome AI生成・読解中）でも同様に解除する。
     // [fromStartScreen]（起動画面のレイヤータイルタップ）のときは、
     // モードを一切解除せず常に続きから再開する——選択画面に戻すのは
     // [forceReset]（長押し）のときだけ。
@@ -228,8 +227,7 @@ class MainShellState extends State<MainShell> {
         _resetLayerToFresh(index);
         setState(() {});
       } else if (!fromStartScreen) {
-        if (index == 0 &&
-            _layer1Key.currentState?.mode != Layer1Mode.longReading) {
+        if (index == 0) {
           _layer1Key.currentState?.resetMode();
           setState(() {});
         } else if (index == 1) {

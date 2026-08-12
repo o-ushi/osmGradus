@@ -51,7 +51,7 @@ class CategorySelectField extends StatelessWidget {
         child: Row(
           children: [
             Text(
-              '分野'.tr(lang),
+              'カテゴリ'.tr(lang),
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

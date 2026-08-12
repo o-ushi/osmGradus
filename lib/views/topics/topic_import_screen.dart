@@ -16,7 +16,7 @@ import '../../widgets/swipe_to_close_wrapper.dart';
 /// 元の画面構成をそのまま再現している。
 ///
 /// [PronunciationExerciseImportScreen]（レイヤーⅤ）と同じ動線を持つが、
-/// お題は「見出し付きテキスト・3分野・全件クリア」という構造のため、
+/// お題は「見出し付きテキスト・3カテゴリ・全件クリア」という構造のため、
 /// カテゴリごとの整合性検証やプレビューが必要な発音課題側とは
 /// カード内側（サマリー・クリア操作）のみ別実装にしている。共通フローは
 /// [AiImportFlowMixin]、パーサ・全削除は本画面。
@@ -57,8 +57,8 @@ class _TopicImportScreenState extends State<TopicImportScreen>
 
   @override
   bool looksLikeAiImport(String text) {
-    return text.contains('【日常の身近な話題】') ||
-        text.contains('【ビジネスシーン】') ||
+    return text.contains('【日常】') ||
+        text.contains('【ビジネス】') ||
         text.contains('【シチュエーション】');
   }
 
@@ -118,7 +118,7 @@ class _TopicImportScreenState extends State<TopicImportScreen>
       setImportResult(
         message: hasAnyParsed
             ? '新しいお題はありませんでした（すべて重複しています）。'
-            : 'お題を読み取れませんでした。【日常の身近な話題】【ビジネスシーン】【シチュエーション】の見出し付きで貼り付けてください。',
+            : 'お題を読み取れませんでした。【日常】【ビジネス】【シチュエーション】の見出し付きで貼り付けてください。',
         isError: true,
       );
       return;
@@ -128,7 +128,7 @@ class _TopicImportScreenState extends State<TopicImportScreen>
     await loadImportCounts();
     if (!mounted) return;
     setImportResult(
-      message: '日常の身近な話題 %lld 件、ビジネスシーン %lld 件、シチュエーション %lld 件を追加しました。',
+      message: '日常 %lld 件、ビジネス %lld 件、シチュエーション %lld 件を追加しました。',
       counts: [dailyNew, businessNew, situationalNew],
     );
   }
@@ -179,7 +179,7 @@ class _TopicImportScreenState extends State<TopicImportScreen>
                         lang: lang,
                         controller: importTextController,
                         onChanged: (_) => setState(() {}),
-                        hintText: '【日常の身近な話題】\n1. ...',
+                        hintText: '【日常】\n1. ...',
                       ),
                     ],
                   ),
@@ -277,12 +277,12 @@ class _TopicImportScreenState extends State<TopicImportScreen>
           const SizedBox(height: 8),
           AiImportCountRow(
             lang: lang,
-            label: '日常の身近な話題'.tr(lang),
+            label: '日常'.tr(lang),
             count: _dailyCount,
           ),
           AiImportCountRow(
             lang: lang,
-            label: 'ビジネスシーン'.tr(lang),
+            label: 'ビジネス'.tr(lang),
             count: _businessCount,
           ),
           AiImportCountRow(

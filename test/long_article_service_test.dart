@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:osm_gradus/models/long_article_comprehension_check.dart';
 import 'package:osm_gradus/services/long_article_service.dart';
 
 void main() {
@@ -35,6 +36,38 @@ void main() {
     expect(saved.generationKeyword, '旅行');
     expect(saved.generationJlptLevel, 'n2');
     expect(saved.generationLength, 400);
+  });
+
+  test('comprehensionCheckを渡すと保存・復元できる', () async {
+    final service = LongArticleService();
+    const check = LongArticleComprehensionCheck(
+      question: '誰と旅行に行きましたか？',
+      optionA: '友達',
+      optionB: '家族',
+      correctOption: 'A',
+      explanation: '本文に「友達と一緒に」とある。',
+    );
+    await service.addArticle(
+      title: '旅行',
+      body: '本文',
+      comprehensionCheck: check,
+    );
+
+    final saved = (await service.loadArticles()).single;
+    expect(saved.comprehensionCheck, isNotNull);
+    expect(saved.comprehensionCheck!.question, check.question);
+    expect(saved.comprehensionCheck!.optionA, check.optionA);
+    expect(saved.comprehensionCheck!.optionB, check.optionB);
+    expect(saved.comprehensionCheck!.correctOption, check.correctOption);
+    expect(saved.comprehensionCheck!.explanation, check.explanation);
+  });
+
+  test('comprehensionCheckを渡さなければnullのまま（旧データ互換）', () async {
+    final service = LongArticleService();
+    await service.addArticle(title: '旅行', body: '本文');
+
+    final saved = (await service.loadArticles()).single;
+    expect(saved.comprehensionCheck, isNull);
   });
 
   test('updateArticle()でtitle/bodyが更新され、updatedAtが進む', () async {
@@ -87,9 +120,7 @@ void main() {
     final beforeReorder = await service.loadArticles();
     // 現在は新しい順で ['C', 'B', 'A']。これを ['A', 'B', 'C'] へ並び替える。
     final idsInDesiredOrder = ['A', 'B', 'C']
-        .map(
-          (title) => beforeReorder.firstWhere((a) => a.title == title).id,
-        )
+        .map((title) => beforeReorder.firstWhere((a) => a.title == title).id)
         .toList();
 
     final reordered = await service.reorderArticles(idsInDesiredOrder);

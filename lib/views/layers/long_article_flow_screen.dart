@@ -1,15 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../models/long_article.dart';
+import '../../models/long_article_comprehension_check.dart';
+import '../../models/long_article_generation_result.dart';
 import '../../models/long_article_generation_settings.dart';
 import '../../services/long_article_service.dart';
+import 'long_article_comprehension_check_screen.dart';
 import 'long_article_generate_screen.dart';
 import 'long_article_keyword_screen.dart';
 import 'long_article_reader_screen.dart';
 
-enum _LongReadingPhase { keyword, generate, reading }
+enum _LongReadingPhase { keyword, generate, reading, comprehensionCheck }
 
 /// レイヤーⅠ「長文読解」フロー本体。キーワード → Chrome AI生成・貼付 →
 /// 読む（タップで単語帳登録）→（任意で訳付け）→ 長文一覧へ保存、という
@@ -47,6 +52,11 @@ class Layer1LongReadingScreenState extends State<Layer1LongReadingScreen> {
   LongArticleGenerationSettings? _settings;
   late String? _articleBody = widget.initialArticle?.body;
 
+  /// 生成AIレスポンス（または保存済み[LongArticle]）に同梱された1秒チェック。
+  /// nullなら旧データ／旧レスポンスとしてクイズフェーズをスキップする。
+  late LongArticleComprehensionCheck? _comprehensionCheck =
+      widget.initialArticle?.comprehensionCheck;
+
   void _onSettingsReady(LongArticleGenerationSettings settings) {
     setState(() {
       _settings = settings;
@@ -54,11 +64,22 @@ class Layer1LongReadingScreenState extends State<Layer1LongReadingScreen> {
     });
   }
 
-  void _onArticleGenerated(String body) {
+  void _onArticleGenerated(LongArticleGenerationResult result) {
     setState(() {
-      _articleBody = body;
+      _articleBody = result.body;
+      _comprehensionCheck = result.comprehensionCheck;
       _phase = _LongReadingPhase.reading;
     });
+  }
+
+  /// 読解画面の「次へ」タップ時の分岐。1秒チェックがあればそのフェーズへ
+  /// 進み、無ければ（旧データ／旧AIレスポンス）従来どおり即終了する。
+  void _onReadingFinished() {
+    if (_comprehensionCheck != null) {
+      setState(() => _phase = _LongReadingPhase.comprehensionCheck);
+      return;
+    }
+    unawaited(_finish());
   }
 
   /// 長文一覧から選んだ既存の長文で始めたときは、既に保存済みなので
@@ -78,6 +99,7 @@ class Layer1LongReadingScreenState extends State<Layer1LongReadingScreen> {
       generationKeyword: settings.keyword,
       generationJlptLevel: settings.jlptLevel.storageKey,
       generationLength: settings.length.targetCharacterCount,
+      comprehensionCheck: _comprehensionCheck,
     );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -98,8 +120,13 @@ class Layer1LongReadingScreenState extends State<Layer1LongReadingScreen> {
       ),
       _LongReadingPhase.reading => LongArticleReaderScreen(
         body: _articleBody!,
-        onFinish: _finish,
+        onFinish: _onReadingFinished,
       ),
+      _LongReadingPhase.comprehensionCheck =>
+        LongArticleComprehensionCheckScreen(
+          check: _comprehensionCheck!,
+          onComplete: _finish,
+        ),
     };
   }
 }

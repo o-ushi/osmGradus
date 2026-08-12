@@ -6,7 +6,7 @@ import '../../models/topic_category.dart';
 import '../../theme/app_colors.dart';
 
 /// osmWashabeのカテゴリ選択（`.pickerStyle(.menu)`）に相当する一覧シート。
-/// 「日常の身近な話題」「ビジネスシーン」「シチュエーション」「ランダム」を
+/// 「日常」「ビジネス」「シチュエーション」「ランダム」を
 /// タップで選択し、選択中の項目にチェックマークを付ける。
 class CategorySelectSheet extends StatelessWidget {
   const CategorySelectSheet({
@@ -62,7 +62,7 @@ class CategorySelectSheet extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'お題のカテゴリ'.tr(lang),
+              '問題文のカテゴリ'.tr(lang),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -71,7 +71,7 @@ class CategorySelectSheet extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             for (final category in categories)
-              _CategoryRow(
+              CategorySelectRow(
                 label: category.labelKey().tr(lang),
                 selected: category == selected,
                 onTap: () => Navigator.of(context).pop(category),
@@ -83,8 +83,12 @@ class CategorySelectSheet extends StatelessWidget {
   }
 }
 
-class _CategoryRow extends StatelessWidget {
-  const _CategoryRow({
+/// [CategorySelectSheet]の選択行。25マス作成のカテゴリ選択シート
+/// （[ThinkingMatrixScreen]）など、同じ見た目の一覧を持つ他のシートとも
+/// 共有する。
+class CategorySelectRow extends StatelessWidget {
+  const CategorySelectRow({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,

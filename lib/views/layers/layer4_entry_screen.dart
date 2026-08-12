@@ -45,6 +45,24 @@ class Layer4EntryScreenState extends State<Layer4EntryScreen> {
 
   Layer4Mode? get mode => _mode;
 
+  @override
+  void initState() {
+    super.initState();
+    // [MainShell]に一度生成されたら破棄されずキャッシュされ続けるため、
+    // 設定画面で言語を変えて戻ってきただけでは再構築されず、2択画面が
+    // 古い言語のまま表示され続ける。appSettingsの変更を直接購読し、
+    // その場で再描画する（[Layer1EntryScreenState]と同じ理由）。
+    appSettings.addListener(_onSettingsChanged);
+  }
+
+  @override
+  void dispose() {
+    appSettings.removeListener(_onSettingsChanged);
+    super.dispose();
+  }
+
+  void _onSettingsChanged() => setState(() {});
+
   void _selectMode(Layer4Mode mode) {
     setState(() => _mode = mode);
   }

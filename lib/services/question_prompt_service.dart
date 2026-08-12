@@ -14,12 +14,12 @@ import 'jsst_scoring_service.dart';
 ///
 /// [TopicService]（サイコロ抽選・カテゴリ別SharedPreferencesリスト）はStep 1
 /// 時点では引き続き並行稼働させ、[TopicService.importTopics]・
-/// [TopicService.clearImported]から[recordImport]・[clearImportedField]を
+/// [TopicService.clearImported]から[recordImport]・[clearImportedCategory]を
 /// 呼んで、このサービスの構造化ストアへ内容をミラーする。組み込みバンクと
 /// 旧`topics.imported.*`データ（このサービス導入前の既存インストール分）は
 /// [loadAll]の呼び出し時に不足分だけ自動で取り込む（差分同期）。
 class QuestionPromptService {
-  static const _importableFields = [
+  static const _importableCategories = [
     TopicCategory.daily,
     TopicCategory.business,
     TopicCategory.situational,
@@ -45,21 +45,19 @@ class QuestionPromptService {
     }
 
     final prefs = await SharedPreferences.getInstance();
-    for (final field in _importableFields) {
-      final raw =
-          prefs.getStringList('$topicsImportedKeyPrefix${field.storageKey}') ??
-          const [];
+    for (final category in _importableCategories) {
+      final raw = await loadImportedTopicsPref(prefs, category);
       if (raw.isEmpty) continue;
       final existingBodies = {
         for (final p in [...stored, ...additions])
-          if (p.field == field && p.source != QuestionPromptSource.builtIn)
+          if (p.category == category && p.source != QuestionPromptSource.builtIn)
             p.body,
       };
       for (final body in raw) {
         if (!existingBodies.add(body)) continue;
         additions.add(
           QuestionPrompt.create(
-            field: field,
+            category: category,
             body: body,
             source: QuestionPromptSource.imported,
           ),
@@ -82,14 +80,14 @@ class QuestionPromptService {
     return null;
   }
 
-  /// 指定した分野の問題文だけを返す（組み込み＋各入手元、すべて含む）。
-  Future<List<QuestionPrompt>> loadByField(TopicCategory field) async {
+  /// 指定したカテゴリの問題文だけを返す（組み込み＋各入手元、すべて含む）。
+  Future<List<QuestionPrompt>> loadByCategory(TopicCategory category) async {
     final all = await loadAll();
-    return all.where((p) => p.field == field).toList();
+    return all.where((p) => p.category == category).toList();
   }
 
   /// 理解・要約・PREP・スコア・アドバイス等の更新を保存する
-  /// （[id]・[source]・[field]・[body]・[situationCondition]は変えない）。
+  /// （[id]・[source]・[category]・[body]・[situationCondition]は変えない）。
   Future<void> update(QuestionPrompt prompt) async {
     final all = await loadAll();
     final updated = [
@@ -119,7 +117,7 @@ class QuestionPromptService {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
-    final key = '$topicsImportedKeyPrefix${target.field.storageKey}';
+    final key = '$topicsImportedKeyPrefix${target.category.storageKey}';
     final raw = prefs.getStringList(key);
     if (raw == null || raw.isEmpty) return;
     final next = raw.where((body) => body != target.body).toList();
@@ -134,7 +132,7 @@ class QuestionPromptService {
   /// [TopicService.importTopics]から呼ばれる。新規追加分（重複除外済み）を
   /// 正しい[source]付きで構造化ストアへミラーする。
   Future<void> recordImport({
-    required TopicCategory field,
+    required TopicCategory category,
     required List<String> bodies,
     required QuestionPromptSource source,
   }) async {
@@ -142,13 +140,13 @@ class QuestionPromptService {
     final stored = await loadAll();
     final existingBodies = {
       for (final p in stored)
-        if (p.field == field && p.source != QuestionPromptSource.builtIn)
+        if (p.category == category && p.source != QuestionPromptSource.builtIn)
           p.body,
     };
     final additions = [
       for (final body in bodies)
         if (existingBodies.add(body))
-          QuestionPrompt.create(field: field, body: body, source: source),
+          QuestionPrompt.create(category: category, body: body, source: source),
     ];
     if (additions.isEmpty) return;
     await _store.saveAll([...stored, ...additions]);
@@ -273,29 +271,30 @@ class QuestionPromptService {
   }
 
   /// [TopicService.clearImported]から呼ばれる。組み込みは残し、指定した
-  /// 分野の取り込み済み分（AI・手入力・インポートいずれも）だけを削除する。
-  Future<void> clearImportedField(TopicCategory field) async {
+  /// カテゴリの取り込み済み分（AI・手入力・インポートいずれも）だけを削除する。
+  Future<void> clearImportedCategory(TopicCategory category) async {
     final all = await loadAll();
     final kept = all
         .where(
           (p) =>
-              !(p.field == field && p.source != QuestionPromptSource.builtIn),
+              !(p.category == category &&
+                  p.source != QuestionPromptSource.builtIn),
         )
         .toList();
     await _store.saveAll(kept);
   }
 
-  /// [field]・[source]・[layer1Done]のいずれかで絞り込む（未指定の軸は無視）。
+  /// [category]・[source]・[layer1Done]のいずれかで絞り込む（未指定の軸は無視）。
   /// 一覧画面のフィルタ用途を想定した単純な同期フィルタ。[layer1Done]は
   /// [QuestionPrompt.isLayer1Done]（レイヤーⅠ語彙テスト実施済みか）で判定する。
   List<QuestionPrompt> filter(
     List<QuestionPrompt> prompts, {
-    TopicCategory? field,
+    TopicCategory? category,
     QuestionPromptSource? source,
     bool? layer1Done,
   }) {
     return prompts.where((p) {
-      if (field != null && p.field != field) return false;
+      if (category != null && p.category != category) return false;
       if (source != null && p.source != source) return false;
       if (layer1Done != null && p.isLayer1Done != layer1Done) return false;
       return true;
@@ -314,11 +313,11 @@ class QuestionPromptService {
   }
 
   /// [TopicBank.supplementTopics]（「ランダム」抽選専用の補充データ）は
-  /// [QuestionPrompt]化しない。[QuestionPrompt.field]はrandomを取れず、
-  /// 日常/ビジネスいずれの分野とも言えない雑多な内容のため、Step 1では
+  /// [QuestionPrompt]化しない。[QuestionPrompt.category]はrandomを取れず、
+  /// 日常/ビジネスいずれのカテゴリとも言えない雑多な内容のため、Step 1では
   /// 従来どおり[TopicService.drawRandom]内だけで使う（一覧・詳細には出ない）。
   ///
-  /// [TopicBank]を[QuestionPrompt]化した仮想エントリ。IDは`builtin_<分野>_<index>`
+  /// [TopicBank]を[QuestionPrompt]化した仮想エントリ。IDは`builtin_<カテゴリ>_<index>`
   /// で固定し、[loadAll]が既存ストアとのdiffに使う。本文の真実のソースは
   /// [TopicBank]側であり続けるため、内容そのものは複製しても、アプリ更新で
   /// [TopicBank]が変わった場合は新しいIDの項目が追加取り込みされるだけで、
@@ -330,7 +329,7 @@ class QuestionPromptService {
         QuestionPrompt(
           id: 'builtin_daily_$i',
           source: QuestionPromptSource.builtIn,
-          field: TopicCategory.daily,
+          category: TopicCategory.daily,
           body: TopicBank.dailyTopics[i],
           createdAt: _builtInCreatedAt,
         ),
@@ -341,7 +340,7 @@ class QuestionPromptService {
         QuestionPrompt(
           id: 'builtin_business_$i',
           source: QuestionPromptSource.builtIn,
-          field: TopicCategory.business,
+          category: TopicCategory.business,
           body: TopicBank.businessTopics[i],
           createdAt: _builtInCreatedAt,
         ),
@@ -353,7 +352,7 @@ class QuestionPromptService {
         QuestionPrompt(
           id: 'builtin_situational_$i',
           source: QuestionPromptSource.builtIn,
-          field: TopicCategory.situational,
+          category: TopicCategory.situational,
           body: situation.situation,
           situationCondition: situation.condition,
           createdAt: _builtInCreatedAt,

@@ -117,3 +117,24 @@ extension AppPaletteContrast on AppPalette {
 
 /// osmGenkiの「貼り付け待ち」ボタン色（Chrome AI から戻ったあと）。
 const Color kPasteReadyColor = Color(0xFF34C759);
+
+/// レイヤーⅡ「25マス思考」の`spoken`（キーワードあり＋「1分話した」）セル色。
+/// シーン青（[AppPalette.scene]）の上でも読めるアンバー系ゴールド。盤面
+/// トロフィーにも同じ色を使う（「達成」の一貫表現）。
+const Color kThinkingMatrixGoldColor = Color(0xFFFFC857);
+
+/// レイヤーⅢ「25マス思考」の盤面セル色（5段階中の4・5共通）。キーワード＋
+/// 60秒スピーチは完了しているがPREP（結論・理由・例示）はまだ揃っていない
+/// （段階4）、または揃っている（段階5）。段階5は背景をこの色のまま、
+/// [kThinkingMatrixCompleteBorderColor]の太枠だけで区別する。
+const Color kThinkingMatrixSpeechOnlyColor = Color(0xFFFFD675);
+
+/// レイヤーⅢ「25マス思考」の最終段階（5段階中の5：PREP＋60秒スピーチ完了）
+/// マスの枠線色。背景の淡いゴールド系と埋もれないよう、はっきり目立つピンク
+/// にする（レイヤーⅣのイメージカラー[kLayerColors]と同じ色）。
+const Color kThinkingMatrixCompleteBorderColor = Color(0xFFFA408C);
+
+/// レイヤーⅢ「25マス思考」の盤面セル色（5段階中の3）。PREP（結論・理由・
+/// 例示）は揃っているが60秒スピーチはまだ。[kThinkingMatrixGoldColor]（段階5）
+/// より淡いゴールド。
+const Color kThinkingMatrixPrepCompleteColor = Color(0xFFFFE9A6);

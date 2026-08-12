@@ -46,10 +46,10 @@ void main() {
   });
 
   group('QuestionPromptモデル', () {
-    test('fieldにrandomを渡すとassertで弾かれる', () {
+    test('categoryにrandomを渡すとassertで弾かれる', () {
       expect(
         () => QuestionPrompt.create(
-          field: TopicCategory.random,
+          category: TopicCategory.random,
           body: '不正な分野',
           source: QuestionPromptSource.manual,
         ),
@@ -60,7 +60,7 @@ void main() {
     test('toJson/fromJsonで全フィールドが往復する', () {
       final original =
           QuestionPrompt.create(
-            field: TopicCategory.situational,
+            category: TopicCategory.situational,
             body: '状況文',
             source: QuestionPromptSource.imported,
             situationCondition: '条件文',
@@ -98,7 +98,7 @@ void main() {
 
       expect(restored.id, original.id);
       expect(restored.source, original.source);
-      expect(restored.field, original.field);
+      expect(restored.category, original.category);
       expect(restored.body, original.body);
       expect(restored.situationCondition, original.situationCondition);
       expect(restored.understood, true);
@@ -167,7 +167,7 @@ void main() {
 
     test('isLayer1Doneは出題数・正解数が揃って初めてtrueになる。vocabTestAccuracyは正解数/出題数', () {
       final base = QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '語彙テスト対象の問題文',
         source: QuestionPromptSource.manual,
       );
@@ -194,7 +194,7 @@ void main() {
 
     test('横断一覧の総評⭕️はアドバイス済またはⅠ〜Ⅴいずれか実施で立つ', () {
       final base = QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '山と海どっちが好きですか？',
         source: QuestionPromptSource.manual,
       );
@@ -250,10 +250,10 @@ void main() {
     test('組み込み30件（日常10・ビジネス10・シチュエーション10）がsource=builtInで読める', () async {
       final all = await QuestionPromptService().loadAll();
 
-      final daily = all.where((p) => p.field == TopicCategory.daily);
-      final business = all.where((p) => p.field == TopicCategory.business);
+      final daily = all.where((p) => p.category == TopicCategory.daily);
+      final business = all.where((p) => p.category == TopicCategory.business);
       final situational = all.where(
-        (p) => p.field == TopicCategory.situational,
+        (p) => p.category == TopicCategory.situational,
       );
 
       expect(daily, hasLength(10));
@@ -282,7 +282,7 @@ void main() {
         'AIが生成した問題文',
       ], source: QuestionPromptSource.ai);
 
-      final daily = await QuestionPromptService().loadByField(
+      final daily = await QuestionPromptService().loadByCategory(
         TopicCategory.daily,
       );
       final added = daily.singleWhere((p) => p.body == 'AIが生成した問題文');
@@ -294,7 +294,7 @@ void main() {
         '手入力した問題文',
       ], source: QuestionPromptSource.manual);
 
-      final business = await QuestionPromptService().loadByField(
+      final business = await QuestionPromptService().loadByCategory(
         TopicCategory.business,
       );
       final added = business.singleWhere((p) => p.body == '手入力した問題文');
@@ -304,7 +304,7 @@ void main() {
     test('sourceを渡さない場合はimportedが既定値になる（JSON/バックアップ経由との互換）', () async {
       await TopicService().importTopics(TopicCategory.situational, ['素の取り込み']);
 
-      final situational = await QuestionPromptService().loadByField(
+      final situational = await QuestionPromptService().loadByCategory(
         TopicCategory.situational,
       );
       final added = situational.singleWhere((p) => p.body == '素の取り込み');
@@ -319,7 +319,7 @@ void main() {
       final second = await service.importTopics(TopicCategory.daily, ['重複お題']);
 
       expect(second, 0);
-      final daily = await QuestionPromptService().loadByField(
+      final daily = await QuestionPromptService().loadByCategory(
         TopicCategory.daily,
       );
       expect(daily.where((p) => p.body == '重複お題'), hasLength(1));
@@ -330,7 +330,7 @@ void main() {
       await service.importTopics(TopicCategory.daily, ['消される問題文']);
       await service.clearImported(TopicCategory.daily);
 
-      final daily = await QuestionPromptService().loadByField(
+      final daily = await QuestionPromptService().loadByCategory(
         TopicCategory.daily,
       );
       expect(daily.any((p) => p.body == '消される問題文'), false);
@@ -346,7 +346,7 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList('topics.imported.daily', ['旧データA', '旧データB']);
 
-      final daily = await QuestionPromptService().loadByField(
+      final daily = await QuestionPromptService().loadByCategory(
         TopicCategory.daily,
       );
 
@@ -375,7 +375,7 @@ void main() {
     test('理解フラグ・要約・PREP・スコア・アドバイスを書き換えて読み直せる', () async {
       final service = QuestionPromptService();
       final all = await service.loadAll();
-      final target = all.firstWhere((p) => p.field == TopicCategory.daily);
+      final target = all.firstWhere((p) => p.category == TopicCategory.daily);
 
       final updated = target.copyWith(
         understood: true,
@@ -409,12 +409,12 @@ void main() {
     test('deleteで指定IDだけが消える', () async {
       final service = QuestionPromptService();
       await TopicService().importTopics(TopicCategory.daily, ['削除対象']);
-      final before = await service.loadByField(TopicCategory.daily);
+      final before = await service.loadByCategory(TopicCategory.daily);
       final target = before.firstWhere((p) => p.body == '削除対象');
 
       await service.delete(target.id);
 
-      final after = await service.loadByField(TopicCategory.daily);
+      final after = await service.loadByCategory(TopicCategory.daily);
       expect(after.any((p) => p.id == target.id), false);
       expect(
         after.where((p) => p.source == QuestionPromptSource.builtIn),
@@ -425,7 +425,7 @@ void main() {
     test('deleteした取り込み本文はtopics.importedからも消え、loadAllで復活しない', () async {
       final service = QuestionPromptService();
       await TopicService().importTopics(TopicCategory.daily, ['復活させない']);
-      final target = (await service.loadByField(
+      final target = (await service.loadByCategory(
         TopicCategory.daily,
       )).firstWhere((p) => p.body == '復活させない');
 
@@ -440,7 +440,7 @@ void main() {
   });
 
   group('filter / progressRatio', () {
-    test('filterはfield・source・layer1DoneのAND条件で絞り込む', () async {
+    test('filterはcategory・source・layer1DoneのAND条件で絞り込む', () async {
       final service = QuestionPromptService();
       await TopicService().importTopics(TopicCategory.daily, [
         '絞り込み対象',
@@ -449,7 +449,7 @@ void main() {
 
       final filtered = service.filter(
         all,
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         source: QuestionPromptSource.manual,
       );
 
@@ -459,13 +459,13 @@ void main() {
       // layer1Done: 語彙テスト未実施のためfalseだけが残る。
       final notDone = service.filter(
         all,
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         layer1Done: false,
       );
       expect(notDone.any((p) => p.body == '絞り込み対象'), true);
       final done = service.filter(
         all,
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         layer1Done: true,
       );
       expect(done, isEmpty);
@@ -476,14 +476,14 @@ void main() {
       expect(service.progressRatio(const [], (p) => true), 0);
 
       final all = await service.loadAll();
-      final daily = service.filter(all, field: TopicCategory.daily);
+      final daily = service.filter(all, category: TopicCategory.daily);
       // 組み込み10件は全てunderstood=false。
       expect(service.progressRatio(daily, (p) => p.understood), 0);
 
       await service.update(daily.first.copyWith(understood: true));
       final reloaded = service.filter(
         await service.loadAll(),
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
       );
       expect(
         service.progressRatio(reloaded, (p) => p.understood),
@@ -514,7 +514,7 @@ void main() {
     test('resyncJsstScores: 残っている最新の結果からjsstScore等を再計算する', () async {
       final service = QuestionPromptService();
       final prompt = QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: 'テスト問題文',
         source: QuestionPromptSource.manual,
       ).copyWith(jsstScore: 9, hitScore: 5, prepScore: 5);
@@ -550,7 +550,7 @@ void main() {
       () async {
         final service = QuestionPromptService();
         final prompt = QuestionPrompt.create(
-          field: TopicCategory.daily,
+          category: TopicCategory.daily,
           body: 'テスト問題文2',
           source: QuestionPromptSource.manual,
         );
@@ -585,7 +585,7 @@ void main() {
       final service = QuestionPromptService();
       final prompt =
           QuestionPrompt.create(
-            field: TopicCategory.daily,
+            category: TopicCategory.daily,
             body: 'テスト問題文3',
             source: QuestionPromptSource.manual,
           ).copyWith(

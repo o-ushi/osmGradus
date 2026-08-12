@@ -26,10 +26,7 @@ class TopicService {
 
   Future<List<String>> loadImported(TopicCategory category) async {
     final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getStringList(
-      '$_importedKeyPrefix${category.storageKey}',
-    );
-    return raw ?? const [];
+    return loadImportedTopicsPref(prefs, category);
   }
 
   /// osmWashabeの `mergeTopics`（重複除外・件数上限）を移植。
@@ -52,7 +49,7 @@ class TopicService {
     // 「まだミラーされていない生リストの新規分」を検知して先にimported扱いで
     // 取り込んでしまい、正しいsourceで記録できなくなる（Step 1回帰テストで発見）。
     await _promptService.recordImport(
-      field: category,
+      category: category,
       bodies: additions,
       source: source,
     );
@@ -67,7 +64,8 @@ class TopicService {
   Future<void> clearImported(TopicCategory category) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('$_importedKeyPrefix${category.storageKey}');
-    await _promptService.clearImportedField(category);
+    await prefs.remove('$_importedKeyPrefix${category.legacyStorageKey}');
+    await _promptService.clearImportedCategory(category);
   }
 
   /// osmWashabeの「全てクリア」ボタンに相当。取り込み済みお題を全カテゴリ分削除する。
@@ -133,8 +131,8 @@ class TopicImportParser {
   static const int minTopicLength = 8;
 
   static const Map<TopicCategory, String> _sectionHeaders = {
-    TopicCategory.daily: '日常の身近な話題',
-    TopicCategory.business: 'ビジネスシーン',
+    TopicCategory.daily: '日常',
+    TopicCategory.business: 'ビジネス',
     TopicCategory.situational: 'シチュエーション',
   };
 

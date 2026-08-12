@@ -9,7 +9,7 @@ void main() {
   group('QuestionPromptVocabExtractionAiPromptTemplate.buildPrompt', () {
     test('問題文本文と抽出ルール・最大件数・JSONスキーマを含む', () {
       final prompt = QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '週末はどう過ごしましたか？',
         source: QuestionPromptSource.manual,
       );
@@ -27,7 +27,7 @@ void main() {
 
     test('シチュエーションの条件文があれば問題文に続けて含める', () {
       final prompt = QuestionPrompt.create(
-        field: TopicCategory.situational,
+        category: TopicCategory.situational,
         body: '状況本文',
         source: QuestionPromptSource.manual,
         situationCondition: '条件文テキスト',
@@ -43,7 +43,7 @@ void main() {
 
     test('アプリ表示言語がenなら訳の言語ラベルが英語になる', () {
       final prompt = QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: 'テスト本文',
         source: QuestionPromptSource.manual,
       );
@@ -72,7 +72,7 @@ void main() {
   group('QuestionPromptVocabExtractionAiPromptTemplate.buildLaunchPlan', () {
     test('プロンプト本文を含むURLかクリップボード貼り付け指示のいずれかを返す', () {
       final prompt = QuestionPrompt.create(
-        field: TopicCategory.daily,
+        category: TopicCategory.daily,
         body: '短い問題文',
         source: QuestionPromptSource.manual,
       );

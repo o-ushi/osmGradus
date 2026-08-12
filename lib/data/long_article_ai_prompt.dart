@@ -31,8 +31,24 @@ abstract final class LongArticleAiPrompt {
         '- 文体: ${_loosenessDescription(settings.looseness)}\n'
         '- 目安の文字数: ${settings.length.targetCharacterCount}字程度\n'
         '\n'
+        '文章に加えて、読解確認用の2択クイズ「1秒チェック」も作成してください。\n'
+        '【1秒チェックの条件】\n'
+        '- 文章の文脈・因果関係・主張の理解を問う問題にする\n'
+        '  （語彙の暗記・発音・単純な言い換えを問う問題は不可）\n'
+        '- 選択肢は短い日本語テキスト（1〜2文以内）にする\n'
+        '- 正解（correctOption）は"A"または"B"のみ\n'
+        '- 解説（explanation）は1行で、なぜ正解か／なぜもう一方が違うかを書く\n'
+        '- レイヤーⅠ（インプット確認）の範囲に閉じる\n'
+        '\n'
         '【出力形式（このJSON形式のみで回答し、前後に説明文を付けないでください）】\n'
-        '{"body": "（ここに生成した文章本文）"}';
+        '{"body": "（ここに生成した文章本文）", '
+        '"comprehensionCheck": {'
+        '"question": "（この文章から読み取れる内容を問う問題文）", '
+        '"optionA": "（選択肢A）", '
+        '"optionB": "（選択肢B）", '
+        '"correctOption": "A", '
+        '"explanation": "（1行解説）"'
+        '}}';
   }
 
   static Uri buildSearchUrl(LongArticleGenerationSettings settings) =>
