@@ -165,15 +165,18 @@ class _OptionCard extends StatelessWidget {
         palette.cardFill,
         palette.textOnCardSecondary,
       ),
+      // 塗りは不透明度0.12の緑/赤をシーンの濃紺に重ねた暗めの色になるため、
+      // カード用の暗い文字色（textOnCardPrimary）ではなく、シーン用の白文字
+      // （textOnScenePrimary）を使う。
       _OptionVisualState.correct => (
         Colors.green,
         Colors.green.withValues(alpha: 0.12),
-        palette.textOnCardPrimary,
+        palette.textOnScenePrimary,
       ),
       _OptionVisualState.incorrect => (
         Colors.redAccent,
         Colors.redAccent.withValues(alpha: 0.12),
-        palette.textOnCardPrimary,
+        palette.textOnScenePrimary,
       ),
     };
     return Material(
