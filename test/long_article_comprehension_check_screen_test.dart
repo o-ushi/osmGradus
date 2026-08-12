@@ -101,12 +101,9 @@ void main() {
 
     await tester.tap(find.text(_t('長文読解_1秒チェック_トップへ戻る')));
     expect(completed, isTrue);
-
-    // 保留中の自動遷移タイマーが残らないよう、テスト終了前に使い切る。
-    await tester.pump(const Duration(seconds: 3));
   });
 
-  testWidgets('回答から2秒後に自動でonCompleteが呼ばれる', (tester) async {
+  testWidgets('回答しても自動では戻らない（タップするまで待つ）', (tester) async {
     var completed = false;
     await _pumpScreen(tester, onComplete: () => completed = true);
 
@@ -114,10 +111,8 @@ void main() {
     await tester.pump();
     expect(completed, isFalse);
 
-    await tester.pump(const Duration(milliseconds: 1900));
+    // 解説を読む時間は学習者ごとに違うため、時間が経っても自動遷移しない。
+    await tester.pump(const Duration(seconds: 10));
     expect(completed, isFalse);
-
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(completed, isTrue);
   });
 }

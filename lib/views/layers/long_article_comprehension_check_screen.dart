@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
@@ -9,7 +7,8 @@ import '../../theme/app_colors.dart';
 
 /// 長文読解フローの「1秒チェック」画面。文脈・ロジック理解を問う2択クイズ
 /// （発話・発音は触らない）。回答後は正解/不正解と1行解説を同画面内に表示し、
-/// 「トップへ戻る」（または2秒後の自動遷移）で[onComplete]を呼ぶ。
+/// 「トップへ戻る」タップで[onComplete]を呼ぶ（自動遷移はしない。解説を
+/// 読み終えるまでの時間は学習者ごとに違うため）。
 class LongArticleComprehensionCheckScreen extends StatefulWidget {
   const LongArticleComprehensionCheckScreen({
     super.key,
@@ -19,7 +18,7 @@ class LongArticleComprehensionCheckScreen extends StatefulWidget {
 
   final LongArticleComprehensionCheck check;
 
-  /// 「トップへ戻る」タップ、または回答から2秒後に呼ぶ。
+  /// 「トップへ戻る」タップで呼ぶ。
   final VoidCallback onComplete;
 
   @override
@@ -30,7 +29,6 @@ class LongArticleComprehensionCheckScreen extends StatefulWidget {
 class _LongArticleComprehensionCheckScreenState
     extends State<LongArticleComprehensionCheckScreen> {
   String? _selectedOption;
-  Timer? _autoCompleteTimer;
 
   bool get _answered => _selectedOption != null;
   bool get _isCorrect => _selectedOption == widget.check.correctOption;
@@ -38,9 +36,6 @@ class _LongArticleComprehensionCheckScreenState
   void _select(String option) {
     if (_answered) return;
     setState(() => _selectedOption = option);
-    _autoCompleteTimer = Timer(const Duration(seconds: 2), () {
-      if (mounted) widget.onComplete();
-    });
   }
 
   _OptionVisualState _stateFor(String option) {
@@ -49,12 +44,6 @@ class _LongArticleComprehensionCheckScreenState
     return _isCorrect
         ? _OptionVisualState.correct
         : _OptionVisualState.incorrect;
-  }
-
-  @override
-  void dispose() {
-    _autoCompleteTimer?.cancel();
-    super.dispose();
   }
 
   @override
