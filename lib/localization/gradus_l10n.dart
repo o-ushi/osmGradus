@@ -78,6 +78,19 @@ abstract final class GradusL10n {
     '長文読解_1秒チェック_不正解': '不正解',
     '長文読解_1秒チェック_正解表示': '正解: %@',
     '長文読解_1秒チェック_トップへ戻る': 'トップへ戻る',
+    '長文読解_1秒チェック_語彙テストへ': '語彙テストへ進む',
+    '長文読解_語彙_履歴バッジ': '長文の見直し',
+    '長文読解_語彙_内訳': '（単語 %1/%2 ＋ クイズ %3/%4）',
+    '長文読解_語彙_選択': '選択: %@',
+    '長文読解_正解率': '正解率: %@',
+    '長文読解_語彙_結果詳細なし': '語彙テスト結果の詳細が見つかりませんでした',
+    '長文読解_次へヒント': '次へ（チェック・語彙）',
+    '長文読解_使い方_タイトル': '使い方',
+    '長文読解_使い方_次へ': '1️⃣ 「次へ」で1秒チェック→語彙テストへ進む',
+    '長文読解_使い方_訳付':
+        '2️⃣ 「訳を付ける」は追加で気になった語用（9語の語彙テストの代わりではない）',
+    '長文読解_使い方_単語帳': '3️⃣ 本文をタップして単語登録、単語帳アイコンで一覧を見る',
+    'ボタンヒント_単語帳_長押し': '使い方を表示',
     'N1レベル': 'N1レベル',
     'N2レベル': 'N2レベル',
     'N3レベル': 'N3レベル',
@@ -134,9 +147,12 @@ abstract final class GradusL10n {
     '25マス_ネタ入力例': '例：メロンパン、カフェのバイトなど',
     '25マス_一覧が空です': 'まだセットがありません。＋からカテゴリを選んで作成しましょう',
     '25マス_一覧_使い方_追加': '1️⃣ {{icon}} でカテゴリを選んで新規作成',
+    '25マス_一覧_使い方_標準シート':
+        '日常・ビジネス・シチュエーションの3シートは最初から用意されており、埋めるとダッシュボードの25マス拡充度に反映される',
     '25マス_一覧_使い方_詳細': '2️⃣ 行をタップすると盤面が開く',
     '25マス_一覧_使い方_削除': '3️⃣ 行を左スワイプすると削除できる',
     '25マス_達成率': '達成率 %1% (%2/%3)',
+    '25マス_拡充度_一覧': '拡充度 %1',
     '25マス_キーワード入力例': '例：具体的な固有名詞や場面',
     'マスを埋める': 'マスを埋める',
     '1分話した': '1分話した',
@@ -308,6 +324,7 @@ abstract final class GradusL10n {
     '日本語で回答しよう': '日本語で回答しよう',
     'はっきり声に出して読んでみよう': 'はっきり声に出して読んでみよう',
     'サイコロをタップして問題を表示': 'サイコロをタップして問題を表示',
+    '？ボタンをタップして問題を作成': '？ボタンをタップして問題を作成',
 
     // Step 2: レイヤーⅠ「問題文解析」
     '問題文解析': '問題文解析',
@@ -454,6 +471,12 @@ abstract final class GradusL10n {
     '総合判定': '総合判定',
     '判定': '判定',
     '総合': '総合',
+    'テスト総合': 'テスト総合',
+    '拡充度総合': '拡充度総合',
+    'テスト結果': 'テスト結果',
+    '25マス拡充度': '25マス拡充度',
+    '25マス': '25マス',
+    'トータル': 'トータル',
     '会話': '会話',
     'JSST': 'JSST',
     '発音': '発音',
@@ -461,7 +484,7 @@ abstract final class GradusL10n {
     'アドバイス': 'アドバイス',
     'ダッシュボード_アドバイス空': '{{plane}}をタップ',
     'ダッシュボード_アドバイス_挑戦': 'JSST・的中度・PREP・語彙・発音にチャレンジ',
-    'ダッシュボード_E案内': '5つの指標がすべて揃うまで総合はEです。的中度・PREPはレイヤーⅣで記録できます。',
+    'ダッシュボード_E案内': '5つの指標がすべて揃うまでテスト総合はEです。的中度・PREPはレイヤーⅣで記録できます。',
     'Chromeから戻ったら貼り付けボタンを押して、アドバイスを保存しよう':
         'Chrome AIの回答をコピーして戻ると自動で取り込みます。緑の貼り付けボタンでも保存できます',
     'ダッシュボード_Google送信確認_タイトル': '練習履歴をGoogleに送信しますか？',
@@ -496,6 +519,8 @@ abstract final class GradusL10n {
     '初期化しました': '初期化しました',
     'help.gradus.title': 'osmGradus？',
     'help.gradus.subtitle': '5段階で日本語会話力を磨く',
+    'help.gradus.manual.title': '操作マニュアル',
+    'help.gradus.manual.summary': '図解で画面ごとの使い方を見る',
     'help.gradus.overview.title': 'はじめに',
     'help.gradus.overview.summary': '起動画面でレイヤーを選び、段階的に練習する。',
     'help.gradus.overview.tip1': 'Ⅰ〜Ⅴはいつでもヘッダーから切り替えられる',
@@ -510,9 +535,12 @@ abstract final class GradusL10n {
         '不正解は単語帳へ自動登録。Ⅰの完了は語彙テスト実施で判定する',
     'help.gradus.layer1.tip3':
         '長文読解：保存済みの長文があれば「一覧から選ぶ」か「新規作成」かを選べる。'
-        '一覧では削除・並び替え・★も可能。'
-        '「訳を付ける」はタップで選び直し、長押しで自動送信。'
-        '読解後は1秒チェック（2択）で文脈理解を確認。'
+        '一覧では削除・並び替え・★・正解率表示（タップで詳細）も可能。'
+        '生成時に語彙9語と1秒チェックが同梱される。'
+        '読解後は1秒チェック（2択）→語彙テスト（9問）の順に進む。'
+        '1秒チェックは語彙テストの1問目として扱い、正解率と★は最大10問で出す。'
+        '「訳を付ける」は追加で気になった語用'
+        '（タップで選び直し、長押しで自動送信。9語テストの代わりにはならない）。'
         '保存後はレイヤーⅤで音読できる',
     'help.gradus.layer1.tip4':
         '語彙：10問テスト。🇻🇳/🇺🇸/🇯🇵で音声またはキーボード回答。過去の回答は✏️から修正。＋でChrome AI取り込み。標準語彙は例文つき',
@@ -526,6 +554,9 @@ abstract final class GradusL10n {
     'help.gradus.layer2.tip4': '声に出さなくて良いから、どんな回答をするかイメージする',
     'help.gradus.layer2.tip5': '「話題を増やす」ではタップで直接Google検索が開く',
     'help.gradus.layer2.tip6': '「25マスで考える」ではテーマ×視点をキーワードで埋める。声に出さなくてもよい',
+    'help.gradus.layer2.tip7':
+        '標準の日常・ビジネス・シチュエーションシートは最初から用意されており、'
+        '埋めるとダッシュボードの25マス拡充度に反映される',
     'help.gradus.layer3.title': 'レイヤーⅢ：PREP',
     'help.gradus.layer3.summary': '話の型を身につける',
     'help.gradus.layer3.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」「25マスで考える」から選ぶ',
@@ -535,6 +566,7 @@ abstract final class GradusL10n {
     'help.gradus.layer3.tip5':
         '「25マスで考える」ではⅡで埋めたキーワードに結論・理由・例示を足して深掘りし、'
         '「母語で60秒スピーチ」でカウントダウンに挑戦できる',
+    'help.gradus.layer3.tip6': '標準シートでの進み具合も、ダッシュボードの25マス拡充度に反映される',
     'help.gradus.layer4.title': 'レイヤーⅣ：採点',
     'help.gradus.layer4.summary': '日本語で話し切る',
     'help.gradus.layer4.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」から選ぶ',
@@ -562,14 +594,23 @@ abstract final class GradusL10n {
     'help.gradus.dashboard.summary': '直近の練習から総合判定を見る',
     'help.gradus.dashboard.tip1': '起動画面のダッシュボードアイコンから開く',
     'help.gradus.dashboard.tip2':
-        'JSST・的中度・PREP・語彙・発音の平均点で総合A〜Dが決まる（1つでも欠けるとE）',
+        'テスト総合はJSST・的中度・PREP・語彙・発音の平均点でA〜Dが決まる（1つでも欠けるとE）。'
+        '総合はテスト総合と拡充度総合を組み合わせて決まる',
     'help.gradus.dashboard.tip3': '各行をタップすると履歴が開く。練習記録が1件でもあれば紙飛行機でアドバイスを受け取れる',
-    'help.gradus.dashboard.tip4': '語彙の点数はレイヤーⅠの単語テスト結果のみ（長文で単語帳に登録した語は含まない）',
+    'help.gradus.dashboard.tip4':
+        '語彙の点数はレイヤーⅠの単語テスト結果のみ（長文読解は1秒チェックを1問目に含めた語彙テストも含む。読解中に単語帳へ登録しただけでは点数に入らない）',
+    'help.gradus.dashboard.tip5':
+        '拡充度総合は25マス（日常・ビジネス・シチュエーションの計65マス）の埋まり具合でA〜Eが決まる',
+    'help.gradus.dashboard.tip6':
+        '25マスは日常・ビジネス・シチュエーションの3シートが最初から用意されており、'
+        '1マスはキーワード→結論・理由・具体例→60秒スピーチの順に進むほど拡充度への貢献が上がる',
     'help.gradus.transcript.title': '成績証明証',
     'help.gradus.transcript.summary': '直近の練習結果を1枚にまとめる',
     'help.gradus.transcript.tip1': '起動画面の「…」→成績証明証から開く',
-    'help.gradus.transcript.tip2': '発行日時・総合判定・JSST/的中度/PREP/語彙/発音の直近結果を表示する',
+    'help.gradus.transcript.tip2': '発行日時・総合判定・テスト総合・拡充度総合と、会話/語彙/発音/25マスの直近結果を表示する',
     'help.gradus.transcript.tip3': 'ダッシュボードと同じ計算で総合判定が決まる',
+    'help.gradus.transcript.tip4':
+        '総合はテスト総合と拡充度総合を組み合わせて決まる。25マスは発行時点の日常・ビジネス・シチュエーションの拡充度を表示する',
     'help.gradus.backup.title': 'エクスポート・インポート',
     'help.gradus.backup.summary': 'データをバックアップする',
     'help.gradus.backup.tip1': '起動画面の「…」から開く',
@@ -808,6 +849,24 @@ abstract final class GradusL10n {
     '長文読解_1秒チェック_不正解': 'Incorrect',
     '長文読解_1秒チェック_正解表示': 'Correct answer: %@',
     '長文読解_1秒チェック_トップへ戻る': 'Back to top',
+    '長文読解_1秒チェック_語彙テストへ': 'Go to vocabulary test',
+    '長文読解_語彙_履歴バッジ': 'Article review',
+    '長文読解_語彙_内訳': '(words %1/%2 + quiz %3/%4)',
+    '長文読解_語彙_選択': 'Selected: %@',
+    '長文読解_正解率': 'Accuracy: %@',
+    '長文読解_語彙_結果詳細なし':
+        'Could not find the vocabulary test result details',
+    '長文読解_次へヒント': 'Next (check, vocab)',
+    '長文読解_使い方_タイトル': 'How to use',
+    '長文読解_使い方_次へ':
+        '1️⃣ Tap "Next" to move to the Quick Check, then the vocabulary test',
+    '長文読解_使い方_訳付':
+        '2️⃣ "Add translations" is for extra words you notice '
+        '(not a substitute for the 9-word vocabulary test)',
+    '長文読解_使い方_単語帳':
+        '3️⃣ Tap words in the text to register them; the word list icon '
+        'shows the list',
+    'ボタンヒント_単語帳_長押し': 'Show usage',
     'N1レベル': 'N1 level',
     'N2レベル': 'N2 level',
     'N3レベル': 'N3 level',
@@ -871,9 +930,12 @@ abstract final class GradusL10n {
     '25マス_ネタ入力例': 'e.g. melon bread, café job',
     '25マス_一覧が空です': 'No sets yet. Tap + to choose a category and create one.',
     '25マス_一覧_使い方_追加': '1️⃣ {{icon}} to choose a category and create a new set',
+    '25マス_一覧_使い方_標準シート':
+        'The Daily, Business, and Situational sheets are ready from the start — filling them counts toward the Dashboard’s 25-cell expansion',
     '25マス_一覧_使い方_詳細': '2️⃣ Tap a row to open its board',
     '25マス_一覧_使い方_削除': '3️⃣ Swipe a row left to delete it',
     '25マス_達成率': '%1% complete (%2/%3)',
+    '25マス_拡充度_一覧': 'Expansion %1',
     '25マス_キーワード入力例': 'e.g. a specific name or scene',
     'マスを埋める': 'Fill the cell',
     '1分話した': 'I spoke for 1 min',
@@ -1058,6 +1120,7 @@ abstract final class GradusL10n {
     '日本語で回答しよう': 'Answer in Japanese',
     'はっきり声に出して読んでみよう': 'Read aloud clearly',
     'サイコロをタップして問題を表示': 'Tap the dice to show the question',
+    '？ボタンをタップして問題を作成': 'Tap the ? button to create the question',
 
     // Step 2: Layer I "Prompt Analysis"
     '問題文解析': 'Prompt Analysis',
@@ -1219,6 +1282,12 @@ abstract final class GradusL10n {
     '総合判定': 'Overall Assessment',
     '判定': 'Assessment',
     '総合': 'Overall',
+    'テスト総合': 'Test overall',
+    '拡充度総合': 'Expansion overall',
+    'テスト結果': 'Test results',
+    '25マス拡充度': '25-cell expansion',
+    '25マス': '25 cells',
+    'トータル': 'Total',
     '会話': 'Conversation',
     'JSST': 'JSST',
     '発音': 'Pronunciation',
@@ -1228,7 +1297,7 @@ abstract final class GradusL10n {
     'ダッシュボード_アドバイス_挑戦':
         'Try JSST, relevance, PREP, vocabulary, and pronunciation',
     'ダッシュボード_E案内':
-        'Overall stays E until all five metrics are recorded. Relevance and PREP come from Layer IV.',
+        'Test overall stays E until all five metrics are recorded. Relevance and PREP come from Layer IV.',
     'Chromeから戻ったら貼り付けボタンを押して、アドバイスを保存しよう':
         'Copy the Chrome AI answer and return — it imports automatically. You can also save with the green paste button',
     'ダッシュボード_Google送信確認_タイトル': 'Send practice history to Google?',
@@ -1264,6 +1333,9 @@ abstract final class GradusL10n {
     '初期化しました': 'Reset complete',
     'help.gradus.title': 'osmGradus?',
     'help.gradus.subtitle': 'Polish your Japanese in five layers',
+    'help.gradus.manual.title': 'User manual',
+    'help.gradus.manual.summary':
+        'Illustrated guide for each screen (Japanese)',
     'help.gradus.overview.title': 'Getting started',
     'help.gradus.overview.summary':
         'Pick a layer on the launch screen and practice step by step.',
@@ -1285,9 +1357,14 @@ abstract final class GradusL10n {
         'complete when the vocab test is done',
     'help.gradus.layer1.tip3':
         'Long reading: if you have saved articles, choose “Choose from list” '
-        'or “Create new”. The list also supports delete, reorder, and ★. '
-        '“Add translations”: tap to reselect, long-press to auto-send. After '
-        'reading, a Quick Check (2 choices) confirms your comprehension. '
+        'or “Create new”. The list also supports delete, reorder, ★, and an '
+        'accuracy display (tap for details). Generation includes 9 '
+        'vocabulary words plus a Quick Check. After reading, a Quick Check '
+        '(2 choices) is followed by a 9-question vocabulary test. The Quick '
+        'Check counts as question 1 of that test; accuracy and ★ are out of '
+        'up to 10. “Add '
+        'translations” is for extra words you notice (tap to reselect, '
+        'long-press to auto-send; it does not replace the 9-word test). '
         'After saving, read aloud in Layer V',
     'help.gradus.layer1.tip4':
         'Vocab: 10 questions. Answer in 🇻🇳/🇺🇸/🇯🇵 by voice or keyboard. Edit past answers via ✏️. “+” imports via Chrome AI. Built-in words include example sentences',
@@ -1310,6 +1387,9 @@ abstract final class GradusL10n {
     'help.gradus.layer2.tip6':
         '“Think in 25 cells”: fill themes × perspectives with keywords — '
         'no need to speak aloud',
+    'help.gradus.layer2.tip7':
+        'The standard Daily, Business, and Situational sheets are ready from '
+        'the start — filling them counts toward the Dashboard’s 25-cell expansion',
     'help.gradus.layer3.title': 'Layer III: PREP',
     'help.gradus.layer3.summary': 'Master a speaking pattern',
     'help.gradus.layer3.tip1':
@@ -1324,6 +1404,9 @@ abstract final class GradusL10n {
         '“Think in 25 cells”: add Point / Reason / Example to the keywords '
         'you filled in Layer II to dig deeper, then try the “Native-Language '
         '60-Second Speech” countdown',
+    'help.gradus.layer3.tip6':
+        'Progress on the standard sheets also counts toward the Dashboard’s '
+        '25-cell expansion',
     'help.gradus.layer4.title': 'Layer IV: Scoring',
     'help.gradus.layer4.summary': 'Speak through in Japanese',
     'help.gradus.layer4.tip1':
@@ -1363,20 +1446,26 @@ abstract final class GradusL10n {
     'help.gradus.dashboard.tip1':
         'Open from the dashboard icon on the launch screen',
     'help.gradus.dashboard.tip2':
-        'Overall A–D is decided by the average of your JSST, relevance, PREP, vocabulary, and pronunciation scores (E if any is missing)',
+        'Test overall A–D is decided by the average of your JSST, relevance, PREP, vocabulary, and pronunciation scores (E if any is missing). Overall combines Test overall and Expansion overall',
     'help.gradus.dashboard.tip3':
         'Tap each row for history. If you have any practice record, use the paper plane for advice',
     'help.gradus.dashboard.tip4':
-        'Vocabulary score uses Layer I vocabulary-test results only (words registered while reading long articles are not included)',
+        'Vocabulary score uses Layer I vocabulary-test results only (this includes long-article tests, with the Quick Check as question 1; merely registering words while reading does not count)',
+    'help.gradus.dashboard.tip5':
+        'Expansion overall (A–E) is decided by how filled the 25-cell sheets are (65 cells total across Daily, Business, and Situational)',
+    'help.gradus.dashboard.tip6':
+        'The Daily, Business, and Situational 25-cell sheets are ready from the start; each cell contributes more as it progresses from keyword → Point/Reason/Example → 60-second speech',
     'help.gradus.transcript.title': 'Certificate of Results',
     'help.gradus.transcript.summary':
         'Summarize recent practice on one certificate',
     'help.gradus.transcript.tip1':
         'Open from “… → Certificate of Results” on the launch screen',
     'help.gradus.transcript.tip2':
-        'Shows issue date/time, overall grade, and recent JSST / relevance / PREP / vocabulary / pronunciation results',
+        'Shows issue date/time, overall / test / expansion grades, and recent conversation / vocab / pronunciation / 25-cell results',
     'help.gradus.transcript.tip3':
         'Overall grade uses the same calculation as the Dashboard',
+    'help.gradus.transcript.tip4':
+        'Overall combines Test overall and Expansion overall. The 25-cell block shows Daily / Business / Situations expansion at issue time',
     'help.gradus.backup.title': 'Export & import',
     'help.gradus.backup.summary': 'Back up your data',
     'help.gradus.backup.tip1': 'Open from “…” on the launch screen',
@@ -1634,6 +1723,24 @@ abstract final class GradusL10n {
     '長文読解_1秒チェック_不正解': 'Sai',
     '長文読解_1秒チェック_正解表示': 'Đáp án đúng: %@',
     '長文読解_1秒チェック_トップへ戻る': 'Về màn hình chính',
+    '長文読解_1秒チェック_語彙テストへ': 'Chuyển sang bài kiểm tra từ vựng',
+    '長文読解_語彙_履歴バッジ': 'Ôn lại bài đọc',
+    '長文読解_語彙_内訳': '(từ %1/%2 + câu hỏi %3/%4)',
+    '長文読解_語彙_選択': 'Đã chọn: %@',
+    '長文読解_正解率': 'Tỷ lệ đúng: %@',
+    '長文読解_語彙_結果詳細なし':
+        'Không tìm thấy chi tiết kết quả kiểm tra từ vựng',
+    '長文読解_次へヒント': 'Tiếp (kiểm tra, từ vựng)',
+    '長文読解_使い方_タイトル': 'Cách dùng',
+    '長文読解_使い方_次へ':
+        '1️⃣ Nhấn "Tiếp theo" để chuyển sang Kiểm tra nhanh rồi bài kiểm '
+        'tra từ vựng',
+    '長文読解_使い方_訳付':
+        '2️⃣ "Thêm bản dịch" dành cho từ bạn để ý thêm '
+        '(không thay thế bài kiểm tra 9 từ)',
+    '長文読解_使い方_単語帳':
+        '3️⃣ Chạm vào từ trong bài để đăng ký; biểu tượng sổ từ hiện danh sách',
+    'ボタンヒント_単語帳_長押し': 'Xem cách dùng',
     'N1レベル': 'Cấp độ N1',
     'N2レベル': 'Cấp độ N2',
     'N3レベル': 'Cấp độ N3',
@@ -1696,9 +1803,12 @@ abstract final class GradusL10n {
     '25マス_ネタ入力例': 'VD: bánh mì dưa lưới, việc làm thêm quán cà phê',
     '25マス_一覧が空です': 'Chưa có bộ nào. Nhấn + để chọn danh mục và tạo.',
     '25マス_一覧_使い方_追加': '1️⃣ Nhấn {{icon}} để chọn danh mục và tạo bộ mới',
+    '25マス_一覧_使い方_標準シート':
+        'Các tờ Hàng ngày, Công việc, Tình huống đã có sẵn từ đầu — điền vào sẽ tính vào mở rộng 25 ô ở Bảng điều khiển',
     '25マス_一覧_使い方_詳細': '2️⃣ Nhấn vào một dòng để mở bảng',
     '25マス_一覧_使い方_削除': '3️⃣ Vuốt sang trái để xóa',
     '25マス_達成率': 'Hoàn thành %1% (%2/%3)',
+    '25マス_拡充度_一覧': 'Mở rộng %1',
     '25マス_キーワード入力例': 'VD: tên riêng hoặc tình huống cụ thể',
     'マスを埋める': 'Điền ô',
     '1分話した': 'Đã nói 1 phút',
@@ -1880,6 +1990,7 @@ abstract final class GradusL10n {
     '日本語で回答しよう': 'Hãy trả lời bằng tiếng Nhật',
     'はっきり声に出して読んでみよう': 'Hãy đọc to và rõ ràng',
     'サイコロをタップして問題を表示': 'Nhấn vào xúc xắc để hiện câu hỏi',
+    '？ボタンをタップして問題を作成': 'Nhấn nút ? để tạo câu hỏi',
 
     // Step 2: Tầng I "Phân tích đề bài"
     '問題文解析': 'Phân tích đề bài',
@@ -2039,6 +2150,12 @@ abstract final class GradusL10n {
     '総合判定': 'Đánh giá tổng hợp',
     '判定': 'Đánh giá',
     '総合': 'Tổng hợp',
+    'テスト総合': 'Tổng hợp bài kiểm tra',
+    '拡充度総合': 'Tổng hợp mở rộng',
+    'テスト結果': 'Kết quả bài kiểm tra',
+    '25マス拡充度': 'Mở rộng 25 ô',
+    '25マス': '25 ô',
+    'トータル': 'Tổng',
     '会話': 'Hội thoại',
     'JSST': 'JSST',
     '発音': 'Phát âm',
@@ -2047,7 +2164,7 @@ abstract final class GradusL10n {
     'ダッシュボード_アドバイス空': 'Nhấn {{plane}}',
     'ダッシュボード_アドバイス_挑戦': 'Thử JSST, độ trúng đích, PREP, từ vựng và phát âm',
     'ダッシュボード_E案内':
-        'Tổng hợp giữ E cho đến khi đủ cả 5 chỉ số. Độ trúng đích và PREP ghi ở Tầng IV.',
+        'Tổng hợp bài kiểm tra giữ E cho đến khi đủ cả 5 chỉ số. Độ trúng đích và PREP ghi ở Tầng IV.',
     'Chromeから戻ったら貼り付けボタンを押して、アドバイスを保存しよう':
         'Sao chép câu trả lời Chrome AI rồi quay lại — sẽ tự nhập. Có thể lưu bằng nút dán màu xanh',
     'ダッシュボード_Google送信確認_タイトル': 'Gửi lịch sử luyện tập đến Google?',
@@ -2083,6 +2200,9 @@ abstract final class GradusL10n {
     '初期化しました': 'Đã đặt lại',
     'help.gradus.title': 'osmGradus?',
     'help.gradus.subtitle': 'Rèn tiếng Nhật qua 5 tầng',
+    'help.gradus.manual.title': 'Hướng dẫn sử dụng',
+    'help.gradus.manual.summary':
+        'Xem cách dùng từng màn hình bằng hình (tiếng Nhật)',
     'help.gradus.overview.title': 'Bắt đầu',
     'help.gradus.overview.summary':
         'Chọn tầng trên màn hình khởi động và luyện từng bước.',
@@ -2104,9 +2224,14 @@ abstract final class GradusL10n {
         'thành khi đã làm bài kiểm tra từ vựng',
     'help.gradus.layer1.tip3':
         'Đọc dài: nếu đã có bài lưu, chọn “Chọn từ danh sách” hoặc “Tạo mới”. '
-        'Danh sách cũng có thể xóa, sắp xếp, ★. “Thêm bản dịch”: chạm để '
-        'chọn lại, nhấn giữ để gửi tự động. Sau khi đọc, phần Kiểm tra nhanh '
-        '(2 lựa chọn) xác nhận mức hiểu bài. Sau khi lưu có thể đọc to ở Tầng V',
+        'Danh sách cũng có thể xóa, sắp xếp, ★, và hiển thị tỷ lệ đúng '
+        '(chạm để xem chi tiết). Khi tạo bài sẽ có kèm 9 từ vựng và Kiểm '
+        'tra nhanh. Sau khi đọc, Kiểm tra nhanh (2 lựa chọn) tiếp theo là '
+        'bài kiểm tra từ vựng (9 câu). Kiểm tra nhanh là câu 1 của bài đó; '
+        'tỷ lệ đúng và ★ tính trên tối đa 10 câu. '
+        '“Thêm bản dịch” dành cho từ bạn để '
+        'ý thêm (chạm để chọn lại, nhấn giữ để gửi tự động; không thay thế '
+        'bài kiểm tra 9 từ). Sau khi lưu có thể đọc to ở Tầng V',
     'help.gradus.layer1.tip4':
         'Từ vựng: 10 câu. Trả lời 🇻🇳/🇺🇸/🇯🇵 bằng giọng nói hoặc bàn phím. Sửa câu trước bằng ✏️. “+” nhập qua Chrome AI. Từ chuẩn có câu ví dụ',
     'help.gradus.layer1.tip5':
@@ -2128,6 +2253,9 @@ abstract final class GradusL10n {
     'help.gradus.layer2.tip6':
         '“Suy nghĩ 25 ô”: điền từ khóa cho chủ đề × góc nhìn — không cần '
         'nói thành tiếng',
+    'help.gradus.layer2.tip7':
+        'Các tờ chuẩn Hàng ngày, Công việc, Tình huống đã có sẵn từ đầu — '
+        'điền vào sẽ tính vào mở rộng 25 ô ở Bảng điều khiển',
     'help.gradus.layer3.title': 'Tầng III: PREP',
     'help.gradus.layer3.summary': 'Rèn mẫu câu trả lời',
     'help.gradus.layer3.tip1':
@@ -2142,6 +2270,8 @@ abstract final class GradusL10n {
         '“Suy nghĩ 25 ô”: thêm Kết luận / Lý do / Ví dụ vào từ khóa đã điền '
         'ở Tầng II để đào sâu hơn, rồi thử đếm ngược “Nói 60 giây bằng '
         'tiếng mẹ đẻ”',
+    'help.gradus.layer3.tip6':
+        'Tiến độ trên tờ chuẩn cũng tính vào mở rộng 25 ô ở Bảng điều khiển',
     'help.gradus.layer4.title': 'Tầng IV: Chấm điểm',
     'help.gradus.layer4.summary': 'Nói trọn vẹn bằng tiếng Nhật',
     'help.gradus.layer4.tip1':
@@ -2181,20 +2311,26 @@ abstract final class GradusL10n {
     'help.gradus.dashboard.tip1':
         'Mở từ biểu tượng bảng điều khiển trên màn hình khởi động',
     'help.gradus.dashboard.tip2':
-        'Điểm trung bình JSST / độ trúng đích / PREP / từ vựng / phát âm quyết định tổng A–D (thiếu 1 chỉ số cũng thành E)',
+        'Tổng hợp bài kiểm tra (A–D) được quyết định bằng điểm trung bình JSST / độ trúng đích / PREP / từ vựng / phát âm (thiếu 1 chỉ số cũng thành E). Đánh giá tổng hợp kết hợp Tổng hợp bài kiểm tra và Tổng hợp mở rộng',
     'help.gradus.dashboard.tip3':
         'Chạm từng dòng để xem lịch sử. Nếu đã có ít nhất 1 bản ghi luyện tập, dùng máy bay giấy để nhận lời khuyên',
     'help.gradus.dashboard.tip4':
-        'Điểm từ vựng chỉ lấy từ kết quả kiểm tra từ vựng Tầng I (từ đăng ký khi đọc đoạn dài không tính vào)',
+        'Điểm từ vựng chỉ lấy từ kết quả kiểm tra từ vựng Tầng I (bao gồm bài đọc dài, với Kiểm tra nhanh là câu 1; chỉ đăng ký từ khi đọc thì không tính điểm)',
+    'help.gradus.dashboard.tip5':
+        'Tổng hợp mở rộng (A–E) được quyết định bởi mức độ lấp đầy của các tờ 25 ô (tổng 65 ô gồm Hàng ngày, Công việc, Tình huống)',
+    'help.gradus.dashboard.tip6':
+        'Các tờ 25 ô Hàng ngày, Công việc, Tình huống đã có sẵn từ đầu; mỗi ô đóng góp nhiều hơn khi tiến từ từ khóa → Kết luận/Lý do/Ví dụ → nói 60 giây',
     'help.gradus.transcript.title': 'Giấy chứng nhận kết quả',
     'help.gradus.transcript.summary':
         'Tóm tắt kết quả luyện tập gần đây trên một tờ',
     'help.gradus.transcript.tip1':
         'Mở từ “… → Giấy chứng nhận kết quả” trên màn hình khởi động',
     'help.gradus.transcript.tip2':
-        'Hiện ngày/giờ phát hành, đánh giá tổng hợp và kết quả JSST / độ trúng đích / PREP / từ vựng / phát âm gần đây',
+        'Hiện ngày/giờ phát hành, đánh giá tổng hợp / bài kiểm tra / mở rộng, và kết quả hội thoại / từ vựng / phát âm / 25 ô gần đây',
     'help.gradus.transcript.tip3':
         'Đánh giá tổng hợp dùng cùng cách tính với Bảng điều khiển',
+    'help.gradus.transcript.tip4':
+        'Đánh giá tổng hợp kết hợp Tổng hợp bài kiểm tra và Tổng hợp mở rộng. Khối 25 ô hiện mức mở rộng Hàng ngày / Công việc / Tình huống tại thời điểm cấp',
     'help.gradus.backup.title': 'Xuất & nhập dữ liệu',
     'help.gradus.backup.summary': 'Sao lưu dữ liệu của bạn',
     'help.gradus.backup.tip1': 'Mở từ “…” trên màn hình khởi động',

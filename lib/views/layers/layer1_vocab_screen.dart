@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../data/vocabulary_ai_prompt_template.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings, topicSpeechReader;
+import '../../models/long_article.dart';
 import '../../models/question_prompt.dart';
 import '../../models/recording_mode.dart';
 import '../../models/saved_vocabulary_check.dart';
@@ -17,6 +18,7 @@ import '../../models/vocabulary_level.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/jlpt_vocab_bank_service.dart';
 import '../../services/learner_answer_language.dart';
+import '../../services/long_article_service.dart';
 import '../../services/question_prompt_service.dart';
 import '../../services/recording_stt_service.dart';
 import '../../services/vocabulary_ai_response_parser.dart';
@@ -24,6 +26,7 @@ import '../../services/vocabulary_check_storage.dart';
 import '../../services/vocabulary_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
+import '../../widgets/app_header.dart';
 import '../../widgets/dice_action_row.dart';
 import '../../widgets/genki_transport_row.dart';
 import '../../widgets/last_recording_playback_mixin.dart';
@@ -124,6 +127,9 @@ class Layer1VocabScreen extends StatefulWidget {
     this.sourcePromptId,
     this.sourcePromptBody,
     this.gradedPrompt,
+    this.gradedLongArticle,
+    this.comprehensionQuiz,
+    this.onLongArticleGraded,
   });
 
   /// レイヤーⅠの2択（語彙／耳慣れ）へ戻る。未指定なら戻るボタンを出さない。
@@ -151,21 +157,62 @@ class Layer1VocabScreen extends StatefulWidget {
   /// （既存の単語帳エントリの再テストであり、問題文への正解率保存は対象外）。
   final QuestionPrompt? gradedPrompt;
 
+  /// 非nullの場合、長文読解フロー（[Layer1LongReadingScreenState]）から
+  /// 埋め込みで開かれ、[fixedEntries]は[LongArticle.vocabTestWords]由来として
+  /// 扱う。Chrome AI評価が届いて保存できたタイミングで、正解数・出題数・
+  /// [SavedVocabularyCheck.id]をこの長文へ書き戻し（[LongArticleService]）、
+  /// 不正解語を[VocabularyService]へ自動登録する（[_gradeLongArticle]、
+  /// [gradedPrompt]の[_gradeQuestionPrompt]と同型）。[gradedPrompt]とは
+  /// 排他（両方非nullになる呼び出しは想定しない）。
+  final LongArticle? gradedLongArticle;
+
+  /// 長文読解で1秒チェックを実施した場合の結果。[gradedLongArticle]と
+  /// 一緒に渡し、[SavedVocabularyCheck]へ載せて一覧・詳細の母数に1問分を足す。
+  /// チェック無し（旧データ／スキップ）や通常の単語テストではnull。
+  final SavedComprehensionQuizResult? comprehensionQuiz;
+
+  /// [gradedLongArticle]が非nullのとき、採点・結果ダイアログの表示まで
+  /// 完了した直後に1回だけ呼ぶ。[Layer1LongReadingScreenState]はこれを
+  /// フローの「vocabTest完了」トリガーとして使い、保存・3択復帰へ進む
+  /// （Navigatorでこの画面を別スタックにしていないため、通常の
+  /// [onBackToModeSelect]ではなくこちらで完了を伝える）。
+  final VoidCallback? onLongArticleGraded;
+
   /// 総評画面などから、通常のレイヤーⅠモード選択の外で単独の画面として開く
   /// （[fixedEntries]で「分からなかった単語」だけに絞ったテストを想定）。
   /// 他の詳細画面と同じくスワイプで閉じる（[SwipeToCloseWrapper]）。
+  /// [onSelectLayer]/[onGoToStart]を渡した呼び出し元では、
+  /// [Layer1QuestionPromptDetailScreen]と同じく常設[AppHeader]を表示する
+  /// （呼び出し元がまだ持たない＝渡さない場合はヘッダー無しの従来表示）。
   static Future<void> push(
     BuildContext context, {
     List<VocabularyEntry>? fixedEntries,
     String? sourcePromptId,
     String? sourcePromptBody,
     QuestionPrompt? gradedPrompt,
+    ValueChanged<int>? onSelectLayer,
+    VoidCallback? onGoToStart,
   }) {
     return Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => SwipeToCloseWrapper(
+        builder: (routeContext) => SwipeToCloseWrapper(
           child: Scaffold(
             backgroundColor: AppColors.current.scene,
+            appBar: onSelectLayer == null
+                ? null
+                : AppHeader(
+                    currentIndex: 0,
+                    onSelect: (index) {
+                      Navigator.of(routeContext).pop();
+                      onSelectLayer(index);
+                    },
+                    onLongPress: onGoToStart == null
+                        ? null
+                        : () {
+                            Navigator.of(routeContext).pop();
+                            onGoToStart();
+                          },
+                  ),
             body: Layer1VocabScreen(
               fixedEntries: fixedEntries,
               sourcePromptId: sourcePromptId,
@@ -194,6 +241,7 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
   final _storage = VocabularyCheckStorage();
   final _vocabularyService = VocabularyService();
   final _questionPromptService = QuestionPromptService();
+  final _longArticleService = LongArticleService();
   final _random = Random();
   final _answerController = TextEditingController();
   late final FocusNode _answerFocusNode;
@@ -1025,9 +1073,10 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
     await toggleLastRecordingPlayback(_recordingService.lastRecordingPath);
   }
 
-  /// 紙飛行機（送信）タップ：10問すべての「期待単語・読み・学習者のSTT
+  /// 紙飛行機（送信）タップ：単語テスト各問の「期待単語・読み・学習者のSTT
   /// 回答」をテキストのみでプロンプトに組み立て、Chrome AI（Google検索
-  /// AIモード）へ送る。録音音声そのものは送らない（レイヤーⅤと同じ）。
+  /// AIモード）へ送る。1秒チェックは送らず、結果貼り付け後に先頭へ付け足す。
+  /// 録音音声そのものは送らない（レイヤーⅤと同じ）。
   ///
   /// [chromeAiSend]自体が[chromeAiActionInFlight]の二重タップ防止を持つため、
   /// ここでは[_actionInFlight]で包まない（ダッシュボードと同じ）。
@@ -1071,6 +1120,15 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
         languageCode: chromeAiPendingResponseLanguage,
       );
 
+      var evaluation = parseResult.evaluation;
+      final quiz = widget.comprehensionQuiz;
+      if (evaluation != null && quiz != null) {
+        evaluation = evaluation.aligningComprehensionQuiz(
+          isCorrect: quiz.isCorrect,
+          vocabQuestionCount: session.questions.length,
+        );
+      }
+
       final now = DateTime.now();
       if (!parseResult.isSuccess) {
         showChromeAiMessage('Chrome AIの回答を解析できませんでした'.tr(lang));
@@ -1083,6 +1141,9 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
           unparsedResponse: text,
           questionPromptId: widget.sourcePromptId,
           questionPromptBody: widget.sourcePromptBody,
+          longArticleId: widget.gradedLongArticle?.id,
+          longArticleTitle: widget.gradedLongArticle?.title,
+          comprehensionQuiz: widget.comprehensionQuiz,
         );
         await _storage.save(saved);
         if (!mounted) return;
@@ -1099,10 +1160,13 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
         sessionId: _sessionId,
         createdAt: now,
         session: session,
-        evaluation: parseResult.evaluation,
+        evaluation: evaluation,
         unparsedResponse: null,
         questionPromptId: widget.sourcePromptId,
         questionPromptBody: widget.sourcePromptBody,
+        longArticleId: widget.gradedLongArticle?.id,
+        longArticleTitle: widget.gradedLongArticle?.title,
+        comprehensionQuiz: widget.comprehensionQuiz,
       );
       await _storage.save(saved);
       if (!mounted) return;
@@ -1111,8 +1175,13 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
         _hasSavedChecks = true;
       });
       clearChromeAiPendingState();
-      final evaluation = parseResult.evaluation;
-      if (evaluation != null) {
+      if (evaluation == null) return;
+      if (widget.gradedLongArticle != null) {
+        await _gradeLongArticle(session, evaluation, checkId: saved.id);
+        if (!mounted) return;
+        await _showResultDialog(evaluation);
+        widget.onLongArticleGraded?.call();
+      } else {
         await _gradeQuestionPrompt(session, evaluation);
         if (!mounted) return;
         unawaited(_showResultDialog(evaluation));
@@ -1177,6 +1246,53 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
     );
   }
 
+  /// Step 4: [widget.gradedLongArticle]が非nullのとき、この試験の正解数・
+  /// 出題数・[SavedVocabularyCheck.id]（[checkId]）を長文へ書き戻し
+  /// （[LongArticleService.recordVocabTestResult]）、不正解語を
+  /// [VocabularyService]へ自動登録する（[_gradeQuestionPrompt]と同型。
+  /// 読み・訳・例文は長文生成時にChrome AIが作成済みの[widget.fixedEntries]を
+  /// そのまま使い、追加のAI往復はしない）。
+  Future<void> _gradeLongArticle(
+    VocabTestSession session,
+    VocabularyEvaluation evaluation, {
+    required String checkId,
+  }) async {
+    final article = widget.gradedLongArticle;
+    if (article == null) return;
+
+    final existingEntries = await _vocabularyService.loadEntries();
+    final byWord = {for (final entry in existingEntries) entry.word: entry};
+
+    final quizOffset = widget.comprehensionQuiz != null ? 1 : 0;
+    for (var i = 0; i < session.questions.length; i++) {
+      final evalIndex = i + quizOffset;
+      final correct =
+          evalIndex < evaluation.questionEvaluations.length &&
+          evaluation.questionEvaluations[evalIndex].correct;
+      if (correct) continue;
+
+      final missed = session.questions[i].entry;
+      if (byWord.containsKey(missed.word)) continue;
+      final updatedEntries = await _vocabularyService.addEntry(
+        missed.word,
+        missed.translation,
+        reading: missed.reading,
+        exampleSentence: missed.exampleSentence,
+        translationLang: missed.translationLang,
+        level: VocabularyLevel.other,
+      );
+      final added = updatedEntries.first;
+      byWord[added.word] = added;
+    }
+
+    await _longArticleService.recordVocabTestResult(
+      article.id,
+      correctCount: evaluation.correctCount,
+      questionCount: session.questions.length + quizOffset,
+      lastVocabularyCheckId: checkId,
+    );
+  }
+
   Future<void> _onSubmitTap() => chromeAiOnSubmitTap(
     onSend: _sendToChromeAi,
     onPaste: _pasteAndSaveResult,
@@ -1195,6 +1311,7 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
         evaluation: evaluation,
         session: _session,
         lang: lang,
+        comprehensionQuiz: widget.comprehensionQuiz,
       ),
     );
   }
@@ -1380,15 +1497,21 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
                       ),
                       const SizedBox(height: 4),
                       // 固定語リスト（総評画面の「分からなかった単語だけ
-                      // テスト」）ではプール抽選そのものを行わないため、
-                      // レベル選択を出しても意味を持たない。
-                      if (widget.fixedEntries == null) ...[
-                        _Layer1LevelField(
+                      // テスト」、または問題文解析・長文読解経由の語彙テスト）
+                      // ではプール抽選そのものを行わないため、レベル選択を出しても
+                      // 意味を持たない。ただし問題表示欄の縦位置を単独の語彙
+                      // テストと揃えるため、枠だけは常に確保して隠す。
+                      Visibility(
+                        visible: widget.fixedEntries == null,
+                        maintainState: true,
+                        maintainAnimation: true,
+                        maintainSize: true,
+                        child: _Layer1LevelField(
                           selection: _levelSelection,
                           onTap: _selectLevel,
                         ),
-                        const SizedBox(height: 4),
-                      ],
+                      ),
+                      const SizedBox(height: 4),
                     ],
                   ),
                 ),

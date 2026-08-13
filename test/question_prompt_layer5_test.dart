@@ -23,6 +23,7 @@ import 'package:osm_gradus/widgets/category_select_field.dart';
 import 'package:osm_gradus/widgets/dice_action_row.dart';
 import 'package:osm_gradus/widgets/pronunciation_mic_button.dart';
 import 'package:osm_gradus/widgets/question_prompt_list_row.dart';
+import 'package:osm_gradus/widgets/question_prompt_nav_row.dart';
 
 const _lang = 'vi';
 String _t(String key) => key.tr(_lang);
@@ -158,6 +159,9 @@ void main() {
     tester,
   ) async {
     await _openLayer5QuestionPromptList(tester);
+    final firstRow = tester.widget<QuestionPromptListRow>(
+      find.byType(QuestionPromptListRow).first,
+    );
     await tester.tap(find.byType(QuestionPromptListRow).first);
     await tester.pumpAndSettle();
 
@@ -166,9 +170,12 @@ void main() {
     // ▲▼ボタン（QuestionPromptNavRow）を表示する。
     expect(find.byType(CategorySelectField), findsNothing);
     expect(find.byType(PronunciationMicButton), findsOneWidget);
-    // 「ランダム」と同型のセッションUIのため、サイコロをタップするまでは
-    // 問題を隠したままの案内が出る（1回の即興回答UIではない）。
-    expect(find.text(_t('サイコロをタップして問題を表示')), findsOneWidget);
+    // サイコロをタップするまでは、「ランダム」と同じ案内文だけでなく問題文
+    // 本文もそのまま見せる（▲▼で移動しても見た目が変わらず反応がないように
+    // 見えていた回帰の修正）。この問題文専用の発音課題がまだ未生成のため、
+    // 案内は「サイコロを...」ではなく「？」（問題作成）を押す案内になる。
+    expect(find.text(firstRow.body), findsOneWidget);
+    expect(find.text(_t('？ボタンをタップして問題を作成')), findsOneWidget);
   });
 
   testWidgets('サイコロをタップすると「ランダム」と同型の複数問セッションが組み立てられ、マイクに切り替わる（Step 5）', (
@@ -346,7 +353,7 @@ void main() {
     );
   });
 
-  testWidgets('録音中（isBusy）は▼ボタンで前後の問題文へ移動できず、案内が出る', (tester) async {
+  testWidgets('録音中（isBusy）は▲▼ボタン自体が隠れており、前後の問題文へ移動できない', (tester) async {
     await _openLayer5QuestionPromptList(tester);
     await tester.tap(find.byType(QuestionPromptListRow).first);
     await tester.pumpAndSettle();
@@ -356,13 +363,16 @@ void main() {
     await tester.pump();
     expect(state.isBusy, isTrue);
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    // 進行中の録音を失わせないよう、セッションは切り替わらず案内だけが出る
-    // （切り替わっていればresetAttemptで録音中状態が失われ、isBusyがfalseになる）。
-    expect(state.isBusy, isTrue);
-    expect(find.text(_t('録音中は移動できません')), findsOneWidget);
+    // 進行中の10問セッションの間（サイコロタップ後〜採点まで）は、進行中の
+    // 録音を失わせないよう▲▼ボタンごと隠す（枠だけ確保し、タップも通さない）。
+    final navVisibility = tester.widget<Visibility>(
+      find
+          .ancestor(
+            of: find.byType(QuestionPromptNavRow),
+            matching: find.byType(Visibility),
+          )
+          .first,
+    );
+    expect(navVisibility.visible, isFalse);
   });
 }

@@ -596,6 +596,9 @@ class Layer5ScreenState extends State<Layer5Screen>
           _hasSavedChecks = true;
         });
         clearChromeAiPendingState();
+        if (widget.gradedPrompt != null) {
+          unawaited(_startFreshAttemptAfterGrading());
+        }
         return;
       }
 
@@ -620,7 +623,25 @@ class Layer5ScreenState extends State<Layer5Screen>
       });
       clearChromeAiPendingState();
       unawaited(_showResultDialog(evaluation));
+      // Step 5: 問題文に紐づく10問セッションの採点が終わったら、元の問題文＋
+      // サイコロ導線・▲▼ナビの状態へ戻し、次の周回に備える。「総評」バッジ
+      // 表示に使う[_lastEvaluation]は消さない点が[resetAttempt]と異なる。
+      if (widget.gradedPrompt != null) {
+        unawaited(_startFreshAttemptAfterGrading());
+      }
     });
+  }
+
+  Future<void> _startFreshAttemptAfterGrading() async {
+    if (!mounted) return;
+    setState(() {
+      _session = _newSession();
+      _sessionId = _newSessionId();
+      _armed = false;
+      _isSessionSaved = false;
+      hideResetUntilNextChange(_resetStateKey());
+    });
+    unawaited(_refreshSessionWithFullPoolIfUntouched());
   }
 
   /// Step 5: [widget.gradedPrompt]が非nullのとき、5カテゴリの発音評点を
@@ -960,23 +981,27 @@ class Layer5ScreenState extends State<Layer5Screen>
               // （[Layer1QuestionPromptDetailScreen]と同じ設計）。「ランダム」
               // 単体モードでは分野セレクタ自体を使わないため、レイアウトの
               // 高さを他レイヤーと揃えるためだけに枠だけ確保して隠す。
-              widget.gradedPrompt != null
-                  ? QuestionPromptNavRow(
-                      canGoPrevious: widget.canGoPrevious,
-                      canGoNext: widget.canGoNext,
-                      onPrevious: widget.onGoPrevious ?? () {},
-                      onNext: widget.onGoNext ?? () {},
-                    )
-                  : Visibility(
-                      visible: false,
-                      maintainState: true,
-                      maintainAnimation: true,
-                      maintainSize: true,
-                      child: CategorySelectField(
+              // サイコロタップ後（[_questionVisible]）は、この問題文の10問
+              // セッションの途中で押しても反応が見えず紛らわしいため、同じ
+              // 枠のまま一時的に隠す（10問の採点が終わりリセットされたら
+              // 再び現れる）。
+              Visibility(
+                visible: widget.gradedPrompt != null && !_questionVisible,
+                maintainState: true,
+                maintainAnimation: true,
+                maintainSize: true,
+                child: widget.gradedPrompt != null
+                    ? QuestionPromptNavRow(
+                        canGoPrevious: widget.canGoPrevious,
+                        canGoNext: widget.canGoNext,
+                        onPrevious: widget.onGoPrevious ?? () {},
+                        onNext: widget.onGoNext ?? () {},
+                      )
+                    : CategorySelectField(
                         selected: TopicCategory.daily,
                         onChanged: (_) {},
                       ),
-                    ),
+              ),
               const SizedBox(height: 4),
               Expanded(
                 child: SingleChildScrollView(
@@ -1051,14 +1076,49 @@ class Layer5ScreenState extends State<Layer5Screen>
                             ),
                           ),
                           alignment: Alignment.centerLeft,
-                          child: Text(
-                            'サイコロをタップして問題を表示'.tr(lang),
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: palette.textOnCardSecondary,
-                            ),
-                          ),
+                          // Step 5: 問題文に紐づくセッションでは、生成済み・
+                          // 未生成にかかわらず、サイコロをタップするまでは
+                          // 元の問題文をそのまま見せる。「ランダム」単体モードと
+                          // 同じ「サイコロをタップして問題を表示」だけだと、
+                          // ▲▼で問題文を切り替えても見た目が変わらず反応が
+                          // ないように見えるため。ただしこの問題文専用の発音
+                          // 課題（[_pronunciationSentences]）がまだ無い間は、
+                          // サイコロを押しても関係ない汎用プールが出るだけなので、
+                          // 「？」（問題作成）を押すよう案内する。
+                          child: widget.gradedPrompt != null
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      widget.gradedPrompt!.body,
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        color: palette.textOnCardPrimary,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      _pronunciationSentences.isEmpty
+                                          ? '？ボタンをタップして問題を作成'.tr(lang)
+                                          : 'サイコロをタップして問題を表示'.tr(lang),
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: palette.textOnCardSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  'サイコロをタップして問題を表示'.tr(lang),
+                                  textAlign: TextAlign.left,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: palette.textOnCardSecondary,
+                                  ),
+                                ),
                         ),
                 ),
               ),

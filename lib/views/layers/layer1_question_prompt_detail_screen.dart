@@ -151,6 +151,8 @@ class _Layer1QuestionPromptDetailScreenState
           key: ValueKey(widget.promptIds[_index]),
           promptId: widget.promptIds[_index],
           onOpenPromptDetail: widget.onOpenPromptDetail,
+          onSelectLayer: widget.onSelectLayer,
+          onGoToStart: widget.onGoToStart,
           canGoPrevious: _canGoPrevious,
           canGoNext: _canGoNext,
           onGoPrevious: _goPrevious,
@@ -166,6 +168,8 @@ class _Layer1PromptDetailBody extends StatefulWidget {
     super.key,
     required this.promptId,
     this.onOpenPromptDetail,
+    this.onSelectLayer,
+    this.onGoToStart,
     required this.canGoPrevious,
     required this.canGoNext,
     required this.onGoPrevious,
@@ -174,6 +178,11 @@ class _Layer1PromptDetailBody extends StatefulWidget {
 
   final String promptId;
   final void Function(int layerIndex, String promptId)? onOpenPromptDetail;
+
+  /// [Layer1VocabScreen.push]へそのまま渡し、語彙テスト画面（Step 3）に
+  /// 常設[AppHeader]を表示させる（この画面自身の[AppHeader]と同じ導線）。
+  final ValueChanged<int>? onSelectLayer;
+  final VoidCallback? onGoToStart;
   final bool canGoPrevious;
   final bool canGoNext;
   final VoidCallback onGoPrevious;
@@ -343,6 +352,8 @@ class _Layer1PromptDetailBodyState extends State<_Layer1PromptDetailBody>
       sourcePromptId: prompt.id,
       sourcePromptBody: prompt.body,
       gradedPrompt: prompt,
+      onSelectLayer: widget.onSelectLayer,
+      onGoToStart: widget.onGoToStart,
     );
     await _load();
     await _textKey.currentState?.reloadRegisteredWords();

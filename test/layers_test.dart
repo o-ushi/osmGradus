@@ -1963,7 +1963,11 @@ void main() {
             '"optionA": "友達", '
             '"optionB": "家族", '
             '"correctOption": "A", '
-            '"explanation": "本文に「友達と一緒に」とある。"'
+            '"explanation": {'
+            '"ja": "本文に「友達と一緒に」とある。", '
+            '"en": "The text says with a friend.", '
+            '"vi": "Văn bản có ghi cùng bạn."'
+            '}'
             '}}',
       ),
     );
@@ -2061,7 +2065,8 @@ void main() {
     await tester.tap(find.text('友達'));
     await tester.pump();
     expect(find.text(_t('長文読解_1秒チェック_正解')), findsOneWidget);
-    expect(find.text('本文に「友達と一緒に」とある。'), findsOneWidget);
+    // 画面表示言語（vi）に合わせて、ベトナム語の解説が表示される。
+    expect(find.text('Văn bản có ghi cùng bạn.'), findsOneWidget);
 
     await tester.tap(find.text(_t('長文読解_1秒チェック_トップへ戻る')));
     await tester.pump(_tapConfirmWait);
@@ -2077,7 +2082,77 @@ void main() {
     expect(articles.single.comprehensionCheck, isNotNull);
     expect(articles.single.comprehensionCheck!.question, '誰と旅行に行きましたか？');
     expect(articles.single.comprehensionCheck!.correctOption, 'A');
+    expect(
+      articles.single.comprehensionCheck!.explanationJa,
+      '本文に「友達と一緒に」とある。',
+    );
+    expect(
+      articles.single.comprehensionCheck!.explanationEn,
+      'The text says with a friend.',
+    );
+    expect(
+      articles.single.comprehensionCheck!.explanationVi,
+      'Văn bản có ghi cùng bạn.',
+    );
     expect(find.text(_t('語彙を増やす')), findsOneWidget);
+  });
+
+  testWidgets('レイヤーⅠ長文読解：読解画面の「単語帳」を長押しすると使い方シートが開く'
+      '（フロー本体に「＋」が無いための代替導線、Step 8）', (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final originalUrlLauncher = UrlLauncherPlatform.instance;
+    final fakeUrlLauncher = _FakeUrlLauncherPlatform();
+    UrlLauncherPlatform.instance = fakeUrlLauncher;
+    addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
+
+    SharedPreferences.setMockInitialValues({});
+    _mockClipboard(tester);
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '旅行');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, _t('開始する')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await Clipboard.setData(
+      const ClipboardData(text: '{"body": "友達と一緒に旅行に行きました。"}'),
+    );
+    await tester.tap(find.widgetWithText(FilledButton, _t('長文読解_文章生成ボタン_貼付')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TappableJapaneseText), findsOneWidget);
+
+    await tester.longPress(find.byIcon(Icons.style_rounded));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(_t('長文読解_使い方_タイトル')), findsOneWidget);
+    expect(
+      find.text(_withoutBadge('長文読解_使い方_次へ'), findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.text(_withoutBadge('長文読解_使い方_訳付'), findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.text(_withoutBadge('長文読解_使い方_単語帳'), findRichText: true),
+      findsOneWidget,
+    );
+    // 「単語帳」の長押しは、単語帳シート自体は開かない（使い方シートのみ）。
+    expect(find.byType(VocabularySheet), findsNothing);
   });
 
   testWidgets('レイヤーⅠ長文読解：旧形式（bodyのみ）のAIレスポンスは1秒チェックを'
@@ -2126,6 +2201,261 @@ void main() {
     expect(articles, hasLength(1));
     expect(articles.single.comprehensionCheck, isNull);
     expect(find.text(_t('語彙を増やす')), findsOneWidget);
+  });
+
+  testWidgets('レイヤーⅠ長文読解：新形式（9語同梱、ここでは3語）のAIレスポンスは'
+      '1秒チェックの次に語彙テストが続き、語彙テスト開始時点で長文が確定保存される',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(390, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final originalUrlLauncher = UrlLauncherPlatform.instance;
+    final fakeUrlLauncher = _FakeUrlLauncherPlatform();
+    UrlLauncherPlatform.instance = fakeUrlLauncher;
+    addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
+
+    SharedPreferences.setMockInitialValues({});
+    _mockClipboard(tester);
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '旅行');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, _t('開始する')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await Clipboard.setData(
+      const ClipboardData(
+        text:
+            '{"body": "友達と一緒に旅行に行きました。とても楽しかったです。", '
+            '"comprehensionCheck": {'
+            '"question": "誰と旅行に行きましたか？", '
+            '"optionA": "友達", '
+            '"optionB": "家族", '
+            '"correctOption": "A", '
+            '"explanation": {'
+            '"ja": "本文に「友達と一緒に」とある。", '
+            '"en": "The text says with a friend.", '
+            '"vi": "Văn bản có ghi cùng bạn."'
+            '}'
+            '}, '
+            '"vocabTestWords": ['
+            '{"word": "旅行", "reading": "りょこう", "meaningEn": "travel", '
+            '"meaningVi": "du lịch", "example": "旅行に行く。"}, '
+            '{"word": "友達", "reading": "ともだち", "meaningEn": "friend", '
+            '"meaningVi": "bạn bè", "example": "友達と話す。"}, '
+            '{"word": "楽しい", "reading": "たのしい", "meaningEn": "fun", '
+            '"meaningVi": "vui", "example": "とても楽しい。"}'
+            ']}',
+      ),
+    );
+    await tester.tap(find.widgetWithText(FilledButton, _t('長文読解_文章生成ボタン_貼付')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TappableJapaneseText), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pumpAndSettle();
+
+    // 1秒チェックが挟まる。語彙テストが続くため、ボタン文言は「トップへ戻る」
+    // ではなく「語彙テストへ進む」になる（Step 10レビューで文言不整合を修正）。
+    expect(find.text('誰と旅行に行きましたか？'), findsOneWidget);
+    expect(find.text(_t('長文読解_1秒チェック_トップへ戻る')), findsNothing);
+
+    await tester.tap(find.text('友達'));
+    await tester.pump();
+    await tester.tap(find.text(_t('長文読解_1秒チェック_語彙テストへ')));
+    await tester.pump(_tapConfirmWait);
+    await tester.pumpAndSettle();
+
+    // 1秒チェック完了時点で、採点の書き戻し先を確保するため長文が確定保存
+    // される（正解率はまだ未確定＝null）。3択へはまだ戻らず、語彙テスト
+    // 画面（サイコロ）が表示される。
+    final articles = await LongArticleService().loadArticles();
+    expect(articles, hasLength(1));
+    expect(articles.single.vocabTestWords, hasLength(3));
+    expect(articles.single.vocabTestCorrectCount, isNull);
+    expect(articles.single.vocabTestQuestionCount, isNull);
+    expect(find.text(_t('語彙を増やす')), findsNothing);
+    expect(_vocabDiceButton, findsOneWidget);
+
+    // fixedEntriesの3語で出題される（レベル選択は、単独の語彙テストと問題
+    // 表示欄の縦位置を揃えるため枠だけ確保しつつ、見た目・操作は隠れている）。
+    await tester.tap(_vocabDiceButton);
+    await tester.pump();
+    expect(find.text('1 / 3'), findsOneWidget);
+    final levelVisibility = tester.widget<Visibility>(
+      find
+          .ancestor(
+            of: find.text(_t('レベル')),
+            matching: find.byType(Visibility),
+          )
+          .first,
+    );
+    expect(levelVisibility.visible, isFalse);
+  });
+
+  testWidgets('レイヤーⅠ長文読解：語彙テストの採点が完了すると、LongArticleの正解率と'
+      'lastVocabularyCheckIdが書き戻され、不正解語が単語帳へ自動登録され、'
+      'スワイプ不要で3択画面へ自動的に戻る（Step 9：採点書き戻しの完走テスト）', (
+    WidgetTester tester,
+  ) async {
+    // 語彙テスト画面（DiceActionRow＋単語カード＋GenkiTransportRow）を
+    // すべてヒットテストできるよう、縦長のビューポートにする
+    // （既存の「語彙テスト」単体テストと同じ理由）。
+    tester.view.physicalSize = const Size(390, 2200);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final originalUrlLauncher = UrlLauncherPlatform.instance;
+    final fakeUrlLauncher = _FakeUrlLauncherPlatform();
+    UrlLauncherPlatform.instance = fakeUrlLauncher;
+    addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
+
+    SharedPreferences.setMockInitialValues({});
+    _mockClipboard(tester);
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), '旅行');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(FilledButton, _t('開始する')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // comprehensionCheckは無し・語彙2語ありの組み合わせで、1秒チェックを
+    // 飛ばして直接語彙テストへ進む経路も一緒に確認する。
+    await Clipboard.setData(
+      const ClipboardData(
+        text:
+            '{"body": "友達と一緒に旅行に行きました。", '
+            '"vocabTestWords": ['
+            '{"word": "旅行", "reading": "りょこう", "meaningEn": "travel", '
+            '"meaningVi": "du lịch", "example": "旅行に行く。"}, '
+            '{"word": "友達", "reading": "ともだち", "meaningEn": "friend", '
+            '"meaningVi": "bạn bè", "example": "友達と話す。"}'
+            ']}',
+      ),
+    );
+    await tester.tap(find.widgetWithText(FilledButton, _t('長文読解_文章生成ボタン_貼付')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(TappableJapaneseText), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.arrow_forward_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pumpAndSettle();
+
+    // 語彙テスト開始のために長文が確定保存されている。
+    expect(find.byType(Layer1VocabScreen), findsOneWidget);
+    final articleId = (await LongArticleService().loadArticles()).single.id;
+
+    // 確定保存時の「長文を保存しました」SnackBarが残ったまま下部の送信
+    // ボタンに重なるとタップが通らないため、消してから操作を続ける。
+    tester
+        .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger))
+        .clearSnackBars();
+    await tester.pumpAndSettle();
+
+    final vocabState = tester.state<Layer1VocabScreenState>(
+      find.byType(Layer1VocabScreen),
+    );
+    final diceButton = find.byWidgetPredicate(
+      (widget) =>
+          widget is Icon &&
+          widget.icon == Icons.casino &&
+          (widget.size ?? 0) >= 40,
+    );
+
+    await tester.tap(diceButton);
+    await tester.pump();
+    expect(vocabState.debugSession!.questionCount, 2);
+    final total = vocabState.debugSession!.questionCount;
+    for (var i = 0; i < total; i++) {
+      vocabState.debugCompleteWithSttAnswer('回答$i');
+      await tester.pump();
+      if (i < total - 1) {
+        await tester.tap(diceButton);
+        await tester.pump();
+      }
+    }
+
+    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pump();
+    await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // 1問目（旅行）正解・2問目（友達）不正解。
+    await Clipboard.setData(
+      const ClipboardData(
+        text:
+            '{"questionEvaluations":['
+            '{"correct":true,"feedback":"ok"},'
+            '{"correct":false,"feedback":"ng"}'
+            '],"overallScore":4,"summary":"良い調子です。"}',
+      ),
+    );
+    await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // 結果ダイアログを閉じると、Navigatorで別スタックにしていないため
+    // スワイプ等の追加操作なしで自動的に3択画面へ戻る（保存も1回だけ）。
+    await tester.tap(find.widgetWithText(TextButton, _t('完了')));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_t('語彙を増やす')), findsOneWidget);
+    expect(find.byType(Layer1VocabScreen), findsNothing);
+
+    final updated = (await LongArticleService().loadArticles()).singleWhere(
+      (a) => a.id == articleId,
+    );
+    expect(updated.vocabTestCorrectCount, 1);
+    expect(updated.vocabTestQuestionCount, 2);
+    expect(updated.lastVocabularyCheckId, isNotNull);
+    expect(updated.vocabTestAccuracy, closeTo(0.5, 0.01));
+
+    final savedChecks = await VocabularyCheckStorage().loadAll();
+    final savedCheck = savedChecks.singleWhere(
+      (c) => c.id == updated.lastVocabularyCheckId,
+    );
+    expect(savedCheck.longArticleId, articleId);
+    expect(savedCheck.longArticleTitle, '旅行');
+    expect(savedCheck.evaluation!.correctCount, 1);
+    expect(savedCheck.comprehensionQuiz, isNull);
+    expect(savedCheck.combinedQuestionCount, 2);
+
+    final vocabEntries = await VocabularyService().loadEntries();
+    // 「旅行」は正解だったので単語帳には追加されない。
+    expect(vocabEntries.where((e) => e.word == '旅行'), isEmpty);
+    // 「友達」は不正解なので単語帳へ自動登録される。
+    expect(vocabEntries.where((e) => e.word == '友達'), hasLength(1));
+
+    // 長文一覧・詳細でも正解率が反映される。
+    await tester.tap(find.text(_t('長文読解')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('長文読解_開始選択_一覧から選ぶ')));
+    await tester.pumpAndSettle();
+    expect(find.text(_t('長文読解_正解率').replaceFirst('%@', '50%')), findsOneWidget);
   });
 
   testWidgets('レイヤーⅠ長文読解：誤ってスワイプでスタート画面に戻っても、'
