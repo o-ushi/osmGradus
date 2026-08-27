@@ -51,6 +51,7 @@ abstract final class LayerHelpTips {
         'help.gradus.layer4.tip1',
         'help.gradus.layer4.tip2',
         'help.gradus.layer4.tip3',
+        'help.gradus.layer4.tip4',
       ],
     ),
     LayerHelpTipSpec(

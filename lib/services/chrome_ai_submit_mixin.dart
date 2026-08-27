@@ -45,9 +45,14 @@ mixin ChromeAiSubmitMixin<T extends StatefulWidget>
       if (!consented || !mounted) return;
 
       unawaited(ensureKeepAliveForExternalApp());
+      // URL に依頼全文が載る短いプロンプトでは、クリップボードへ依頼文を
+      // 残さない（copyPromptToClipboard: false）。残すと、Chrome AI の
+      // 回答コピーが失敗／遅延したときに依頼文のままを「貼り付け成功」と
+      // 誤判定したり、未変化扱いで失敗したりしやすい。
       final launched = await ChromeAiRoundTrip.copyPromptAndLaunch(
         prompt: prompt,
         url: url,
+        copyPromptToClipboard: requiresClipboardPaste,
       );
       if (!mounted) return;
       if (!launched) {

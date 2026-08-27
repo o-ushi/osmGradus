@@ -11,9 +11,10 @@ import 'ghost_pill.dart';
 /// 操作のボタンに転用できる（レイヤーⅣ・Ⅴの「結果一覧」導線で使う、
 /// [DiceActionRow]の`fortyFiveIcon`と同じ差し替え方式）。
 /// [reasonLabel] / [onReasonTap] も同様に、「理由」枠を別ラベル＋タップ
-/// 操作のボタンに転用できる（レイヤーⅡのGoogle検索導線で使う）。
+/// 操作のボタンに転用できる。
 /// [reasonIcon]を指定すると、[reasonLabel]より優先してアイコンボタンに
-/// なる（レイヤーⅠの単語帳導線で使う、[exampleIcon]と同じ差し替え方式）。
+/// なる（レイヤーⅠの単語帳導線、レイヤーⅡの解答例＝Chrome AI往復導線、
+/// レイヤーⅢのPREP「理由」欄で使う、[exampleIcon]と同じ差し替え方式）。
 class PrepLabelRow extends StatelessWidget {
   const PrepLabelRow({
     super.key,
@@ -31,6 +32,7 @@ class PrepLabelRow extends StatelessWidget {
     this.reasonIcon,
     this.reasonTooltip,
     this.onReasonTap,
+    this.onReasonLongPress,
     this.reasonActive = false,
     this.reasonActiveFill,
     this.reasonActiveForeground,
@@ -75,11 +77,17 @@ class PrepLabelRow extends StatelessWidget {
   final bool showReason;
   final bool showExample;
 
-  /// nullなら「理由」。レイヤーⅡでは「🌐」など別ラベルに差し替える。
+  /// nullなら「理由」。[reasonIcon]モード（レイヤーⅠ〜Ⅲ）では使わず、
+  /// アイコンではなく文字ラベルで別名に差し替えたいときのための予約。
   final String? reasonLabel;
   final IconData? reasonIcon;
   final String? reasonTooltip;
   final VoidCallback? onReasonTap;
+
+  /// 非nullの場合、[reasonIcon]モードのピルで長押しを別動作に使う
+  /// （レイヤーⅡの解答例＝再取得など）。指定時は[reasonTooltip]の
+  /// 長押し表示と競合するため[GhostPill]側がTooltipの長押し表示を譲る。
+  final VoidCallback? onReasonLongPress;
 
   /// trueの間、[reasonIcon]を[reasonActiveForeground]（既定は橙）にして
   /// 「実施済み」を示す（[conclusionActive]と同じ、背景は透明のまま色だけ
@@ -88,7 +96,7 @@ class PrepLabelRow extends StatelessWidget {
   final Color? reasonActiveFill;
   final Color? reasonActiveForeground;
 
-  /// レイヤーⅡの🌐など、枠なしで絵文字を大きくしたいときに使う。
+  /// レイヤーⅡの解答例アイコンなど、枠なしでアイコンを大きくしたいときに使う。
   final bool reasonShowBorder;
   final double reasonHorizontalPadding;
   final double reasonLabelFontSize;
@@ -159,6 +167,7 @@ class PrepLabelRow extends StatelessWidget {
                   activeFill: reasonActiveFill ?? Colors.transparent,
                   activeForeground: reasonActiveForeground ?? Colors.orange,
                   onTap: onReasonTap,
+                  onLongPress: onReasonLongPress,
                   showBorder: reasonShowBorder,
                   horizontalPadding: reasonHorizontalPadding,
                   hintTapText: reasonHintTapText?.tr(lang),

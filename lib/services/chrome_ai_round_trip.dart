@@ -6,13 +6,23 @@ import 'package:url_launcher/url_launcher.dart';
 /// 復帰後に回答テキストを読み取る、というレイヤーⅤ／ダッシュボード共通の
 /// 手順を1箇所に集約する。
 abstract final class ChromeAiRoundTrip {
-  /// [prompt]をクリップボードに置き、[url]を外部アプリで開く。
-  /// 起動に成功したら true。
+  /// [url]を外部アプリで開く。起動に成功したら true。
+  ///
+  /// [copyPromptToClipboard]が true のときだけ[prompt]をクリップボードへ置く
+  /// （長い依頼文を Chrome 側で貼り付ける経路）。false のときは依頼文を
+  /// **置かず空にする**。短い依頼は URL の `q` に載るためクリップボードへ
+  /// 残す必要がなく、残すと「AI 回答のコピーに失敗した／遅延した」ときに
+  /// 依頼文のままを読み取って未変化扱いになりやすい（レイヤーⅡ解答例など）。
   static Future<bool> copyPromptAndLaunch({
     required String prompt,
     required Uri url,
+    bool copyPromptToClipboard = true,
   }) async {
-    await Clipboard.setData(ClipboardData(text: prompt));
+    if (copyPromptToClipboard) {
+      await Clipboard.setData(ClipboardData(text: prompt));
+    } else {
+      await Clipboard.setData(const ClipboardData(text: ''));
+    }
     try {
       return await launchUrl(url, mode: LaunchMode.externalApplication);
     } catch (_) {

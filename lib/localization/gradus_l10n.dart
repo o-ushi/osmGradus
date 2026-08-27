@@ -87,8 +87,7 @@ abstract final class GradusL10n {
     '長文読解_次へヒント': '次へ（チェック・語彙）',
     '長文読解_使い方_タイトル': '使い方',
     '長文読解_使い方_次へ': '1️⃣ 「次へ」で1秒チェック→語彙テストへ進む',
-    '長文読解_使い方_訳付':
-        '2️⃣ 「訳を付ける」は追加で気になった語用（9語の語彙テストの代わりではない）',
+    '長文読解_使い方_訳付': '2️⃣ 「訳を付ける」は追加で気になった語用（9語の語彙テストの代わりではない）',
     '長文読解_使い方_単語帳': '3️⃣ 本文をタップして単語登録、単語帳アイコンで一覧を見る',
     'ボタンヒント_単語帳_長押し': '使い方を表示',
     'N1レベル': 'N1レベル',
@@ -313,6 +312,7 @@ abstract final class GradusL10n {
     '削除': '削除',
     'キャンセル': 'キャンセル',
     '保存': '保存',
+    '閉じる': '閉じる',
     '日常': '日常',
     'ビジネス': 'ビジネス',
     'シチュエーション': 'シチュエーション',
@@ -374,7 +374,33 @@ abstract final class GradusL10n {
     '要約記入状況': '要約記入状況',
     '要約を入力': '要約を入力',
     'レイヤーⅡ_問題文_使い方_要約': '1️⃣ 「要約」をタップして回答の要約を入力する',
-    'レイヤーⅡ_問題文_使い方_III': '2️⃣ 「III」でレイヤーⅢへ進む',
+    'レイヤーⅡ_問題文_使い方_III': '3️⃣ 「III」でレイヤーⅢへ進む',
+
+    // レイヤーⅡ「解答例」（Chrome AI往復）
+    '解答例': '解答例',
+    'レイヤーⅡ_解答例_Google送信確認_タイトル': '解答例をGoogleで作成しますか？',
+    'レイヤーⅡ_解答例_Google送信確認_本文':
+        '約45秒で話せる模範解答を作成するため、この問題文をGoogle LLCのGoogle検索'
+        '（AIモード）へ送信します。検索内容はブラウザやGoogleアカウントの履歴に残る'
+        '場合があります。',
+    'レイヤーⅡ_問題文_使い方_解答例': '2️⃣ 「解答例」でChrome AIに依頼→戻って貼り付け（うまくいかなければ枠に直接貼る）',
+    'レイヤーⅡ_ランダム_使い方_解答例': '4️⃣ 「解答例」でChrome AIに依頼→戻って貼り付け（うまくいかなければ枠に直接貼る）',
+    'レイヤーⅡ_解答例_取得': '解答例を取得',
+    'レイヤーⅡ_解答例_再取得': '解答例を再取得',
+    'レイヤーⅡ_解答例_コピー案内':
+        '模範解答が出たらコピー（または本文を長押しコピー）して戻り、'
+        '緑の貼り付けボタンを押してください。うまくいかなければ枠に直接貼れます',
+    'レイヤーⅡ_解答例_貼り付け失敗':
+        '解答例をまだ読み取れませんでした。貼り付けボタンから枠を開き、'
+        '長押しで貼り付けて保存してください。',
+    'レイヤーⅡ_解答例_貼り付けタイトル': '解答例を貼り付け',
+    'レイヤーⅡ_解答例_貼り付け説明':
+        'Chromeでコピーしたあと、下の枠を長押しして「ペースト」するか、'
+        '「クリップボードから読み込む」を押してください',
+    'レイヤーⅡ_解答例_貼り付けヒント': 'ここに解答例を貼り付け',
+    'レイヤーⅡ_解答例_クリップボード読込': 'クリップボードから読み込む',
+    'レイヤーⅡ_解答例_クリップボード空': 'クリップボードに文字がありません',
+    'レイヤーⅡ_解答例_貼り付け無効': '有効な解答例ではありません。依頼文やリンクではなく、回答本文を貼り付けてください',
 
     // Step 4: レイヤーⅢ「問題文一覧から選ぶ」
     '問題文一覧から選ぶ': '問題文一覧から選ぶ',
@@ -388,9 +414,10 @@ abstract final class GradusL10n {
     '開始': '開始',
     'レイヤーⅣ_問題文_使い方_開始': '2️⃣ {{icon}} ボタンで開始',
     'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ 音声を聴いたら日本語で回答',
-    'レイヤーⅣ_問題文_使い方_PREP的中度': '4️⃣ {{icon}} ボタンでPREP評価・的中度も依頼',
-    'レイヤーⅣ_問題文_使い方_採点結果': '5️⃣ 採点結果を確認',
-    'レイヤーⅣ_問題文_使い方_V': '6️⃣ 「V」でレイヤーⅤへ進む',
+    'レイヤーⅣ_問題文_使い方_解答例': '4️⃣ Ⅱで「解答例」を取得済みなら、同じアイコンから読み返せる（Ⅳでは取得しない）',
+    'レイヤーⅣ_問題文_使い方_PREP的中度': '5️⃣ {{icon}} ボタンでPREP評価・的中度も依頼',
+    'レイヤーⅣ_問題文_使い方_採点結果': '6️⃣ 採点結果を確認',
+    'レイヤーⅣ_問題文_使い方_V': '7️⃣ 「V」でレイヤーⅤへ進む',
 
     // Step 6: レイヤーⅤ「問題文一覧から選ぶ」
     '発音評点': '発音評点',
@@ -549,8 +576,12 @@ abstract final class GradusL10n {
     'help.gradus.layer2.title': 'レイヤーⅡ：問題文',
     'help.gradus.layer2.summary': '回答をイメージして瞬発力を鍛える',
     'help.gradus.layer2.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」「25マスで考える」「話題を増やす」から選ぶ',
-    'help.gradus.layer2.tip2': '「問題文一覧から選ぶ」では問題文一覧から選び、要約を記入する',
-    'help.gradus.layer2.tip3': '「ランダム」ではサイコロで問題文を引き、どんな回答をするか想像する',
+    'help.gradus.layer2.tip2':
+        '「問題文一覧から選ぶ」では問題文一覧から選び、要約を記入する。'
+        '「解答例」ではChrome AIに45秒で話せる模範解答を作ってもらえる',
+    'help.gradus.layer2.tip3':
+        '「ランダム」ではサイコロで問題文を引き、どんな回答をするか想像する。'
+        'ここでも「解答例」ボタンでChrome AIに模範解答を依頼できる',
     'help.gradus.layer2.tip4': '声に出さなくて良いから、どんな回答をするかイメージする',
     'help.gradus.layer2.tip5': '「話題を増やす」ではタップで直接Google検索が開く',
     'help.gradus.layer2.tip6': '「25マスで考える」ではテーマ×視点をキーワードで埋める。声に出さなくてもよい',
@@ -572,6 +603,9 @@ abstract final class GradusL10n {
     'help.gradus.layer4.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」から選ぶ',
     'help.gradus.layer4.tip2': 'タイマー終了後、自動で録音→JSST参考レベルを採点する',
     'help.gradus.layer4.tip3': '紙飛行機でPREP評価・的中度も依頼する（評点。レイヤーⅢのPREPガイドとは別）',
+    'help.gradus.layer4.tip4':
+        '「問題文一覧から選ぶ」でⅡの解答例を取得済みなら、'
+        '「解答例」アイコンから読み返せる（Ⅳでの取得・再取得はしない）',
     'help.gradus.layer5.title': 'レイヤーⅤ：発音',
     'help.gradus.layer5.summary': '発音を整える',
     'help.gradus.layer5.tip1':
@@ -607,7 +641,8 @@ abstract final class GradusL10n {
     'help.gradus.transcript.title': '成績証明証',
     'help.gradus.transcript.summary': '直近の練習結果を1枚にまとめる',
     'help.gradus.transcript.tip1': '起動画面の「…」→成績証明証から開く',
-    'help.gradus.transcript.tip2': '発行日時・総合判定・テスト総合・拡充度総合と、会話/語彙/発音/25マスの直近結果を表示する',
+    'help.gradus.transcript.tip2':
+        '発行日時・総合判定・テスト総合・拡充度総合と、会話/語彙/発音/25マスの直近結果を表示する',
     'help.gradus.transcript.tip3': 'ダッシュボードと同じ計算で総合判定が決まる',
     'help.gradus.transcript.tip4':
         '総合はテスト総合と拡充度総合を組み合わせて決まる。25マスは発行時点の日常・ビジネス・シチュエーションの拡充度を表示する',
@@ -854,8 +889,7 @@ abstract final class GradusL10n {
     '長文読解_語彙_内訳': '(words %1/%2 + quiz %3/%4)',
     '長文読解_語彙_選択': 'Selected: %@',
     '長文読解_正解率': 'Accuracy: %@',
-    '長文読解_語彙_結果詳細なし':
-        'Could not find the vocabulary test result details',
+    '長文読解_語彙_結果詳細なし': 'Could not find the vocabulary test result details',
     '長文読解_次へヒント': 'Next (check, vocab)',
     '長文読解_使い方_タイトル': 'How to use',
     '長文読解_使い方_次へ':
@@ -1109,6 +1143,7 @@ abstract final class GradusL10n {
     '削除': 'Delete',
     'キャンセル': 'Cancel',
     '保存': 'Save',
+    '閉じる': 'Close',
     '日常': 'Daily',
     'ビジネス': 'Business',
     'シチュエーション': 'Situations',
@@ -1177,7 +1212,38 @@ abstract final class GradusL10n {
     '要約記入状況': 'Summary status',
     '要約を入力': 'Type a summary',
     'レイヤーⅡ_問題文_使い方_要約': '1️⃣ Tap "Summary" to write a summary of your answer',
-    'レイヤーⅡ_問題文_使い方_III': '2️⃣ Tap "III" to move on to Layer III',
+    'レイヤーⅡ_問題文_使い方_III': '3️⃣ Tap "III" to move on to Layer III',
+
+    // Layer II "Sample answer" (Chrome AI round trip)
+    '解答例': 'Sample answer',
+    'レイヤーⅡ_解答例_Google送信確認_タイトル': 'Create a sample answer using Google?',
+    'レイヤーⅡ_解答例_Google送信確認_本文':
+        'To create a roughly 45-second sample answer, this prompt will be '
+        'sent to Google LLC\'s Google Search (AI mode). The content may '
+        'remain in your browser or Google account history.',
+    'レイヤーⅡ_問題文_使い方_解答例':
+        '2️⃣ Tap "Sample answer" → return and paste (or paste into the box if needed)',
+    'レイヤーⅡ_ランダム_使い方_解答例':
+        '4️⃣ Tap "Sample answer" → return and paste (or paste into the box if needed)',
+    'レイヤーⅡ_解答例_取得': 'Get a sample answer',
+    'レイヤーⅡ_解答例_再取得': 'Get a new sample answer',
+    'レイヤーⅡ_解答例_コピー案内':
+        'When the sample answer appears, copy it (or long-press the text), '
+        'return here, and tap the green paste button. If that fails, you can '
+        'paste directly into the box',
+    'レイヤーⅡ_解答例_貼り付け失敗':
+        "Couldn't read the sample answer yet. Open the paste button, "
+        'long-press to paste into the box, then save.',
+    'レイヤーⅡ_解答例_貼り付けタイトル': 'Paste sample answer',
+    'レイヤーⅡ_解答例_貼り付け説明':
+        'After copying in Chrome, long-press the box below and choose Paste, '
+        'or tap “Load from clipboard”',
+    'レイヤーⅡ_解答例_貼り付けヒント': 'Paste the sample answer here',
+    'レイヤーⅡ_解答例_クリップボード読込': 'Load from clipboard',
+    'レイヤーⅡ_解答例_クリップボード空': 'Clipboard is empty',
+    'レイヤーⅡ_解答例_貼り付け無効':
+        'That does not look like a sample answer. Paste the answer text, '
+        'not the prompt or a link',
 
     // Step 4: Layer III "Choose from prompt list"
     '問題文一覧から選ぶ': 'Choose from prompt list',
@@ -1192,10 +1258,13 @@ abstract final class GradusL10n {
     '開始': 'Start',
     'レイヤーⅣ_問題文_使い方_開始': '2️⃣ {{icon}} button: Start',
     'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ Listen to the audio, then answer in Japanese',
+    'レイヤーⅣ_問題文_使い方_解答例':
+        '4️⃣ If a sample answer was fetched in Layer II, re-read it via the '
+        'same icon (Layer IV never fetches it)',
     'レイヤーⅣ_問題文_使い方_PREP的中度':
-        '4️⃣ {{icon}} button: also ask for a PREP/relevance evaluation',
-    'レイヤーⅣ_問題文_使い方_採点結果': '5️⃣ Check the scoring result',
-    'レイヤーⅣ_問題文_使い方_V': '6️⃣ Tap "V" to move on to Layer V',
+        '5️⃣ {{icon}} button: also ask for a PREP/relevance evaluation',
+    'レイヤーⅣ_問題文_使い方_採点結果': '6️⃣ Check the scoring result',
+    'レイヤーⅣ_問題文_使い方_V': '7️⃣ Tap "V" to move on to Layer V',
 
     // Step 6: Layer V "Choose from prompt list"
     '発音評点': 'Pronunciation score',
@@ -1334,8 +1403,7 @@ abstract final class GradusL10n {
     'help.gradus.title': 'osmGradus?',
     'help.gradus.subtitle': 'Polish your Japanese in five layers',
     'help.gradus.manual.title': 'User manual',
-    'help.gradus.manual.summary':
-        'Illustrated guide for each screen (Japanese)',
+    'help.gradus.manual.summary': 'Illustrated guide for each screen',
     'help.gradus.overview.title': 'Getting started',
     'help.gradus.overview.summary':
         'Pick a layer on the launch screen and practice step by step.',
@@ -1378,9 +1446,11 @@ abstract final class GradusL10n {
         'First choose “Choose from prompt list,” “Random,” “Think in 25 cells,” '
         'or “Add more topics”',
     'help.gradus.layer2.tip2':
-        '“Choose from prompt list”: pick from the prompt list and write a summary',
+        '“Choose from prompt list”: pick from the prompt list and write a '
+        'summary. “Sample answer” asks Chrome AI for a 45-second sample answer',
     'help.gradus.layer2.tip3':
-        '“Random”: roll the dice for a prompt and imagine your answer',
+        '“Random”: roll the dice for a prompt and imagine your answer. '
+        '“Sample answer” works here too, asking Chrome AI for a sample answer',
     'help.gradus.layer2.tip4': 'Imagine your answer — no need to say it aloud',
     'help.gradus.layer2.tip5':
         '“Add more topics”: tap to open a Google search directly',
@@ -1415,6 +1485,10 @@ abstract final class GradusL10n {
         'When the timer ends, recording starts and an approximate JSST level is scored',
     'help.gradus.layer4.tip3':
         'Use the paper plane to request PREP and relevance scores (scores — separate from Layer III’s PREP guide)',
+    'help.gradus.layer4.tip4':
+        '"Choose from prompt list": if a sample answer was already fetched '
+        'in Layer II, you can re-read it via the "Sample answer" icon '
+        '(Layer IV never fetches or refetches it)',
     'help.gradus.layer5.title': 'Layer V: Pronunciation',
     'help.gradus.layer5.summary': 'Refine your pronunciation',
     'help.gradus.layer5.tip1':
@@ -1728,8 +1802,7 @@ abstract final class GradusL10n {
     '長文読解_語彙_内訳': '(từ %1/%2 + câu hỏi %3/%4)',
     '長文読解_語彙_選択': 'Đã chọn: %@',
     '長文読解_正解率': 'Tỷ lệ đúng: %@',
-    '長文読解_語彙_結果詳細なし':
-        'Không tìm thấy chi tiết kết quả kiểm tra từ vựng',
+    '長文読解_語彙_結果詳細なし': 'Không tìm thấy chi tiết kết quả kiểm tra từ vựng',
     '長文読解_次へヒント': 'Tiếp (kiểm tra, từ vựng)',
     '長文読解_使い方_タイトル': 'Cách dùng',
     '長文読解_使い方_次へ':
@@ -1979,6 +2052,7 @@ abstract final class GradusL10n {
     '削除': 'Xóa',
     'キャンセル': 'Hủy',
     '保存': 'Lưu',
+    '閉じる': 'Đóng',
     '日常': 'Hàng ngày',
     'ビジネス': 'Công việc',
     'シチュエーション': 'Tình huống',
@@ -2047,7 +2121,39 @@ abstract final class GradusL10n {
     '要約記入状況': 'Tình trạng tóm tắt',
     '要約を入力': 'Nhập nội dung tóm tắt',
     'レイヤーⅡ_問題文_使い方_要約': '1️⃣ Nhấn "Tóm tắt" để viết tóm tắt câu trả lời',
-    'レイヤーⅡ_問題文_使い方_III': '2️⃣ Nhấn "III" để chuyển sang Tầng III',
+    'レイヤーⅡ_問題文_使い方_III': '3️⃣ Nhấn "III" để chuyển sang Tầng III',
+
+    // Tầng II "Câu trả lời mẫu" (往復 Chrome AI)
+    '解答例': 'Câu trả lời mẫu',
+    'レイヤーⅡ_解答例_Google送信確認_タイトル': 'Tạo câu trả lời mẫu bằng Google?',
+    'レイヤーⅡ_解答例_Google送信確認_本文':
+        'Để tạo câu trả lời mẫu có thể nói trong khoảng 45 giây, đề bài này '
+        'sẽ được gửi đến Google Search (chế độ AI) của Google LLC. Nội dung '
+        'có thể được lưu lại trong lịch sử trình duyệt hoặc tài khoản '
+        'Google của bạn.',
+    'レイヤーⅡ_問題文_使い方_解答例':
+        '2️⃣ Nhấn "Câu trả lời mẫu" → quay lại và dán (hoặc dán vào ô nếu cần)',
+    'レイヤーⅡ_ランダム_使い方_解答例':
+        '4️⃣ Nhấn "Câu trả lời mẫu" → quay lại và dán (hoặc dán vào ô nếu cần)',
+    'レイヤーⅡ_解答例_取得': 'Lấy câu trả lời mẫu',
+    'レイヤーⅡ_解答例_再取得': 'Lấy lại câu trả lời mẫu',
+    'レイヤーⅡ_解答例_コピー案内':
+        'Khi có câu trả lời mẫu, hãy sao chép (hoặc nhấn giữ nội dung), quay '
+        'lại và nhấn nút dán màu xanh. Nếu không được, bạn có thể dán trực '
+        'tiếp vào ô',
+    'レイヤーⅡ_解答例_貼り付け失敗':
+        'Chưa đọc được câu trả lời mẫu. Hãy mở nút dán, nhấn giữ để dán vào '
+        'ô, rồi lưu.',
+    'レイヤーⅡ_解答例_貼り付けタイトル': 'Dán câu trả lời mẫu',
+    'レイヤーⅡ_解答例_貼り付け説明':
+        'Sau khi sao chép trong Chrome, hãy nhấn giữ ô bên dưới và chọn Dán, '
+        'hoặc nhấn “Đọc từ clipboard”',
+    'レイヤーⅡ_解答例_貼り付けヒント': 'Dán câu trả lời mẫu vào đây',
+    'レイヤーⅡ_解答例_クリップボード読込': 'Đọc từ clipboard',
+    'レイヤーⅡ_解答例_クリップボード空': 'Clipboard trống',
+    'レイヤーⅡ_解答例_貼り付け無効':
+        'Không phải câu trả lời mẫu hợp lệ. Hãy dán nội dung trả lời, không '
+        'phải prompt hay liên kết',
 
     // Step 4: Tầng III "Chọn từ danh sách đề bài"
     '問題文一覧から選ぶ': 'Chọn từ danh sách đề bài',
@@ -2061,10 +2167,13 @@ abstract final class GradusL10n {
     '開始': 'Bắt đầu',
     'レイヤーⅣ_問題文_使い方_開始': '2️⃣ Nút {{icon}}: Bắt đầu',
     'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ Nghe xong thì trả lời bằng tiếng Nhật',
+    'レイヤーⅣ_問題文_使い方_解答例':
+        '4️⃣ Nếu đã lấy câu trả lời mẫu ở Tầng II, có thể đọc lại qua cùng '
+        'biểu tượng đó (Tầng IV không lấy)',
     'レイヤーⅣ_問題文_使い方_PREP的中度':
-        '4️⃣ Nút {{icon}}: Nhờ đánh giá thêm PREP và độ chính xác',
-    'レイヤーⅣ_問題文_使い方_採点結果': '5️⃣ Xem kết quả chấm điểm',
-    'レイヤーⅣ_問題文_使い方_V': '6️⃣ Nhấn "V" để chuyển sang Tầng V',
+        '5️⃣ Nút {{icon}}: Nhờ đánh giá thêm PREP và độ chính xác',
+    'レイヤーⅣ_問題文_使い方_採点結果': '6️⃣ Xem kết quả chấm điểm',
+    'レイヤーⅣ_問題文_使い方_V': '7️⃣ Nhấn "V" để chuyển sang Tầng V',
 
     // Step 6: Tầng V "Chọn từ danh sách đề bài"
     '発音評点': 'Điểm phát âm',
@@ -2201,8 +2310,7 @@ abstract final class GradusL10n {
     'help.gradus.title': 'osmGradus?',
     'help.gradus.subtitle': 'Rèn tiếng Nhật qua 5 tầng',
     'help.gradus.manual.title': 'Hướng dẫn sử dụng',
-    'help.gradus.manual.summary':
-        'Xem cách dùng từng màn hình bằng hình (tiếng Nhật)',
+    'help.gradus.manual.summary': 'Xem cách dùng từng màn hình bằng hình',
     'help.gradus.overview.title': 'Bắt đầu',
     'help.gradus.overview.summary':
         'Chọn tầng trên màn hình khởi động và luyện từng bước.',
@@ -2243,9 +2351,11 @@ abstract final class GradusL10n {
         'Trước hết chọn “Chọn từ danh sách đề bài”, “Ngẫu nhiên”, '
         '“Suy nghĩ 25 ô” hoặc “Thêm chủ đề”',
     'help.gradus.layer2.tip2':
-        '“Chọn từ danh sách đề bài”: chọn từ danh sách đề bài và viết tóm tắt',
+        '“Chọn từ danh sách đề bài”: chọn từ danh sách đề bài và viết tóm tắt. '
+        '“Câu trả lời mẫu” nhờ Chrome AI tạo câu trả lời mẫu 45 giây',
     'help.gradus.layer2.tip3':
-        '“Ngẫu nhiên”: tung xúc xắc để ra đề bài và hình dung câu trả lời',
+        '“Ngẫu nhiên”: tung xúc xắc để ra đề bài và hình dung câu trả lời. '
+        '“Câu trả lời mẫu” cũng dùng được ở đây, nhờ Chrome AI tạo câu trả lời mẫu',
     'help.gradus.layer2.tip4':
         'Hình dung câu trả lời — không cần nói thành tiếng',
     'help.gradus.layer2.tip5':
@@ -2280,6 +2390,10 @@ abstract final class GradusL10n {
         'Hết giờ thì tự ghi âm và chấm mức JSST tham khảo',
     'help.gradus.layer4.tip3':
         'Dùng máy bay giấy để nhờ đánh giá PREP và độ trúng đích (điểm — khác với hướng dẫn PREP ở Tầng III)',
+    'help.gradus.layer4.tip4':
+        '“Chọn từ danh sách đề bài”: nếu đã lấy câu trả lời mẫu ở Tầng II, '
+        'có thể đọc lại qua biểu tượng “Câu trả lời mẫu” (Tầng IV không '
+        'lấy hay lấy lại)',
     'help.gradus.layer5.title': 'Tầng V: Phát âm',
     'help.gradus.layer5.summary': 'Chỉnh phát âm',
     'help.gradus.layer5.tip1':

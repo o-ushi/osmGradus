@@ -12,6 +12,8 @@ import '../../models/question_prompt.dart';
 import '../../models/saved_scoring_result.dart';
 import '../../services/alarm_sound_service.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
+import '../../services/layer2_sample_answer_chrome_ai.dart'
+    show showSampleAnswerReadOnlySheet;
 import '../../services/jsst_scoring_service.dart';
 import '../../services/prep_hit_ai_response_parser.dart';
 import '../../services/question_prompt_service.dart';
@@ -427,6 +429,16 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
     });
   }
 
+  /// 「理由」枠＝解答例の閲覧（Step 3）。レイヤーⅡで取得済みの
+  /// `sampleAnswer`を[showSampleAnswerReadOnlySheet]（Ⅱの
+  /// [Layer2SampleAnswerMixin]と共有する表示ヘルパー、Step 6）で表示する
+  /// だけで、Ⅳからの取得・再取得は行わない（取得はⅡが担当）。
+  Future<void> _showSampleAnswer() async {
+    final sampleAnswer = widget.fixedPrompt?.sampleAnswer;
+    if (sampleAnswer == null || sampleAnswer.isEmpty) return;
+    await showSampleAnswerReadOnlySheet(context, sampleAnswer);
+  }
+
   Future<void> _openHistory() async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(builder: (_) => const ScoringHistoryScreen()),
@@ -455,6 +467,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
                 icon: Icons.play_circle_fill_rounded,
               ),
               LayerHelpLine(text: 'レイヤーⅣ_問題文_使い方_日本語回答'.tr(lang)),
+              LayerHelpLine(text: 'レイヤーⅣ_問題文_使い方_解答例'.tr(lang)),
               LayerHelpLine(
                 text: 'レイヤーⅣ_問題文_使い方_PREP的中度'.tr(lang),
                 icon: Icons.send_rounded,
@@ -524,6 +537,8 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
     final lang = appSettings.language;
     final palette = AppColors.current;
     final fixedPrompt = widget.fixedPrompt;
+    final hasSampleAnswer =
+        fixedPrompt != null && fixedPrompt.sampleAnswer.isNotEmpty;
     final showLayer5Badge =
         fixedPrompt != null &&
         widget.onGoToLayer5 != null &&
@@ -618,6 +633,18 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
               // 非表示のまま、「例示」の枠だけ「＋」と同じ結果一覧導線に転用する。
               // 保存済み採点結果があるときだけ表示する。
               PrepLabelRow(
+                // 「理由」枠＝解答例の閲覧ボタン（Step 3）。Ⅱで取得済み
+                // （`sampleAnswer`が非空）のときだけ出す。「ランダム」
+                // （[fixedPrompt] == null）や未取得では[reasonIcon]自体を
+                // 付けない（レイヤーⅡランダムと同じ、アイコンの実体を
+                // 出さない隠し方）。
+                showReason: hasSampleAnswer,
+                reasonIcon: hasSampleAnswer ? Icons.menu_book_rounded : null,
+                reasonTooltip: hasSampleAnswer ? '解答例' : null,
+                reasonShowBorder: false,
+                reasonHorizontalPadding: 0,
+                reasonActive: hasSampleAnswer,
+                onReasonTap: hasSampleAnswer ? _showSampleAnswer : null,
                 showExample: _savedResults.isNotEmpty,
                 exampleIcon: Icons.list_alt_rounded,
                 exampleTooltip: '採点結果',

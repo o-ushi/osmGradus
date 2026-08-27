@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../models/question_prompt.dart';
+import '../../services/chrome_ai_submit_mixin.dart';
+import '../../services/layer2_sample_answer_chrome_ai.dart';
 import '../../services/question_prompt_service.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/ai_import_shared.dart';
 import '../../widgets/app_header.dart';
 import '../../widgets/dice_action_row.dart';
 import '../../widgets/layer_help_sheet.dart';
@@ -21,8 +24,9 @@ import '../../widgets/transport_icon_button.dart';
 ///
 /// レイヤーⅠと同じ「予約席」レイアウト（共通ルール1）。「結論」枠は
 /// 「要約」の記入欄に転用し、タップで[TextEditSheet]を開いて回答の要約を
-/// 記入する（記入済みなら背景青）。下段は左2つをダミーのまま隠し、右端だけ
-/// レイヤーⅢへの遷移ボタンに転用する。
+/// 記入する（記入済みなら背景青）。「理由」枠は「解答例」（Chrome AIに
+/// 45秒模範解答を依頼する往復、[Layer2SampleAnswerMixin]）に転用する。
+/// 下段は左2つをダミーのまま隠し、右端だけレイヤーⅢへの遷移ボタンに転用する。
 ///
 /// 一覧から開いたときの表示順（[promptIds]）を保持し、「分野」枠に置いた
 /// ▲▼ボタン（[QuestionPromptNavRow]）で前後の問題文へ画面を閉じずに移動
@@ -157,7 +161,12 @@ class _Layer2PromptDetailBody extends StatefulWidget {
       _Layer2PromptDetailBodyState();
 }
 
-class _Layer2PromptDetailBodyState extends State<_Layer2PromptDetailBody> {
+class _Layer2PromptDetailBodyState extends State<_Layer2PromptDetailBody>
+    with
+        WidgetsBindingObserver,
+        AiImportKeepAliveMixin<_Layer2PromptDetailBody>,
+        ChromeAiSubmitMixin<_Layer2PromptDetailBody>,
+        Layer2SampleAnswerMixin<_Layer2PromptDetailBody> {
   final _service = QuestionPromptService();
 
   QuestionPrompt? _prompt;
@@ -165,8 +174,39 @@ class _Layer2PromptDetailBodyState extends State<_Layer2PromptDetailBody> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     unawaited(_load());
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    stopKeepAliveIfOwned();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) =>
+      handleAppLifecycleState(state);
+
+  @override
+  QuestionPrompt? get sampleAnswerPrompt => _prompt;
+
+  @override
+  Future<void> saveSampleAnswer(String text) async {
+    final prompt = _prompt;
+    if (prompt == null) return;
+    await _persist(prompt.copyWith(sampleAnswer: text));
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  void showChromeAiMessage(String message) => _showMessage(message);
 
   Future<void> _load() async {
     final prompt = await _service.loadById(widget.promptId);
@@ -200,6 +240,7 @@ class _Layer2PromptDetailBodyState extends State<_Layer2PromptDetailBody> {
       title: '操作方法'.tr(lang),
       lines: [
         LayerHelpLine(text: 'レイヤーⅡ_問題文_使い方_要約'.tr(lang)),
+        LayerHelpLine(text: 'レイヤーⅡ_問題文_使い方_解答例'.tr(lang)),
         LayerHelpLine(text: 'レイヤーⅡ_問題文_使い方_III'.tr(lang)),
       ],
     );
@@ -284,6 +325,35 @@ class _Layer2PromptDetailBodyState extends State<_Layer2PromptDetailBody> {
                     conclusionActive: prompt.summary.isNotEmpty,
                     onConclusionTap: _editSummary,
                     conclusionHintTapText: '回答の要約',
+                    showReason: true,
+                    // 貼り付け待ち中は、送信前・取得済みと見分けが付かない
+                    // 同じアイコンのままだと「まだChromeでコピーしていないのに
+                    // 早すぎるタップで貼り付け失敗」を誘発する（実機報告で発覚）。
+                    // GenkiTransportRowの送信/貼り付け切り替えと同じ見た目
+                    // （アイコン差し替え＋緑）で、いま貼り付け待ちだと一目で
+                    // 分かるようにする。
+                    reasonIcon: chromeAiAwaitingPaste
+                        ? Icons.content_paste_go_rounded
+                        : Icons.menu_book_rounded,
+                    reasonTooltip: chromeAiAwaitingPaste ? '貼り付け' : '解答例',
+                    reasonShowBorder: false,
+                    reasonHorizontalPadding: 0,
+                    reasonActive:
+                        chromeAiAwaitingPaste || prompt.sampleAnswer.isNotEmpty,
+                    reasonActiveForeground: chromeAiAwaitingPaste
+                        ? kPasteReadyColor
+                        : null,
+                    onReasonTap: onSampleAnswerTap,
+                    onReasonLongPress: onSampleAnswerLongPress,
+                    reasonHintTapText: chromeAiAwaitingPaste
+                        ? '貼り付け'
+                        : (prompt.sampleAnswer.isEmpty
+                              ? 'レイヤーⅡ_解答例_取得'
+                              : '解答例'),
+                    reasonHintLongPressText:
+                        !chromeAiAwaitingPaste && prompt.sampleAnswer.isNotEmpty
+                        ? 'レイヤーⅡ_解答例_再取得'
+                        : null,
                   ),
                   const SizedBox(height: 8),
                   Row(

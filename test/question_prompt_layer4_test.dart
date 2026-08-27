@@ -23,6 +23,12 @@ import 'package:osm_gradus/widgets/question_prompt_list_row.dart';
 const _lang = 'vi';
 String _t(String key) => key.tr(_lang);
 
+/// 使い方シートの1行の先頭連番バッジ（1️⃣など）を取り除いた断片
+/// （[LayerHelpLine]が描画時にバッジを別ウィジェットへ分離するため、
+/// test/layers_test.dartの`_withoutBadge`と同じ照合方法）。
+String _withoutBadge(String key) =>
+    _t(key).replaceFirst(RegExp('^[0-9]️⃣[ 　]*'), '');
+
 /// 「V」バッジ等、ダブルタップの機能ヒントが付いたボタン（Step 7）は
 /// GestureDetector.onDoubleTapで単タップ判定を約300ms（kDoubleTapTimeout）
 /// 保留するため、単タップとして確定させるにはこの分だけ余分にpumpする。
@@ -131,6 +137,23 @@ void main() {
     expect(find.byType(LayerNumeralBadge), findsNothing);
   });
 
+  testWidgets('「＋」長押しの使い方シートに、Ⅱで取得済みの解答例をⅣでも読める旨の案内がある（Step 6レビュー）', (
+    tester,
+  ) async {
+    await _openLayer4QuestionPromptList(tester);
+    await tester.tap(find.byType(QuestionPromptListRow).first);
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byIcon(Icons.add_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_t('操作方法')), findsOneWidget);
+    expect(
+      find.text(_withoutBadge('レイヤーⅣ_問題文_使い方_解答例'), findRichText: true),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('JSST採点結果が問題文エンティティのjsstScoreに反映される', (tester) async {
     await _openLayer4QuestionPromptList(tester);
     final firstRow = tester.widget<QuestionPromptListRow>(
@@ -191,5 +214,75 @@ void main() {
     // 進行中の状態を失わせないよう、問題文は切り替わらず案内だけが出る。
     expect(find.text(firstRow.body), findsOneWidget);
     expect(find.text(_t('録音中は移動できません')), findsOneWidget);
+  });
+
+  testWidgets('解答例が空の問題文では「理由」枠（解答例アイコン）が出ない', (tester) async {
+    await _openLayer4QuestionPromptList(tester);
+    await tester.tap(find.byType(QuestionPromptListRow).first);
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.menu_book_rounded), findsNothing);
+  });
+
+  testWidgets('レイヤーⅡで取得済みの解答例は、Ⅳの「理由」枠アイコンから読み取り専用で読める', (tester) async {
+    await _openLayer4QuestionPromptList(tester);
+    final firstRow = tester.widget<QuestionPromptListRow>(
+      find.byType(QuestionPromptListRow).first,
+    );
+
+    final service = QuestionPromptService();
+    final all = await service.loadAll();
+    final target = all.firstWhere((p) => p.body == firstRow.body);
+    final sampleAnswer =
+        '[質問]\n${target.body}\n[日本語]\n模範解答本文です。\n[Romaji]\n'
+        'Mohan kaitou honbun desu.';
+    await service.update(target.copyWith(sampleAnswer: sampleAnswer));
+
+    await tester.tap(find.byType(QuestionPromptListRow).first);
+    await tester.pumpAndSettle();
+
+    final icon = find.byIcon(Icons.menu_book_rounded);
+    expect(icon, findsOneWidget);
+
+    await tester.tap(icon);
+    await tester.pumpAndSettle();
+
+    // 読み取り専用シートに全文が表示される（貼り付け・送信の導線は出ない）。
+    expect(find.text(_t('解答例')), findsWidgets);
+    expect(find.text(sampleAnswer), findsOneWidget);
+    expect(find.byIcon(Icons.content_paste_go_rounded), findsNothing);
+  });
+
+  testWidgets('▲▼で問題文を切り替えると、解答例アイコンの表示も新しい問題文に追従する（Step 6レビュー観点④の回帰防止）', (
+    tester,
+  ) async {
+    await _openLayer4QuestionPromptList(tester);
+    final firstRow = tester.widget<QuestionPromptListRow>(
+      find.byType(QuestionPromptListRow).first,
+    );
+
+    final service = QuestionPromptService();
+    final all = await service.loadAll();
+    final target = all.firstWhere((p) => p.body == firstRow.body);
+    await service.update(
+      target.copyWith(sampleAnswer: '[質問]\n${target.body}\n[日本語]\n模範解答。'),
+    );
+
+    await tester.tap(find.byType(QuestionPromptListRow).first);
+    await tester.pumpAndSettle();
+
+    // 1件目（解答例あり）で表示されている。
+    expect(find.byIcon(Icons.menu_book_rounded), findsOneWidget);
+
+    // ▼で2件目（解答例なし）へ移動すると消える。
+    await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.menu_book_rounded), findsNothing);
+
+    // ▲で1件目へ戻ると再び出る（別問題の解答例が残ったり、消えたままに
+    // ならないこと）。
+    await tester.tap(find.byIcon(Icons.keyboard_arrow_up_rounded));
+    await tester.pumpAndSettle();
+    expect(find.byIcon(Icons.menu_book_rounded), findsOneWidget);
   });
 }

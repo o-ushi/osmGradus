@@ -52,7 +52,7 @@ class GhostPill extends StatelessWidget {
   /// アイコン／絵文字を枠いっぱいに大きくしたいときは0にする。
   final double horizontalPadding;
 
-  /// falseのとき枠線を描かない（レイヤーⅡの🌐など、枠なしアイコン用）。
+  /// falseのとき枠線を描かない（レイヤーⅡの解答例アイコンなど、枠なし用）。
   final bool showBorder;
 
   /// [label]表示時の基準フォントサイズ。[FittedBox]で枠に収まるよう縮小される。

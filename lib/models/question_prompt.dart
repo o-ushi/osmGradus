@@ -36,6 +36,7 @@ class QuestionPrompt {
     this.pronunciationSentences = const [],
     this.registeredWordIds = const [],
     this.summary = '',
+    this.sampleAnswer = '',
     this.conclusion = '',
     this.reason = '',
     this.example = '',
@@ -92,6 +93,12 @@ class QuestionPrompt {
   final List<String> registeredWordIds;
 
   final String summary;
+
+  /// レイヤーⅡ「解答例」（Chrome AIが作成した45秒模範解答）のスナップショット。
+  /// [summary]（学習者自身の答えのメモ）とは役割が異なり、進捗判定
+  /// （[isLayer2Done]）には含めない。未取得は空文字。
+  final String sampleAnswer;
+
   final String conclusion;
   final String reason;
   final String example;
@@ -140,6 +147,7 @@ class QuestionPrompt {
     List<QuestionPromptPronunciationSentence>? pronunciationSentences,
     List<String>? registeredWordIds,
     String? summary,
+    String? sampleAnswer,
     String? conclusion,
     String? reason,
     String? example,
@@ -169,6 +177,7 @@ class QuestionPrompt {
         pronunciationSentences ?? this.pronunciationSentences,
     registeredWordIds: registeredWordIds ?? this.registeredWordIds,
     summary: summary ?? this.summary,
+    sampleAnswer: sampleAnswer ?? this.sampleAnswer,
     conclusion: conclusion ?? this.conclusion,
     reason: reason ?? this.reason,
     example: example ?? this.example,
@@ -250,6 +259,7 @@ class QuestionPrompt {
       vocabTestCorrectCount != null ||
       pronunciationSentences.isNotEmpty ||
       summary.isNotEmpty ||
+      sampleAnswer.isNotEmpty ||
       conclusion.isNotEmpty ||
       reason.isNotEmpty ||
       example.isNotEmpty ||
@@ -277,6 +287,7 @@ class QuestionPrompt {
         (json['registeredWordIds'] as List<dynamic>?)?.cast<String>() ??
         const [],
     summary: json['summary'] as String? ?? '',
+    sampleAnswer: json['sampleAnswer'] as String? ?? '',
     conclusion: json['conclusion'] as String? ?? '',
     reason: json['reason'] as String? ?? '',
     example: json['example'] as String? ?? '',
@@ -311,6 +322,7 @@ class QuestionPrompt {
           .toList(),
     if (registeredWordIds.isNotEmpty) 'registeredWordIds': registeredWordIds,
     if (summary.isNotEmpty) 'summary': summary,
+    if (sampleAnswer.isNotEmpty) 'sampleAnswer': sampleAnswer,
     if (conclusion.isNotEmpty) 'conclusion': conclusion,
     if (reason.isNotEmpty) 'reason': reason,
     if (example.isNotEmpty) 'example': example,
