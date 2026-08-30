@@ -29,9 +29,18 @@ import 'package:osm_gradus/services/topic_speech_reader.dart';
 import 'package:osm_gradus/services/tts_settings_service.dart';
 import 'package:osm_gradus/services/vocabulary_check_storage.dart';
 import 'package:osm_gradus/services/vocabulary_service.dart';
+import 'package:osm_gradus/models/saved_scoring_result.dart';
+import 'package:osm_gradus/models/scoring_models.dart';
+import 'package:osm_gradus/services/scoring_result_storage.dart';
 import 'package:osm_gradus/views/layers/layer1_vocab_screen.dart';
+import 'package:osm_gradus/views/layers/layer4_screen.dart';
 import 'package:osm_gradus/views/layers/layer5_screen.dart';
 import 'package:osm_gradus/views/layers/long_article_list_screen.dart';
+import 'package:osm_gradus/views/layers/pronunciation_check_detail_screen.dart';
+import 'package:osm_gradus/views/layers/pronunciation_history_screen.dart';
+import 'package:osm_gradus/views/layers/scoring_history_screen.dart';
+import 'package:osm_gradus/views/layers/scoring_result_screen.dart';
+import 'package:osm_gradus/views/layers/vocabulary_check_detail_screen.dart';
 import 'package:osm_gradus/views/launch_screen.dart';
 import 'package:osm_gradus/widgets/app_header.dart';
 import 'package:osm_gradus/widgets/category_select_field.dart';
@@ -1027,8 +1036,8 @@ void main() {
     expect(addIgnorePointer.ignoring, isFalse);
 
     // 結論/理由はレイヤーⅢと違い非表示（IgnorePointerでゴースト化）のまま、
-    // 例示の枠は保存済み採点結果があるときだけ一覧導線として表示する。
-    // 0件のうちは背景色に同化して非表示。
+    // 例示の枠は保存済み採点結果があるときだけ結果ボタン（タップ＝最新詳細、
+    // 長押し＝一覧）として表示する。0件のうちは背景色に同化して非表示。
     for (final label in ['結論', '理由']) {
       final finder = find.text(_t(label));
       expect(finder, findsOneWidget);
@@ -1111,10 +1120,13 @@ void main() {
       find.text(_withoutBadge('レイヤーⅣ_使い方_タイマー'), findRichText: true),
       findsOneWidget,
     );
+    // サイコロモードの既定はタートル（test/layer4_prompt_reveal_mode_test.dart
+    // 参照）のため、2タップ手順のタートル用文言が表示される。
     expect(
-      find.text(_afterIcon('レイヤーⅣ_使い方_サイコロ'), findRichText: true),
+      find.text(_afterIcon('レイヤーⅣ_使い方_サイコロ_タートル'), findRichText: true),
       findsOneWidget,
     );
+    expect(find.text(_t('レイヤーⅣ_使い方_モード切替')), findsOneWidget);
     expect(
       find.text(_withoutBadge('レイヤーⅣ_使い方_採点結果'), findRichText: true),
       findsOneWidget,
@@ -2204,8 +2216,7 @@ void main() {
   });
 
   testWidgets('レイヤーⅠ長文読解：新形式（9語同梱、ここでは3語）のAIレスポンスは'
-      '1秒チェックの次に語彙テストが続き、語彙テスト開始時点で長文が確定保存される',
-      (WidgetTester tester) async {
+      '1秒チェックの次に語彙テストが続き、語彙テスト開始時点で長文が確定保存される', (WidgetTester tester) async {
     tester.view.physicalSize = const Size(390, 900);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
@@ -2296,10 +2307,7 @@ void main() {
     expect(find.text('1 / 3'), findsOneWidget);
     final levelVisibility = tester.widget<Visibility>(
       find
-          .ancestor(
-            of: find.text(_t('レベル')),
-            matching: find.byType(Visibility),
-          )
+          .ancestor(of: find.text(_t('レベル')), matching: find.byType(Visibility))
           .first,
     );
     expect(levelVisibility.visible, isFalse);
@@ -2307,9 +2315,7 @@ void main() {
 
   testWidgets('レイヤーⅠ長文読解：語彙テストの採点が完了すると、LongArticleの正解率と'
       'lastVocabularyCheckIdが書き戻され、不正解語が単語帳へ自動登録され、'
-      'スワイプ不要で3択画面へ自動的に戻る（Step 9：採点書き戻しの完走テスト）', (
-    WidgetTester tester,
-  ) async {
+      'スワイプ不要で3択画面へ自動的に戻る（Step 9：採点書き戻しの完走テスト）', (WidgetTester tester) async {
     // 語彙テスト画面（DiceActionRow＋単語カード＋GenkiTransportRow）を
     // すべてヒットテストできるよう、縦長のビューポートにする
     // （既存の「語彙テスト」単体テストと同じ理由）。
@@ -3750,20 +3756,128 @@ void main() {
     expect(ghostPill.visible, isTrue);
     expect(ghostPill.active, isTrue);
 
+    // タップ＝最新1件の詳細画面が直接開く（Step 7）。ダブルタップの機能
+    // ヒント（exampleHintTapText）が付いたため、単タップの確定に
+    // kDoubleTapTimeout分の待ちが要る（他のダブルタップヒント付きボタンと
+    // 同じ_tapConfirmWaitパターン）。
     await tester.tap(find.byIcon(Icons.list_alt_rounded));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(find.text(_t('語彙力評価結果')), findsOneWidget);
-    expect(find.text('★★★★☆'), findsOneWidget);
-
-    await tester.tap(find.text('★★★★☆'));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(_tapConfirmWait);
+    await tester.pumpAndSettle();
 
     // 詳細画面：出題した単語一覧と、1問目のSTT結果が表示されている。
     expect(find.text(_t('出題した単語')), findsOneWidget);
     expect(find.text('回答0'), findsOneWidget);
+
+    // 詳細画面（[OsmSubpageScaffold]）はスワイプで閉じる方式で通常の戻る
+    // ボタンが無いため、settings_reset_flow_testと同じく直接popする。
+    Navigator.of(
+      tester.element(find.byType(VocabularyCheckDetailScreen)),
+    ).pop();
+    await tester.pumpAndSettle();
+
+    // 長押し＝一覧画面（Step 7）。長押しはダブルタップ判定と競合しないため
+    // 即座に発火する。
+    await tester.longPress(find.byIcon(Icons.list_alt_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_t('語彙力評価結果')), findsOneWidget);
+    expect(find.text('★★★★☆'), findsOneWidget);
+  });
+
+  testWidgets('採点結果を保存すると「採点結果」アイコンが青地になり、'
+      'タップで最新詳細・長押しで一覧を開ける', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await _pumpLayer4Standalone(tester);
+
+    final state = tester.state<Layer4ScreenState>(find.byType(Layer4Screen));
+    final result = _buildScoringResultForTest('layer4-result-btn');
+    await ScoringResultStorage().save(result);
+    state.debugSetEvaluatedResult(result);
+    await tester.pump();
+
+    final ghostPill = tester.widget<GhostPill>(
+      find.ancestor(
+        of: find.byIcon(Icons.list_alt_rounded),
+        matching: find.byType(GhostPill),
+      ),
+    );
+    expect(ghostPill.visible, isTrue);
+    expect(ghostPill.active, isTrue);
+
+    await tester.tap(find.byIcon(Icons.list_alt_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ScoringResultScreen), findsOneWidget);
+
+    Navigator.of(
+      tester.element(find.byType(ScoringResultScreen)),
+    ).pop();
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byIcon(Icons.list_alt_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_t('採点結果')), findsOneWidget);
+    expect(find.byType(ScoringHistoryScreen), findsOneWidget);
+  });
+
+  testWidgets('発音チェック結果を保存すると「発音チェック結果」アイコンが青地になり、'
+      'タップで最新詳細・長押しで一覧を開ける', (WidgetTester tester) async {
+    final originalUrlLauncher = UrlLauncherPlatform.instance;
+    final fakeUrlLauncher = _FakeUrlLauncherPlatform();
+    UrlLauncherPlatform.instance = fakeUrlLauncher;
+    addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
+
+    SharedPreferences.setMockInitialValues({});
+    _mockClipboard(tester);
+    await _pumpLayer5Standalone(tester);
+
+    final state = tester.state<Layer5ScreenState>(find.byType(Layer5Screen));
+    await _completeAllQuestions(tester, state);
+
+    await tester.tap(find.byIcon(Icons.send_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pump();
+    await tester.tap(find.widgetWithText(TextButton, _t('同意してGoogleへ送信')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await Clipboard.setData(const ClipboardData(text: _validAiEvaluationJson));
+    await tester.tap(find.byIcon(Icons.content_paste_go_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    await tester.tap(find.widgetWithText(TextButton, _t('完了')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    final ghostPill = tester.widget<GhostPill>(
+      find.ancestor(
+        of: find.byIcon(Icons.list_alt_rounded),
+        matching: find.byType(GhostPill),
+      ),
+    );
+    expect(ghostPill.visible, isTrue);
+    expect(ghostPill.active, isTrue);
+
+    await tester.tap(find.byIcon(Icons.list_alt_rounded));
+    await tester.pump(_tapConfirmWait);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PronunciationCheckDetailScreen), findsOneWidget);
+
+    Navigator.of(
+      tester.element(find.byType(PronunciationCheckDetailScreen)),
+    ).pop();
+    await tester.pumpAndSettle();
+
+    await tester.longPress(find.byIcon(Icons.list_alt_rounded));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_t('発音チェック結果')), findsOneWidget);
+    expect(find.byType(PronunciationHistoryScreen), findsOneWidget);
   });
 
   testWidgets('単語テストで全10問に回答すると送信ボタンが表示される', (WidgetTester tester) async {
@@ -4225,6 +4339,56 @@ Future<void> _rightSwipeFrom(WidgetTester tester, Offset start) async {
     timeStamp: const Duration(milliseconds: 40),
   );
   await gesture.up(timeStamp: const Duration(milliseconds: 40));
+}
+
+Future<void> _pumpLayer4Standalone(WidgetTester tester) async {
+  await tester.pumpWidget(
+    const MaterialApp(home: Scaffold(body: Layer4Screen())),
+  );
+  await tester.pump();
+}
+
+SavedScoringResult _buildScoringResultForTest(String id) {
+  final started = DateTime(2026, 1, 1, 10, 0, 0);
+  return SavedScoringResult(
+    id: id,
+    createdAt: started,
+    result: ScoringResult(
+      transcriptChunks: [
+        TranscriptChunk(text: 'わたしはこう考えます。', recognizedAt: started),
+      ],
+      fullTranscript: 'わたしはこう考えます。',
+      keigo: const KeigoAnalysis(
+        categories: [
+          KeigoCategoryResult(category: 'teineigo', matchedExpressions: {'です'}),
+        ],
+        varietyScore: 1,
+      ),
+      complexity: const SentenceComplexityAnalysis(
+        totalUnits: 1,
+        complexUnitCount: 0,
+        complexityRatio: 0,
+      ),
+      fluency: FluencyAnalysis(
+        allottedSeconds: 45,
+        capturedSeconds: 45,
+        timeToFirstSpeechSeconds: 1,
+        estimatedSpeechSeconds: 10,
+        estimatedSilenceSeconds: 35,
+        silenceRatio: 0.78,
+        timeUtilization: 0.22,
+        spokenCharacterCount: 11,
+        charactersPerAllottedMinute: 14.6,
+        longPauseCount: 1,
+        referenceLevel: 2,
+      ),
+      session: SpeechSessionContext(
+        allottedSeconds: 45,
+        startedAt: started,
+        endedAt: started.add(const Duration(seconds: 45)),
+      ),
+    ),
+  );
 }
 
 /// [Layer5Screen]単体を最小限のMaterialApp（SnackBar表示用にScaffold付き）で描画する。

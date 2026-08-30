@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../models/layer4_prompt_reveal_mode.dart';
 import '../models/long_article_word_selection_mode.dart';
 import '../models/recording_mode.dart';
 import '../models/vocab_answer_mode.dart';
@@ -99,6 +100,16 @@ class AppSettings extends ChangeNotifier {
   set buttonHintDisplaySeconds(int value) {
     if (_prefs.buttonHintDisplaySeconds == value) return;
     _prefs.buttonHintDisplaySeconds = value;
+    notifyListeners();
+  }
+
+  /// レイヤーⅣのお題表示モード（ラピッド/タートル）。サイコロ長押しで切替。
+  Layer4PromptRevealMode get layer4PromptRevealMode =>
+      _prefs.layer4PromptRevealMode;
+
+  set layer4PromptRevealMode(Layer4PromptRevealMode value) {
+    if (_prefs.layer4PromptRevealMode == value) return;
+    _prefs.layer4PromptRevealMode = value;
     notifyListeners();
   }
 

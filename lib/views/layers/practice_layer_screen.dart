@@ -153,14 +153,22 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
   Future<void> drawAndSpeak() async {
     final topic = await pickTopic();
     if (!mounted) return;
+    setState(() => drawnTopic = topic);
+    await speakDrawnTopic(topic);
+  }
+
+  /// [drawnTopic]として既に確定している問題文を読み上げ、カウントダウンへ
+  /// つなげる（[drawAndSpeak]の「抽選」より後の部分）。レイヤーⅣのタートル
+  /// モード（問題文表示とこの読み上げ開始を別タップに分ける）が、抽選
+  /// （[pickTopic]）を経由せず表示済みの[drawnTopic]だけを渡して直接呼べる
+  /// よう切り出している。
+  Future<void> speakDrawnTopic(DrawnTopic topic) async {
+    if (!mounted) return;
     topicSpeechReader.clearGenderLock();
-    // タイマー開始（onStarted）を待たず、サイコロを引いた瞬間に
+    // タイマー開始（onStarted）を待たず、読み上げを始める瞬間に
     // 「結論」から点滅し直す（PREPガイド利用時のみ）。
     if (enablesPrepGuide) prepStageController.start();
-    setState(() {
-      drawnTopic = topic;
-      buttonPhase = TopicSpeakerTimerPhase.speaking;
-    });
+    setState(() => buttonPhase = TopicSpeakerTimerPhase.speaking);
 
     // 「15+60秒」は準備フェーズの案内込みで読み上げる（osmWashabeと同じ文言）。
     final text = timerController.usesTwoPhaseTimer

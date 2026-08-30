@@ -48,6 +48,8 @@ void main() {
     const referenced = <String>[
       'help.gradus.title',
       'help.gradus.subtitle',
+      'help.gradus.manual.title',
+      'help.gradus.manual.summary',
       'help.gradus.sections.layers',
       'help.gradus.sections.more',
       'help.gradus.overview.title',
@@ -63,6 +65,8 @@ void main() {
       'help.gradus.dashboard.tip2',
       'help.gradus.dashboard.tip3',
       'help.gradus.dashboard.tip4',
+      'help.gradus.dashboard.tip5',
+      'help.gradus.dashboard.tip6',
       'help.gradus.vocabulary.title',
       'help.gradus.vocabulary.summary',
       'help.gradus.vocabulary.tip1',
@@ -74,6 +78,7 @@ void main() {
       'help.gradus.transcript.tip1',
       'help.gradus.transcript.tip2',
       'help.gradus.transcript.tip3',
+      'help.gradus.transcript.tip4',
       'help.gradus.backup.title',
       'help.gradus.backup.summary',
       'help.gradus.backup.tip1',
@@ -116,5 +121,18 @@ void main() {
     }
 
     expect(missing, isEmpty, reason: '参照キーが未定義または空: $missing');
+  });
+
+  test('help.gradus.dashboard.tip3 はタップと長押しの動線を説明している', () {
+    final ja = mapFor('ja')['help.gradus.dashboard.tip3']!;
+    final en = mapFor('en')['help.gradus.dashboard.tip3']!;
+    final vi = mapFor('vi')['help.gradus.dashboard.tip3']!;
+
+    expect(ja, contains('長押し'));
+    expect(ja, contains('詳細'));
+    expect(en.toLowerCase(), contains('long-press'));
+    expect(en.toLowerCase(), contains('latest'));
+    expect(vi.toLowerCase(), contains('nhấn giữ'));
+    expect(vi.toLowerCase(), contains('mới nhất'));
   });
 }

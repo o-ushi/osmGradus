@@ -13,7 +13,7 @@ import 'ghost_pill.dart';
 /// [reasonLabel] / [onReasonTap] も同様に、「理由」枠を別ラベル＋タップ
 /// 操作のボタンに転用できる。
 /// [reasonIcon]を指定すると、[reasonLabel]より優先してアイコンボタンに
-/// なる（レイヤーⅠの単語帳導線、レイヤーⅡの解答例＝Chrome AI往復導線、
+/// なる（レイヤーⅠの単語帳導線、レイヤーⅡ・Ⅳの解答例＝Chrome AI往復導線、
 /// レイヤーⅢのPREP「理由」欄で使う、[exampleIcon]と同じ差し替え方式）。
 class PrepLabelRow extends StatelessWidget {
   const PrepLabelRow({
@@ -47,6 +47,7 @@ class PrepLabelRow extends StatelessWidget {
     this.exampleActiveFill,
     this.exampleActiveForeground,
     this.onExampleTap,
+    this.onExampleLongPress,
     this.exampleHintTapText,
     this.exampleHintLongPressText,
   });
@@ -116,6 +117,11 @@ class PrepLabelRow extends StatelessWidget {
   final Color? exampleActiveFill;
   final Color? exampleActiveForeground;
   final VoidCallback? onExampleTap;
+
+  /// 非nullの場合、[exampleIcon]モードのピルで長押しを別動作に使う
+  /// （[onReasonLongPress]と同型。レイヤーⅠ・Ⅳ・Ⅴの「結果一覧」ボタンで、
+  /// タップ＝最新詳細・長押し＝一覧の動線分けに使う、Step 7で配線）。
+  final VoidCallback? onExampleLongPress;
 
   /// 非nullの場合、[exampleIcon]モードのピルにダブルタップの機能ヒント
   /// （[conclusionHintTapText]と同じStep 7の[ButtonActionHint]基盤）を付ける。
@@ -196,6 +202,7 @@ class PrepLabelRow extends StatelessWidget {
                   showBorder: false,
                   horizontalPadding: 0,
                   onTap: onExampleTap,
+                  onLongPress: onExampleLongPress,
                   hintTapText: exampleHintTapText?.tr(lang),
                   hintLongPressText: exampleHintLongPressText?.tr(lang),
                 )

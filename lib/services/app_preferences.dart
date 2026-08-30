@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/layer4_prompt_reveal_mode.dart';
 import '../models/long_article_word_selection_mode.dart';
 import '../models/recording_mode.dart';
 import '../models/vocab_answer_mode.dart';
@@ -23,6 +24,8 @@ class AppPreferences {
       'osmGradus.buttonHint.persistUntilNextAction';
   static const buttonHintDisplaySecondsKey =
       'osmGradus.buttonHint.displaySeconds';
+  static const layer4PromptRevealModeKey =
+      'osmGradus.layer4.promptRevealMode';
   static const defaultLanguage = 'vi';
 
   /// ダブルタップの機能ヒント（Step 7）の既定表示期間・選択肢（秒）。
@@ -137,4 +140,17 @@ class AppPreferences {
 
   set buttonHintDisplaySeconds(int value) =>
       _prefs.setInt(buttonHintDisplaySecondsKey, value);
+
+  /// レイヤーⅣのお題表示モード（ラピッド/タートル）。既定はタートル
+  /// （ランダムでも問題文を確認してから読み上げられるようにするため）。
+  Layer4PromptRevealMode get layer4PromptRevealMode {
+    final raw = _prefs.getString(layer4PromptRevealModeKey);
+    return Layer4PromptRevealMode.values.firstWhere(
+      (mode) => mode.name == raw,
+      orElse: () => Layer4PromptRevealMode.turtle,
+    );
+  }
+
+  set layer4PromptRevealMode(Layer4PromptRevealMode value) =>
+      _prefs.setString(layer4PromptRevealModeKey, value.name);
 }

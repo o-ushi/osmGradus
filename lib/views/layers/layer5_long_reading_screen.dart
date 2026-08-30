@@ -9,6 +9,7 @@ import '../../main.dart' show appSettings, topicSpeechReader;
 import '../../models/long_article.dart';
 import '../../models/pronunciation_evaluation.dart';
 import '../../models/saved_pronunciation_check.dart';
+import '../../navigation/app_routes.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/pronunciation_ai_response_parser.dart';
 import '../../services/pronunciation_check_storage.dart';
@@ -19,7 +20,7 @@ import '../../widgets/genki_transport_row.dart';
 import '../../widgets/google_ai_send_consent_dialog.dart';
 import '../../widgets/last_recording_playback_mixin.dart';
 import '../../widgets/prep_label_row.dart';
-import '../../widgets/pronunciation_evaluation_result_view.dart';
+import '../../widgets/pronunciation_result_preview_dialog.dart';
 import '../../widgets/pronunciation_mic_button.dart';
 import '../../widgets/reset_button_visibility_mixin.dart';
 import '../../widgets/speech_processing_consent_dialog.dart';
@@ -313,24 +314,10 @@ class Layer5LongReadingScreenState extends State<Layer5LongReadingScreen>
 
   Future<void> _showResultDialog(PronunciationEvaluation evaluation) async {
     if (!mounted) return;
-    final lang = appSettings.language;
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text('評価結果プレビュー'.tr(lang)),
-        content: SingleChildScrollView(
-          child: PronunciationEvaluationResultView(
-            evaluation: evaluation,
-            languageCode: lang,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text('完了'.tr(lang)),
-          ),
-        ],
-      ),
+    await showPronunciationResultPreviewDialog(
+      context,
+      evaluation: evaluation,
+      languageCode: appSettings.language,
     );
   }
 
@@ -367,6 +354,12 @@ class Layer5LongReadingScreenState extends State<Layer5LongReadingScreen>
 
   Future<void> _openHistory() async {
     await PronunciationHistoryScreen.push(context);
+    await _loadHasSavedChecks();
+  }
+
+  /// 「例示」枠タップ＝最新1件の発音チェック結果詳細を開く（Step 7）。
+  Future<void> _openLatestResult() async {
+    await AppRoutes.openLatestPronunciationCheck(context);
     await _loadHasSavedChecks();
   }
 
@@ -554,7 +547,11 @@ class Layer5LongReadingScreenState extends State<Layer5LongReadingScreen>
                 exampleIcon: Icons.list_alt_rounded,
                 exampleTooltip: '発音チェック結果',
                 exampleActive: _hasSavedChecks,
-                onExampleTap: _openHistory,
+                // タップ＝最新1件の詳細、長押し＝一覧（Step 7）。
+                onExampleTap: _openLatestResult,
+                onExampleLongPress: _openHistory,
+                exampleHintTapText: '発音チェック結果_最新',
+                exampleHintLongPressText: '発音チェック結果_一覧',
               ),
               const SizedBox(height: 8),
               GenkiTransportRow(

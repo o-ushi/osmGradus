@@ -20,7 +20,8 @@ import 'scoring_indicator_glossary_screen.dart';
 /// 開発者向けキャリブレーション・各指標の定義への導線まで、osmWashabeが
 /// 持つ内容をすべて移植する。録音の聞き直しだけは対象外
 /// （osmGradusは採点結果に音声を保存しないため）。
-/// 採点完了後は自動遷移せず、レイヤーⅣの「例示」枠から一覧経由で開く。
+/// 採点完了後は自動遷移せず、レイヤーⅣの「例示」枠から
+/// タップ（最新1件）または長押し（一覧）で開く。
 class ScoringResultScreen extends StatelessWidget {
   const ScoringResultScreen({super.key, required this.result});
 

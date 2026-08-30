@@ -31,6 +31,7 @@ abstract final class LayerHelpTips {
         'help.gradus.layer2.tip4',
         'help.gradus.layer2.tip5',
         'help.gradus.layer2.tip6',
+        'help.gradus.layer2.tip7',
       ],
     ),
     LayerHelpTipSpec(
@@ -42,6 +43,7 @@ abstract final class LayerHelpTips {
         'help.gradus.layer3.tip3',
         'help.gradus.layer3.tip4',
         'help.gradus.layer3.tip5',
+        'help.gradus.layer3.tip6',
       ],
     ),
     LayerHelpTipSpec(
@@ -52,6 +54,8 @@ abstract final class LayerHelpTips {
         'help.gradus.layer4.tip2',
         'help.gradus.layer4.tip3',
         'help.gradus.layer4.tip4',
+        'help.gradus.layer4.tip5',
+        'help.gradus.layer4.tip6',
       ],
     ),
     LayerHelpTipSpec(
@@ -63,6 +67,7 @@ abstract final class LayerHelpTips {
         'help.gradus.layer5.tip3',
         'help.gradus.layer5.tip4',
         'help.gradus.layer5.tip5',
+        'help.gradus.layer5.tip6',
       ],
     ),
   ];

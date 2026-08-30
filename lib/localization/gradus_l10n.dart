@@ -210,10 +210,16 @@ abstract final class GradusL10n {
     'レイヤーⅣ_使い方_タイマー': '1️⃣ タイマーを選択',
     'レイヤーⅣ_使い方_カテゴリ': '2️⃣ カテゴリを選択',
     'レイヤーⅣ_使い方_サイコロ': '3️⃣ {{icon}} ボタンで問題文を表示',
+    'レイヤーⅣ_使い方_サイコロ_タートル': '3️⃣ {{icon}} タップで問題文を表示→もう一度タップで読み上げ',
+    'レイヤーⅣ_使い方_モード切替': '長押しでラピッド／タートルを切り替え（タートルは問題文を確認してから読み上げ）',
     'レイヤーⅣ_使い方_日本語回答': '4️⃣ 音声を聴いたら日本語で回答',
-    'レイヤーⅣ_使い方_PREP的中度': '5️⃣ {{icon}} ボタンでPREP評価・的中度も依頼',
-    'レイヤーⅣ_使い方_採点結果': '6️⃣ 採点結果を確認',
+    'レイヤーⅣ_使い方_解答例': '5️⃣ 抽選後は「解答例」でChrome AIに依頼→戻って貼り付け（うまくいかなければ枠に直接貼る）',
+    'レイヤーⅣ_使い方_PREP的中度': '6️⃣ {{icon}} ボタンでPREP評価・的中度も依頼',
+    'レイヤーⅣ_使い方_採点結果': '7️⃣ 採点結果を確認',
     'レイヤーⅣ_採点完了_案内': '採点が完了しました。例示ボタンから結果を確認できます。',
+    'レイヤーⅣ_モード_ラピッド': 'ラピッド',
+    'レイヤーⅣ_モード_タートル': 'タートル',
+    'レイヤーⅣ_モード_切替': 'モードを{{mode}}に切り替えました',
     'PREP評価': 'PREP評価',
     'PREP': 'PREP',
     '的中度': '的中度',
@@ -244,6 +250,8 @@ abstract final class GradusL10n {
     'レイヤーⅠ_語彙_正解数': '正解 %1 / %2問',
     'レイヤーⅠ_語彙_問題文の見直し': '問題文の見直し',
     '語彙力評価結果': '語彙力評価結果',
+    '語彙力評価結果_最新': '最新の結果を見る',
+    '語彙力評価結果_一覧': '結果一覧を見る',
     'まだ語彙力評価結果がありません': 'まだ語彙力評価結果がありません',
     '出題した単語': '出題した単語',
     'Chrome AIの回答を解析できませんでした': 'Chrome AIの回答を解析できませんでした',
@@ -302,7 +310,11 @@ abstract final class GradusL10n {
     'このお題はすでに追加されています。': 'この問題文はすでに追加されています。',
     '追加済みのお題': '追加済みの問題文',
     '採点結果': '採点結果',
+    '採点結果_最新': '最新の結果を見る',
+    '採点結果_一覧': '結果一覧を見る',
     '発音チェック結果': '発音チェック結果',
+    '発音チェック結果_最新': '最新の結果を見る',
+    '発音チェック結果_一覧': '結果一覧を見る',
     '発音チェック': '発音チェック',
     'まだ採点結果がありません': 'まだ採点結果がありません',
     'まだ発音チェック結果がありません': 'まだ発音チェック結果がありません',
@@ -413,8 +425,10 @@ abstract final class GradusL10n {
     'JSST評点記入状況': 'JSST評点記入状況',
     '開始': '開始',
     'レイヤーⅣ_問題文_使い方_開始': '2️⃣ {{icon}} ボタンで開始',
+    'レイヤーⅣ_問題文_使い方_開始_タートル': '2️⃣ {{icon}} タップで問題文を表示→もう一度タップで開始',
     'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ 音声を聴いたら日本語で回答',
-    'レイヤーⅣ_問題文_使い方_解答例': '4️⃣ Ⅱで「解答例」を取得済みなら、同じアイコンから読み返せる（Ⅳでは取得しない）',
+    'レイヤーⅣ_問題文_使い方_解答例':
+        '4️⃣ 「解答例」でChrome AIに依頼→戻って貼り付け（うまくいかなければ枠に直接貼る。Ⅱで取得済みなら同じアイコンから読める）',
     'レイヤーⅣ_問題文_使い方_PREP的中度': '5️⃣ {{icon}} ボタンでPREP評価・的中度も依頼',
     'レイヤーⅣ_問題文_使い方_採点結果': '6️⃣ 採点結果を確認',
     'レイヤーⅣ_問題文_使い方_V': '7️⃣ 「V」でレイヤーⅤへ進む',
@@ -570,7 +584,8 @@ abstract final class GradusL10n {
         '（タップで選び直し、長押しで自動送信。9語テストの代わりにはならない）。'
         '保存後はレイヤーⅤで音読できる',
     'help.gradus.layer1.tip4':
-        '語彙：10問テスト。🇻🇳/🇺🇸/🇯🇵で音声またはキーボード回答。過去の回答は✏️から修正。＋でChrome AI取り込み。標準語彙は例文つき',
+        '語彙：10問テスト。🇻🇳/🇺🇸/🇯🇵で音声またはキーボード回答。過去の回答は✏️から修正。＋でChrome AI取り込み。標準語彙は例文つき。'
+        '語彙力評価結果ボタンはタップで最新1件の詳細、長押しで結果一覧を開く',
     'help.gradus.layer1.tip5': '耳慣れ：URL・検索・おすすめから番組を登録して再生する',
     'help.gradus.layer1.tip6': 'モード切替はヘッダーのⅠを再タップ',
     'help.gradus.layer2.title': 'レイヤーⅡ：問題文',
@@ -604,8 +619,12 @@ abstract final class GradusL10n {
     'help.gradus.layer4.tip2': 'タイマー終了後、自動で録音→JSST参考レベルを採点する',
     'help.gradus.layer4.tip3': '紙飛行機でPREP評価・的中度も依頼する（評点。レイヤーⅢのPREPガイドとは別）',
     'help.gradus.layer4.tip4':
-        '「問題文一覧から選ぶ」でⅡの解答例を取得済みなら、'
-        '「解答例」アイコンから読み返せる（Ⅳでの取得・再取得はしない）',
+        '「問題文一覧から選ぶ」でも「ランダム」（抽選後）でも、Ⅱと同じ'
+        '「解答例」アイコンでChrome AIに模範解答を作成・閲覧できる',
+    'help.gradus.layer4.tip5':
+        'サイコロ（または開始）ボタンを長押しすると、ラピッド（1タップで読み上げ）と'
+        'タートル（表示してから読み上げ）を切り替えられる',
+    'help.gradus.layer4.tip6': '採点結果ボタンはタップで最新1件の詳細、長押しで結果一覧を開く',
     'help.gradus.layer5.title': 'レイヤーⅤ：発音',
     'help.gradus.layer5.summary': '発音を整える',
     'help.gradus.layer5.tip1':
@@ -618,6 +637,8 @@ abstract final class GradusL10n {
         '同意して送信すると、文字起こしをもとにGoogle AIが参考評価を行う（録音音声はGoogleへ送信しない）',
     'help.gradus.layer5.tip4': 'Chromeから戻ると自動取り込み。緑の貼り付けボタンで★評価を保存',
     'help.gradus.layer5.tip5': 'ランダム／問題文のみ：画面左上のボタンで断続・半連続・連続モードを切り替えられる',
+    'help.gradus.layer5.tip6':
+        '発音チェック結果ボタンはタップで最新1件の詳細、長押しで結果一覧を開く（ランダム・問題文・長文読み上げで共通）',
     'help.gradus.vocabulary.title': '単語帳',
     'help.gradus.vocabulary.summary': 'フラッシュカードで単語を復習する',
     'help.gradus.vocabulary.tip1': '起動画面のアイコンから開く',
@@ -630,7 +651,8 @@ abstract final class GradusL10n {
     'help.gradus.dashboard.tip2':
         'テスト総合はJSST・的中度・PREP・語彙・発音の平均点でA〜Dが決まる（1つでも欠けるとE）。'
         '総合はテスト総合と拡充度総合を組み合わせて決まる',
-    'help.gradus.dashboard.tip3': '各行をタップすると履歴が開く。練習記録が1件でもあれば紙飛行機でアドバイスを受け取れる',
+    'help.gradus.dashboard.tip3':
+        '各行をタップすると最新の結果の詳細、長押しで一覧が開く。練習記録が1件でもあれば紙飛行機でアドバイスを受け取れる',
     'help.gradus.dashboard.tip4':
         '語彙の点数はレイヤーⅠの単語テスト結果のみ（長文読解は1秒チェックを1問目に含めた語彙テストも含む。読解中に単語帳へ登録しただけでは点数に入らない）',
     'help.gradus.dashboard.tip5':
@@ -1028,12 +1050,24 @@ abstract final class GradusL10n {
     'レイヤーⅣ_使い方_タイマー': '1️⃣ Choose a timer',
     'レイヤーⅣ_使い方_カテゴリ': '2️⃣ Choose a category',
     'レイヤーⅣ_使い方_サイコロ': '3️⃣ {{icon}} button: Show a prompt',
+    'レイヤーⅣ_使い方_サイコロ_タートル':
+        '3️⃣ {{icon}} button: Tap to show the prompt, tap again to read it '
+        'aloud',
+    'レイヤーⅣ_使い方_モード切替':
+        'Long-press to switch Rapid/Turtle (Turtle shows the prompt before '
+        'reading it aloud)',
     'レイヤーⅣ_使い方_日本語回答': '4️⃣ Listen to the audio, then answer in Japanese',
+    'レイヤーⅣ_使い方_解答例':
+        '5️⃣ After drawing, tap "Sample answer" to ask Chrome AI, then return '
+        'and paste (or paste into the box if needed)',
     'レイヤーⅣ_使い方_PREP的中度':
-        '5️⃣ {{icon}} button: Also request a PREP score and relevance score',
-    'レイヤーⅣ_使い方_採点結果': '6️⃣ Check the scoring result',
+        '6️⃣ {{icon}} button: Also request a PREP score and relevance score',
+    'レイヤーⅣ_使い方_採点結果': '7️⃣ Check the scoring result',
     'レイヤーⅣ_採点完了_案内':
         'Scoring complete. Open the example button to view your result.',
+    'レイヤーⅣ_モード_ラピッド': 'Rapid',
+    'レイヤーⅣ_モード_タートル': 'Turtle',
+    'レイヤーⅣ_モード_切替': 'Switched to {{mode}} mode',
     'PREP評価': 'PREP score',
     'PREP': 'PREP',
     '的中度': 'Relevance',
@@ -1073,6 +1107,8 @@ abstract final class GradusL10n {
     'レイヤーⅠ_語彙_正解数': '%1 / %2 correct',
     'レイヤーⅠ_語彙_問題文の見直し': 'Prompt review',
     '語彙力評価結果': 'Vocabulary evaluation result',
+    '語彙力評価結果_最新': 'View latest result',
+    '語彙力評価結果_一覧': 'View result list',
     'まだ語彙力評価結果がありません': 'No vocabulary evaluation results yet',
     '出題した単語': 'Words asked',
     'Chrome AIの回答を解析できませんでした': 'Could not parse the Chrome AI response',
@@ -1133,7 +1169,11 @@ abstract final class GradusL10n {
     'このお題はすでに追加されています。': 'This prompt has already been added.',
     '追加済みのお題': 'Added prompts',
     '採点結果': 'Scoring results',
+    '採点結果_最新': 'View latest result',
+    '採点結果_一覧': 'View result list',
     '発音チェック結果': 'Pronunciation results',
+    '発音チェック結果_最新': 'View latest result',
+    '発音チェック結果_一覧': 'View result list',
     '発音チェック': 'Pronunciation check',
     'まだ採点結果がありません': 'No scoring results yet',
     'まだ発音チェック結果がありません': 'No pronunciation results yet',
@@ -1257,10 +1297,13 @@ abstract final class GradusL10n {
     'JSST評点記入状況': 'JSST level status',
     '開始': 'Start',
     'レイヤーⅣ_問題文_使い方_開始': '2️⃣ {{icon}} button: Start',
+    'レイヤーⅣ_問題文_使い方_開始_タートル':
+        '2️⃣ {{icon}} button: Tap to show the prompt, tap again to start',
     'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ Listen to the audio, then answer in Japanese',
     'レイヤーⅣ_問題文_使い方_解答例':
-        '4️⃣ If a sample answer was fetched in Layer II, re-read it via the '
-        'same icon (Layer IV never fetches it)',
+        '4️⃣ Tap "Sample answer" to ask Chrome AI, then return and paste '
+        '(or paste into the box if needed - if one was already fetched in '
+        'Layer II, read it via the same icon)',
     'レイヤーⅣ_問題文_使い方_PREP的中度':
         '5️⃣ {{icon}} button: also ask for a PREP/relevance evaluation',
     'レイヤーⅣ_問題文_使い方_採点結果': '6️⃣ Check the scoring result',
@@ -1435,7 +1478,8 @@ abstract final class GradusL10n {
         'long-press to auto-send; it does not replace the 9-word test). '
         'After saving, read aloud in Layer V',
     'help.gradus.layer1.tip4':
-        'Vocab: 10 questions. Answer in 🇻🇳/🇺🇸/🇯🇵 by voice or keyboard. Edit past answers via ✏️. “+” imports via Chrome AI. Built-in words include example sentences',
+        'Vocab: 10 questions. Answer in 🇻🇳/🇺🇸/🇯🇵 by voice or keyboard. Edit past answers via ✏️. “+” imports via Chrome AI. Built-in words include example sentences. '
+        'Tap the vocabulary evaluation results button for the latest details, or long-press for the result list',
     'help.gradus.layer1.tip5':
         'Listening: register shows from URL, search, or recommendations, then play',
     'help.gradus.layer1.tip6': 'Switch modes by tapping Ⅰ in the header again',
@@ -1486,9 +1530,16 @@ abstract final class GradusL10n {
     'help.gradus.layer4.tip3':
         'Use the paper plane to request PREP and relevance scores (scores — separate from Layer III’s PREP guide)',
     'help.gradus.layer4.tip4':
-        '"Choose from prompt list": if a sample answer was already fetched '
-        'in Layer II, you can re-read it via the "Sample answer" icon '
-        '(Layer IV never fetches or refetches it)',
+        'Both "Choose from prompt list" and "Random" (after drawing) share '
+        'the same "Sample answer" icon as Layer II to create and view a '
+        'Chrome AI sample answer',
+    'help.gradus.layer4.tip5':
+        'Long-press the dice (or start) button to switch between Rapid '
+        '(reads aloud after one tap) and Turtle (shows the prompt first, '
+        'then reads aloud)',
+    'help.gradus.layer4.tip6':
+        'Tap the scoring results button to open the latest result, or '
+        'long-press it to open the result list',
     'help.gradus.layer5.title': 'Layer V: Pronunciation',
     'help.gradus.layer5.summary': 'Refine your pronunciation',
     'help.gradus.layer5.tip1':
@@ -1506,6 +1557,10 @@ abstract final class GradusL10n {
     'help.gradus.layer5.tip5':
         'Random / prompt only: use the top-left button to switch intermittent, '
         'semi-continuous, and continuous modes',
+    'help.gradus.layer5.tip6':
+        'Tap the pronunciation check results button to open the latest result, '
+        'or long-press it to open the result list (same in Random, prompt, and '
+        'long read-aloud)',
     'help.gradus.vocabulary.title': 'Vocabulary',
     'help.gradus.vocabulary.summary': 'Review words with flashcards',
     'help.gradus.vocabulary.tip1': 'Open from the launch screen icon',
@@ -1522,7 +1577,8 @@ abstract final class GradusL10n {
     'help.gradus.dashboard.tip2':
         'Test overall A–D is decided by the average of your JSST, relevance, PREP, vocabulary, and pronunciation scores (E if any is missing). Overall combines Test overall and Expansion overall',
     'help.gradus.dashboard.tip3':
-        'Tap each row for history. If you have any practice record, use the paper plane for advice',
+        'Tap each row for the latest result details; long-press for the list. '
+        'If you have any practice record, use the paper plane for advice',
     'help.gradus.dashboard.tip4':
         'Vocabulary score uses Layer I vocabulary-test results only (this includes long-article tests, with the Quick Check as question 1; merely registering words while reading does not count)',
     'help.gradus.dashboard.tip5':
@@ -1940,11 +1996,21 @@ abstract final class GradusL10n {
     'レイヤーⅣ_使い方_タイマー': '1️⃣ Chọn hẹn giờ',
     'レイヤーⅣ_使い方_カテゴリ': '2️⃣ Chọn danh mục',
     'レイヤーⅣ_使い方_サイコロ': '3️⃣ Nút {{icon}}: Hiện đề bài',
+    'レイヤーⅣ_使い方_サイコロ_タートル':
+        '3️⃣ Nút {{icon}}: Nhấn để hiện đề bài, nhấn lại để đọc to',
+    'レイヤーⅣ_使い方_モード切替':
+        'Nhấn giữ để chuyển Nhanh/Rùa (Rùa hiện đề bài trước khi đọc to)',
     'レイヤーⅣ_使い方_日本語回答': '4️⃣ Nghe xong thì trả lời bằng tiếng Nhật',
+    'レイヤーⅣ_使い方_解答例':
+        '5️⃣ Sau khi ra đề, nhấn "Câu trả lời mẫu" để nhờ Chrome AI, rồi quay '
+        'lại và dán (hoặc dán vào ô nếu cần)',
     'レイヤーⅣ_使い方_PREP的中度':
-        '5️⃣ Nút {{icon}}: Yêu cầu thêm điểm PREP và độ trúng đích',
-    'レイヤーⅣ_使い方_採点結果': '6️⃣ Xem kết quả chấm điểm',
+        '6️⃣ Nút {{icon}}: Yêu cầu thêm điểm PREP và độ trúng đích',
+    'レイヤーⅣ_使い方_採点結果': '7️⃣ Xem kết quả chấm điểm',
     'レイヤーⅣ_採点完了_案内': 'Chấm điểm xong. Mở nút ví dụ để xem kết quả.',
+    'レイヤーⅣ_モード_ラピッド': 'Nhanh',
+    'レイヤーⅣ_モード_タートル': 'Rùa',
+    'レイヤーⅣ_モード_切替': 'Đã chuyển sang chế độ {{mode}}',
     'PREP評価': 'Điểm PREP',
     'PREP': 'PREP',
     '的中度': 'Độ trúng đích',
@@ -1983,6 +2049,8 @@ abstract final class GradusL10n {
     'レイヤーⅠ_語彙_正解数': 'Đúng %1 / %2 câu',
     'レイヤーⅠ_語彙_問題文の見直し': 'Ôn lại đề bài',
     '語彙力評価結果': 'Kết quả đánh giá vốn từ vựng',
+    '語彙力評価結果_最新': 'Xem kết quả mới nhất',
+    '語彙力評価結果_一覧': 'Xem danh sách kết quả',
     'まだ語彙力評価結果がありません': 'Chưa có kết quả đánh giá vốn từ vựng',
     '出題した単語': 'Các từ đã ra đề',
     'Chrome AIの回答を解析できませんでした': 'Không thể phân tích phản hồi của Chrome AI',
@@ -2042,7 +2110,11 @@ abstract final class GradusL10n {
     'このお題はすでに追加されています。': 'Đề bài này đã được thêm rồi.',
     '追加済みのお題': 'Đề bài đã thêm',
     '採点結果': 'Kết quả chấm điểm',
+    '採点結果_最新': 'Xem kết quả mới nhất',
+    '採点結果_一覧': 'Xem danh sách kết quả',
     '発音チェック結果': 'Kết quả phát âm',
+    '発音チェック結果_最新': 'Xem kết quả mới nhất',
+    '発音チェック結果_一覧': 'Xem danh sách kết quả',
     '発音チェック': 'Kiểm tra phát âm',
     'まだ採点結果がありません': 'Chưa có kết quả chấm điểm',
     'まだ発音チェック結果がありません': 'Chưa có kết quả phát âm',
@@ -2166,10 +2238,13 @@ abstract final class GradusL10n {
     'JSST評点記入状況': 'Tình trạng điểm JSST',
     '開始': 'Bắt đầu',
     'レイヤーⅣ_問題文_使い方_開始': '2️⃣ Nút {{icon}}: Bắt đầu',
+    'レイヤーⅣ_問題文_使い方_開始_タートル':
+        '2️⃣ Nút {{icon}}: Nhấn để hiện đề bài, nhấn lại để bắt đầu',
     'レイヤーⅣ_問題文_使い方_日本語回答': '3️⃣ Nghe xong thì trả lời bằng tiếng Nhật',
     'レイヤーⅣ_問題文_使い方_解答例':
-        '4️⃣ Nếu đã lấy câu trả lời mẫu ở Tầng II, có thể đọc lại qua cùng '
-        'biểu tượng đó (Tầng IV không lấy)',
+        '4️⃣ Nhấn "Câu trả lời mẫu" để nhờ Chrome AI, rồi quay lại và dán '
+        '(hoặc dán vào ô nếu cần - nếu đã lấy ở Tầng II thì đọc lại qua '
+        'cùng biểu tượng đó)',
     'レイヤーⅣ_問題文_使い方_PREP的中度':
         '5️⃣ Nút {{icon}}: Nhờ đánh giá thêm PREP và độ chính xác',
     'レイヤーⅣ_問題文_使い方_採点結果': '6️⃣ Xem kết quả chấm điểm',
@@ -2341,7 +2416,8 @@ abstract final class GradusL10n {
         'ý thêm (chạm để chọn lại, nhấn giữ để gửi tự động; không thay thế '
         'bài kiểm tra 9 từ). Sau khi lưu có thể đọc to ở Tầng V',
     'help.gradus.layer1.tip4':
-        'Từ vựng: 10 câu. Trả lời 🇻🇳/🇺🇸/🇯🇵 bằng giọng nói hoặc bàn phím. Sửa câu trước bằng ✏️. “+” nhập qua Chrome AI. Từ chuẩn có câu ví dụ',
+        'Từ vựng: 10 câu. Trả lời 🇻🇳/🇺🇸/🇯🇵 bằng giọng nói hoặc bàn phím. Sửa câu trước bằng ✏️. “+” nhập qua Chrome AI. Từ chuẩn có câu ví dụ. '
+        'Chạm nút kết quả đánh giá từ vựng để xem chi tiết mới nhất, nhấn giữ để xem danh sách kết quả',
     'help.gradus.layer1.tip5':
         'Nghe: đăng ký chương trình qua URL, tìm kiếm hoặc gợi ý rồi phát',
     'help.gradus.layer1.tip6': 'Đổi chế độ bằng cách chạm lại Ⅰ trên thanh đầu',
@@ -2391,9 +2467,15 @@ abstract final class GradusL10n {
     'help.gradus.layer4.tip3':
         'Dùng máy bay giấy để nhờ đánh giá PREP và độ trúng đích (điểm — khác với hướng dẫn PREP ở Tầng III)',
     'help.gradus.layer4.tip4':
-        '“Chọn từ danh sách đề bài”: nếu đã lấy câu trả lời mẫu ở Tầng II, '
-        'có thể đọc lại qua biểu tượng “Câu trả lời mẫu” (Tầng IV không '
-        'lấy hay lấy lại)',
+        'Cả “Chọn từ danh sách đề bài” lẫn “Ngẫu nhiên” (sau khi ra đề) đều '
+        'dùng chung biểu tượng “Câu trả lời mẫu” như Tầng II để tạo và xem '
+        'câu trả lời mẫu bằng Chrome AI',
+    'help.gradus.layer4.tip5':
+        'Nhấn giữ nút xúc xắc (hoặc nút bắt đầu) để chuyển giữa Nhanh (đọc '
+        'to ngay sau khi nhấn) và Rùa (hiện đề bài trước rồi mới đọc to)',
+    'help.gradus.layer4.tip6':
+        'Nhấn vào nút kết quả chấm điểm để xem kết quả mới nhất, nhấn giữ '
+        'để xem danh sách kết quả',
     'help.gradus.layer5.title': 'Tầng V: Phát âm',
     'help.gradus.layer5.summary': 'Chỉnh phát âm',
     'help.gradus.layer5.tip1':
@@ -2411,6 +2493,10 @@ abstract final class GradusL10n {
     'help.gradus.layer5.tip5':
         'Chỉ ngẫu nhiên / đề bài: dùng nút góc trên trái để chuyển chế độ '
         'ngắt quãng / bán liên tục / liên tục',
+    'help.gradus.layer5.tip6':
+        'Chạm nút kết quả kiểm tra phát âm để xem chi tiết mới nhất, nhấn giữ '
+        'để xem danh sách kết quả (dùng chung cho Ngẫu nhiên, đề bài và đọc '
+        'đoạn dài)',
     'help.gradus.vocabulary.title': 'Sổ từ vựng',
     'help.gradus.vocabulary.summary': 'Ôn từ bằng thẻ flashcard',
     'help.gradus.vocabulary.tip1': 'Mở từ biểu tượng màn hình khởi động',
@@ -2427,7 +2513,8 @@ abstract final class GradusL10n {
     'help.gradus.dashboard.tip2':
         'Tổng hợp bài kiểm tra (A–D) được quyết định bằng điểm trung bình JSST / độ trúng đích / PREP / từ vựng / phát âm (thiếu 1 chỉ số cũng thành E). Đánh giá tổng hợp kết hợp Tổng hợp bài kiểm tra và Tổng hợp mở rộng',
     'help.gradus.dashboard.tip3':
-        'Chạm từng dòng để xem lịch sử. Nếu đã có ít nhất 1 bản ghi luyện tập, dùng máy bay giấy để nhận lời khuyên',
+        'Chạm từng dòng để xem chi tiết kết quả mới nhất; nhấn giữ để xem danh sách. '
+        'Nếu đã có ít nhất 1 bản ghi luyện tập, dùng máy bay giấy để nhận lời khuyên',
     'help.gradus.dashboard.tip4':
         'Điểm từ vựng chỉ lấy từ kết quả kiểm tra từ vựng Tầng I (bao gồm bài đọc dài, với Kiểm tra nhanh là câu 1; chỉ đăng ký từ khi đọc thì không tính điểm)',
     'help.gradus.dashboard.tip5':

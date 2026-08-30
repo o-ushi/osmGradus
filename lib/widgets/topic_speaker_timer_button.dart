@@ -29,9 +29,11 @@ class TopicSpeakerTimerButton extends StatelessWidget {
     this.remainingSeconds,
     this.isPaused = false,
     required this.onTap,
+    this.onLongPress,
     this.size = 140,
     this.idleIcon = Icons.casino,
     this.idleTooltip,
+    this.idleForegroundColor,
   });
 
   /// ボタンの高さ（幅はこの2倍）。内側のアイコン/数字は余白ゼロで
@@ -49,6 +51,10 @@ class TopicSpeakerTimerButton extends StatelessWidget {
 
   final VoidCallback onTap;
 
+  /// 長押しコールバック。phaseがidleのときのみ有効（speaking/counting中は
+  /// 無視する）。レイヤーⅣのサイコロ長押しでのモード切替に使う。
+  final VoidCallback? onLongPress;
+
   /// phaseがidleのときのアイコン。既定はサイコロ。レイヤーⅣ「一覧から選ぶ」
   /// （問題文が既に決まっている詳細画面）では、抽選ではなく開始を表す
   /// アイコンに差し替える。
@@ -57,6 +63,10 @@ class TopicSpeakerTimerButton extends StatelessWidget {
   /// idleIcon用のツールチップ。未指定ならツールチップなし（既定のサイコロと
   /// 同じ、他レイヤーの見た目を変えないための挙動）。
   final String? idleTooltip;
+
+  /// 非nullならidleアイコンの色をこの色にする（既定は[onAccent]のまま）。
+  /// レイヤーⅣのラピッドモード（橙サイコロ）用。
+  final Color? idleForegroundColor;
 
   static const double _baseCountingFontSize = 88;
 
@@ -72,7 +82,11 @@ class TopicSpeakerTimerButton extends StatelessWidget {
     final Widget content;
     switch (phase) {
       case TopicSpeakerTimerPhase.idle:
-        final idleIconWidget = Icon(idleIcon, size: iconSize, color: onAccent);
+        final idleIconWidget = Icon(
+          idleIcon,
+          size: iconSize,
+          color: idleForegroundColor ?? onAccent,
+        );
         content = idleTooltip == null
             ? idleIconWidget
             : Tooltip(message: idleTooltip!, child: idleIconWidget);
@@ -109,6 +123,7 @@ class TopicSpeakerTimerButton extends StatelessWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onLongPress: phase == TopicSpeakerTimerPhase.idle ? onLongPress : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         // 横長の長方形にする：高さはsize基準のまま、幅だけ2倍にする。

@@ -15,6 +15,7 @@ import '../../models/vocab_test_session.dart';
 import '../../models/vocabulary_entry.dart';
 import '../../models/vocabulary_evaluation.dart';
 import '../../models/vocabulary_level.dart';
+import '../../navigation/app_routes.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/jlpt_vocab_bank_service.dart';
 import '../../services/learner_answer_language.dart';
@@ -1300,8 +1301,8 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
 
   /// 保存した評価を、★表示と各問の正誤・フィードバックを添えた簡易
   /// ダイアログでその場で表示する（レイヤーⅤの結果体験に近づける）。
-  /// 過去分をまとめて見るには単語帳アイコンの隣の「語彙力評価結果」アイコンから
-  /// [VocabularyCheckHistoryScreen]を開く（[_openHistory]）。
+  /// 過去分は単語帳の隣の「語彙力評価結果」アイコンから開く（タップ＝
+  /// [_openLatestResult]、長押し＝[_openHistory]）。
   Future<void> _showResultDialog(VocabularyEvaluation evaluation) async {
     if (!mounted) return;
     final lang = appSettings.language;
@@ -1316,10 +1317,16 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
     );
   }
 
-  /// 「語彙力評価結果」アイコンタップ：これまでの単語テスト結果一覧を開く
+  /// 「語彙力評価結果」アイコン長押し：これまでの単語テスト結果一覧を開く
   /// （レイヤーⅤの「発音チェック結果」アイコンと同じ動線）。
   Future<void> _openHistory() async {
     await VocabularyCheckHistoryScreen.push(context);
+    await _loadHasSavedChecks();
+  }
+
+  /// 「語彙力評価結果」アイコンタップ：最新1件の詳細を開く（Step 7）。
+  Future<void> _openLatestResult() async {
+    await AppRoutes.openLatestVocabularyCheck(context);
     await _loadHasSavedChecks();
   }
 
@@ -1669,7 +1676,11 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
                         exampleIcon: Icons.list_alt_rounded,
                         exampleTooltip: '語彙力評価結果',
                         exampleActive: _hasSavedChecks,
-                        onExampleTap: _openHistory,
+                        // タップ＝最新1件の詳細、長押し＝一覧（Step 7）。
+                        onExampleTap: _openLatestResult,
+                        onExampleLongPress: _openHistory,
+                        exampleHintTapText: '語彙力評価結果_最新',
+                        exampleHintLongPressText: '語彙力評価結果_一覧',
                       ),
                       const SizedBox(height: 8),
                       GenkiTransportRow(
