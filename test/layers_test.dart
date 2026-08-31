@@ -20,6 +20,7 @@ import 'package:osm_gradus/models/vocabulary_level.dart';
 import 'package:osm_gradus/notifiers/app_settings.dart';
 import 'package:osm_gradus/services/app_preferences.dart';
 import 'package:osm_gradus/data/long_article_omakase_topics.dart';
+import 'package:osm_gradus/data/topic_bank.dart';
 import 'package:osm_gradus/services/jsst_calibration_preferences.dart';
 import 'package:osm_gradus/services/long_article_service.dart';
 import 'package:osm_gradus/services/podcast_library_service.dart';
@@ -609,22 +610,23 @@ void main() {
       expect(ignorePointer.ignoring, isTrue);
     }
 
-    expect(find.text(_t('日常')), findsOneWidget);
+    expect(find.text(_t('問題文カテゴリ_その他')), findsOneWidget);
     expect(find.byIcon(Icons.casino), findsOneWidget);
     expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
     expect(find.text(_t('どんな回答をするか想像して')), findsOneWidget);
 
-    // QuestionPrompt.categoryはrandomを取らないため、この画面のカテゴリ一覧には
-    // 「ランダム」が出ない（TopicCategoryを使う他のカテゴリ選択とは異なる
-    // プールを使う回帰確認）。
-    await tester.tap(find.text(_t('日常')));
+    // question-prompt-tabs.md Step 3で日常／ビジネスの3分類UIを廃止し、
+    // その他／シチュエーションの2択になった。QuestionPrompt.categoryは
+    // randomを取らないため「ランダム」も出ない。
+    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
     await tester.pumpAndSettle();
-    expect(find.text(_t('ビジネス')), findsOneWidget);
     expect(find.text(_t('シチュエーション')), findsOneWidget);
+    expect(find.text(_t('日常')), findsNothing);
+    expect(find.text(_t('ビジネス')), findsNothing);
     expect(find.text(_t('ランダム')), findsNothing);
-    await tester.tap(find.text(_t('ビジネス')));
+    await tester.tap(find.text(_t('シチュエーション')));
     await tester.pumpAndSettle();
-    expect(find.text(_t('ビジネス')), findsOneWidget);
+    expect(find.text(_t('シチュエーション')), findsOneWidget);
 
     // ダイスタップ中は不確定なCircularProgressIndicatorが一瞬表示されるため、
     // pumpAndSettleではなく明示的なpumpで非同期処理の完了を待つ。
@@ -657,6 +659,37 @@ void main() {
     await tester.pump(const Duration(milliseconds: 350));
     await tester.pumpAndSettle();
     expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
+  });
+
+  testWidgets('レイヤーⅡ「ランダム」画面：タブ「会社」を選ぶと会社タグの問題文だけが抽選される'
+      '（question-prompt-tabs.md Step 3）', (WidgetTester tester) async {
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ⅱ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('ランダム')));
+    await tester.pumpAndSettle();
+
+    // 既定は「その他」選択済みなので、直下のタブ横スクロール行から「会社」を
+    // 選ぶ（組み込みビジネス10問は全問「会社」タグのため、旧businessTopics
+    // 一覧との包含判定で抽選プールが切り替わったことを確認できる）。
+    // 横スクロール行の右寄りにあり初期表示では画面外のため、先にスクロールする。
+    await tester.ensureVisible(find.text(_t('会社')));
+    await tester.tap(find.text(_t('会社')));
+    await tester.pumpAndSettle();
+
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byIcon(Icons.casino));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(
+        TopicBank.businessTopics.any(
+          (body) => find.text(body).evaluate().isNotEmpty,
+        ),
+        isTrue,
+      );
+    }
   });
 
   testWidgets('レイヤーⅡ「ランダム」画面：＋長押しで実際の挙動に合った使い方シートが開き、'
@@ -788,25 +821,20 @@ void main() {
     expect(find.text(_t('取り込み済みのお題')), findsOneWidget);
     expect(find.text(_t('全てクリア')), findsOneWidget);
 
-    // 貼り付け欄に見出し付きテキストを入力して取り込む。
+    // 貼り付け欄に見出し付きテキストを入力して取り込む
+    // （question-prompt-tabs.md Step 4の新見出し【その他】）。
     await tester.enterText(
       find.byType(TextField),
-      '【日常】\n1. 趣味について話してください。\n2. 休日の過ごし方を教えてください。',
+      '【その他】\n1. 趣味について話してください。\n2. 休日の過ごし方を教えてください。',
     );
     await tester.pump();
     await tester.tap(find.text(_t('取り込む')));
     await tester.pump();
 
     expect(tester.takeException(), isNull);
-    // osmWashabeと同じ書式の結果メッセージが表示される。
+    // Step 4からの結果メッセージ書式が表示される。
     expect(
-      find.text(
-        '日常 %lld 件、ビジネス %lld 件、シチュエーション %lld 件を追加しました。'.trFmt(_lang, [
-          '2',
-          '0',
-          '0',
-        ]),
-      ),
+      find.text('その他 %lld 件、シチュエーション %lld 件を追加しました。'.trFmt(_lang, ['2', '0'])),
       findsOneWidget,
     );
 
@@ -838,8 +866,9 @@ void main() {
     // 持つため、pumpAndSettle()は永久に終わらない。以降は明示的なpump()を使う。
     await tester.pump();
 
-    // 分野リストとお題カードはレイヤーⅡと同じく表示される。
-    expect(find.text(_t('日常')), findsOneWidget);
+    // 分野リストとお題カードはレイヤーⅡと同じく表示される
+    // （question-prompt-tabs.md Step 3で分野は「その他」既定に変わった）。
+    expect(find.text(_t('問題文カテゴリ_その他')), findsOneWidget);
     expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
 
     // 45/60/15+60はレイヤーⅡと違い実際に選択できる（IgnorePointerでignoring: false）。
@@ -901,20 +930,24 @@ void main() {
     expect(tester.takeException(), isNull);
 
     // 60秒（45/60秒モード）では、分野の一覧にシチュエーションが出ない
-    // （osmWashabeと同じく「15+60秒」モード専用のため）。PREPガイドが常時
-    // 点滅しているため、ここでもpumpAndSettle()ではなく明示的なpump()を使う。
-    await tester.tap(find.text(_t('日常')));
+    // （osmWashabeと同じく「15+60秒」モード専用のため）。question-prompt-tabs.md
+    // Step 3で日常／ビジネスの3分類UIを廃止したため、この画面の分野は
+    // 「その他」の1択のみ（シート内にも同じラベルの行が出るため、開いたまま
+    // 同テキストを再タップすると曖昧になる。バリアの外側をタップして閉じる）。
+    // PREPガイドが常時点滅しているため、pumpAndSettle()ではなく明示的な
+    // pump()を使う。
+    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text(_t('シチュエーション')), findsNothing);
-    await tester.tap(find.text(_t('ビジネス')));
+    await tester.tapAt(const Offset(20, 20));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
     // 「15+60」に切り替えると、分野の一覧にシチュエーションが出るようになる。
     await tester.tap(find.text('15+60'));
     await tester.pump();
-    await tester.tap(find.text(_t('ビジネス')));
+    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text(_t('シチュエーション')), findsOneWidget);
@@ -923,10 +956,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // 45/60秒モードへ戻すと、シチュエーション選択中だった分野が
-    // 日常にリセットされる（osmWashabeと同じ挙動）。
+    // その他にリセットされる（osmWashabeと同じ挙動）。
     await tester.tap(find.text('45'));
     await tester.pump();
-    expect(find.text(_t('日常')), findsOneWidget);
+    expect(find.text(_t('問題文カテゴリ_その他')), findsOneWidget);
     expect(find.text(_t('シチュエーション')), findsNothing);
 
     // サイコロボタンをタップするとお題が引かれ、スピーカーアイコンに変わる
@@ -3810,9 +3843,7 @@ void main() {
 
     expect(find.byType(ScoringResultScreen), findsOneWidget);
 
-    Navigator.of(
-      tester.element(find.byType(ScoringResultScreen)),
-    ).pop();
+    Navigator.of(tester.element(find.byType(ScoringResultScreen))).pop();
     await tester.pumpAndSettle();
 
     await tester.longPress(find.byIcon(Icons.list_alt_rounded));

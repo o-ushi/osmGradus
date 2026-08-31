@@ -38,7 +38,7 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
     onPrepTick: _playPrepTick,
   );
 
-  TopicCategory selectedCategory = TopicCategory.daily;
+  TopicCategory selectedCategory = TopicCategory.general;
   DrawnTopic? drawnTopic;
   TopicSpeakerTimerPhase buttonPhase = TopicSpeakerTimerPhase.idle;
 
@@ -85,13 +85,13 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
   /// （読み上げ中・カウントダウン中のまま裏に回って動き続けないようにするため）。
   Future<void> resetAttempt();
 
-  /// シチュエーションはosmWashabeと同じく「15+60秒」モード専用。
+  /// シチュエーションはosmWashabeと同じく「15+60秒」モード専用。分野は
+  /// その他（[TopicCategory.general]）／シチュエーションの2つのみ
+  /// （`question-prompt-tabs.md` Step 3、旧日常／ビジネスの3分類UIは廃止）。
   List<TopicCategory> get availableCategories =>
       timerController.usesTwoPhaseTimer
-      ? TopicCategory.values
-      : TopicCategory.values
-            .where((c) => c != TopicCategory.situational)
-            .toList();
+      ? const [TopicCategory.general, TopicCategory.situational]
+      : const [TopicCategory.general];
 
   /// 読み上げ中・カウントダウン中にレイヤー切替・分野変更・プリセット変更が
   /// 起きたとき、裏で動き続けないよう「リセット」ボタンと同じ処理を挟む
@@ -112,7 +112,7 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
     if (option != NormalTimerOption.prep15speaking60 &&
         selectedCategory == TopicCategory.situational) {
       setState(() {
-        selectedCategory = TopicCategory.daily;
+        selectedCategory = TopicCategory.general;
         drawnTopic = null;
       });
     }

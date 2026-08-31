@@ -5,6 +5,7 @@ import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
+import '../../services/question_prompt_auto_tag_service.dart';
 import '../../services/topic_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
@@ -34,9 +35,9 @@ class TopicImportScreen extends StatefulWidget {
 class _TopicImportScreenState extends State<TopicImportScreen>
     with WidgetsBindingObserver, AiImportKeepAliveMixin, AiImportFlowMixin {
   final _service = TopicService();
+  final _autoTagService = QuestionPromptAutoTagService();
 
-  int _dailyCount = 0;
-  int _businessCount = 0;
+  int _generalCount = 0;
   int _situationalCount = 0;
 
   @override
@@ -57,7 +58,10 @@ class _TopicImportScreenState extends State<TopicImportScreen>
 
   @override
   bool looksLikeAiImport(String text) {
-    return text.contains('【日常】') ||
+    // 【日常】【ビジネス】は旧プロンプトの見出し（Step 4で廃止）。読み込み側は
+    // 互換のため引き続き認識する。
+    return text.contains('【その他】') ||
+        text.contains('【日常】') ||
         text.contains('【ビジネス】') ||
         text.contains('【シチュエーション】');
   }
@@ -72,13 +76,11 @@ class _TopicImportScreenState extends State<TopicImportScreen>
 
   @override
   Future<void> loadImportCounts() async {
-    final daily = await _service.loadImported(TopicCategory.daily);
-    final business = await _service.loadImported(TopicCategory.business);
+    final general = await _service.loadImported(TopicCategory.general);
     final situational = await _service.loadImported(TopicCategory.situational);
     if (!mounted) return;
     setState(() {
-      _dailyCount = daily.length;
-      _businessCount = business.length;
+      _generalCount = general.length;
       _situationalCount = situational.length;
     });
   }
@@ -87,38 +89,31 @@ class _TopicImportScreenState extends State<TopicImportScreen>
     final parsed = TopicImportParser.parseBatchImport(
       importTextController.text,
     );
-    final dailyParsed = parsed[TopicCategory.daily] ?? const [];
-    final businessParsed = parsed[TopicCategory.business] ?? const [];
+    final generalParsed = parsed[TopicCategory.general] ?? const [];
     final situationalParsed = parsed[TopicCategory.situational] ?? const [];
 
-    final dailyNew = await _service.importTopics(
-      TopicCategory.daily,
-      dailyParsed,
+    final generalNew = await _service.importTopics(
+      TopicCategory.general,
+      generalParsed,
       source: QuestionPromptSource.ai,
-    );
-    final businessNew = await _service.importTopics(
-      TopicCategory.business,
-      businessParsed,
-      source: QuestionPromptSource.ai,
+      tagsForBody: _autoTagService.suggestTags,
     );
     final situationalNew = await _service.importTopics(
       TopicCategory.situational,
       situationalParsed,
       source: QuestionPromptSource.ai,
     );
-    final total = dailyNew + businessNew + situationalNew;
+    final total = generalNew + situationalNew;
 
     if (!mounted) return;
 
     if (total == 0) {
       final hasAnyParsed =
-          dailyParsed.isNotEmpty ||
-          businessParsed.isNotEmpty ||
-          situationalParsed.isNotEmpty;
+          generalParsed.isNotEmpty || situationalParsed.isNotEmpty;
       setImportResult(
         message: hasAnyParsed
             ? '新しいお題はありませんでした（すべて重複しています）。'
-            : 'お題を読み取れませんでした。【日常】【ビジネス】【シチュエーション】の見出し付きで貼り付けてください。',
+            : 'お題を読み取れませんでした。【その他】【シチュエーション】の見出し付きで貼り付けてください。',
         isError: true,
       );
       return;
@@ -128,8 +123,8 @@ class _TopicImportScreenState extends State<TopicImportScreen>
     await loadImportCounts();
     if (!mounted) return;
     setImportResult(
-      message: '日常 %lld 件、ビジネス %lld 件、シチュエーション %lld 件を追加しました。',
-      counts: [dailyNew, businessNew, situationalNew],
+      message: 'その他 %lld 件、シチュエーション %lld 件を追加しました。',
+      counts: [generalNew, situationalNew],
     );
   }
 
@@ -139,7 +134,7 @@ class _TopicImportScreenState extends State<TopicImportScreen>
       context: context,
       lang: lang,
       title: '取り込み済みお題をすべて削除'.tr(lang),
-      body: '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。'.tr(lang),
+      body: 'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。'.tr(lang),
     );
     if (!confirmed) return;
     await _service.clearAllImported();
@@ -179,7 +174,7 @@ class _TopicImportScreenState extends State<TopicImportScreen>
                         lang: lang,
                         controller: importTextController,
                         onChanged: (_) => setState(() {}),
-                        hintText: '【日常】\n1. ...',
+                        hintText: '【その他】\n1. ...',
                       ),
                     ],
                   ),
@@ -277,13 +272,8 @@ class _TopicImportScreenState extends State<TopicImportScreen>
           const SizedBox(height: 8),
           AiImportCountRow(
             lang: lang,
-            label: '日常'.tr(lang),
-            count: _dailyCount,
-          ),
-          AiImportCountRow(
-            lang: lang,
-            label: 'ビジネス'.tr(lang),
-            count: _businessCount,
+            label: '問題文カテゴリ_その他'.tr(lang),
+            count: _generalCount,
           ),
           AiImportCountRow(
             lang: lang,

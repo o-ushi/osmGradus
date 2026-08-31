@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/question_prompt_builtin_tags.dart';
 import '../data/topic_bank.dart';
 import '../models/question_prompt.dart';
 import '../models/question_prompt_source.dart';
@@ -35,12 +36,42 @@ class QuestionPromptService {
   /// 組み込みバンク（[TopicBank]）・旧`topics.imported.*`データで
   /// このストアにまだ無いものを補いつつ、全件を新しい順とは逆
   /// （保存順＝組み込み→取り込み順）で返す。
+  ///
+  /// 既存ストアに既にある組み込み行（[QuestionPromptSource.builtIn]）は、
+  /// [_builtInPrompts]（[TopicBank]・[QuestionPromptBuiltinTags]）側の
+  /// category・tagsが変わっていれば追随して上書きする（Step 2で組み込みが
+  /// `daily`/`business`→`general`＋タブ付きに切り替わったことに伴う移行。
+  /// 学習進捗フィールドは[QuestionPrompt.copyWith]でそのまま保持する）。
+  /// ただし[QuestionPrompt.contentEdited]がtrueの行（Step 5の長押し編集で
+  /// ユーザーがbody/category/tagsを変更済み）は対象外とする。ここで
+  /// バンク側の値に巻き戻すと、せっかくの編集が次回[loadAll]で消えてしまう。
   Future<List<QuestionPrompt>> loadAll() async {
     var stored = await _store.loadAll();
     final additions = <QuestionPrompt>[];
+    final builtIns = _builtInPrompts();
+    final builtInById = {for (final b in builtIns) b.id: b};
+
+    var storeChanged = false;
+    final migrated = <QuestionPrompt>[];
+    for (final p in stored) {
+      final builtIn = builtInById[p.id];
+      if (builtIn != null &&
+          p.source == QuestionPromptSource.builtIn &&
+          !p.contentEdited &&
+          (p.category != builtIn.category ||
+              !_sameTags(p.tags, builtIn.tags))) {
+        migrated.add(
+          p.copyWith(category: builtIn.category, tags: builtIn.tags),
+        );
+        storeChanged = true;
+      } else {
+        migrated.add(p);
+      }
+    }
+    stored = migrated;
 
     final existingIds = stored.map((p) => p.id).toSet();
-    for (final builtIn in _builtInPrompts()) {
+    for (final builtIn in builtIns) {
       if (existingIds.add(builtIn.id)) additions.add(builtIn);
     }
 
@@ -48,16 +79,22 @@ class QuestionPromptService {
     for (final category in _importableCategories) {
       final raw = await loadImportedTopicsPref(prefs, category);
       if (raw.isEmpty) continue;
+      // Step 6: このサービス導入前（daily/business時代）の生データを移行する
+      // ときも、書き込みはgeneralのみに揃える（normalizeToGeneral）。生リスト
+      // 自体（topics.imported.日常/ビジネス）はここでは動かさない
+      // （[delete]が[_legacyRawKeysFor]で複数キーを探しに行く）。
+      final normalizedCategory = normalizeToGeneral(category);
       final existingBodies = {
         for (final p in [...stored, ...additions])
-          if (p.category == category && p.source != QuestionPromptSource.builtIn)
+          if (p.category == normalizedCategory &&
+              p.source != QuestionPromptSource.builtIn)
             p.body,
       };
       for (final body in raw) {
         if (!existingBodies.add(body)) continue;
         additions.add(
           QuestionPrompt.create(
-            category: category,
+            category: normalizedCategory,
             body: body,
             source: QuestionPromptSource.imported,
           ),
@@ -67,10 +104,16 @@ class QuestionPromptService {
 
     if (additions.isNotEmpty) {
       stored = [...stored, ...additions];
+    }
+    if (additions.isNotEmpty || storeChanged) {
       await _store.saveAll(stored);
     }
     return stored;
   }
+
+  /// 順序を無視したタグの一致判定（[loadAll]の組み込み行マイグレーション判定用）。
+  static bool _sameTags(List<String> a, List<String> b) =>
+      a.length == b.length && a.toSet().containsAll(b);
 
   Future<QuestionPrompt?> loadById(String id) async {
     final all = await loadAll();
@@ -86,8 +129,10 @@ class QuestionPromptService {
     return all.where((p) => p.category == category).toList();
   }
 
-  /// 理解・要約・PREP・スコア・アドバイス等の更新を保存する
-  /// （[id]・[source]・[category]・[body]・[situationCondition]は変えない）。
+  /// 理解・要約・PREP・スコア・アドバイス等の更新を保存する。[prompt]は
+  /// 呼び出し側が[QuestionPrompt.copyWith]で組み立てるため、body/category/tags
+  /// の変更もここを通せば保存できる（[id]は変えない想定。長押し編集画面用の
+  /// 専用メソッドはStep 5で追加）。
   Future<void> update(QuestionPrompt prompt) async {
     final all = await loadAll();
     final updated = [
@@ -96,6 +141,80 @@ class QuestionPromptService {
     ];
     await _store.saveAll(updated);
   }
+
+  /// 長押し編集画面（`question-prompt-tabs.md` Step 5）用。[id]を固定し、
+  /// body/situationCondition/category/tagsを更新する。他フィールド
+  /// （進捗・スコア等）は保持する。組み込み（[QuestionPromptSource.builtIn]）
+  /// 行も対象で、保存後は[QuestionPrompt.contentEdited]をtrueにして、次回
+  /// [loadAll]でバンク側の値に上書きされないようにする。[id]が見つからない
+  /// 場合は何もしない。[category]が[TopicCategory.situational]なら[tags]は
+  /// 空に強制する（[QuestionPrompt]のassertと同じ制約）。
+  ///
+  /// [source]が[QuestionPromptSource.builtIn]以外で本文が`topics.imported.*`
+  /// にも残っている場合、bodyが変わっていればそちらも置換する（[delete]と
+  /// 同じ整合性。生リストの検索は変更前のcategoryで行う）。
+  Future<void> updateContent({
+    required String id,
+    required String body,
+    String? situationCondition,
+    required TopicCategory category,
+    required List<String> tags,
+  }) async {
+    final all = await loadAll();
+    QuestionPrompt? current;
+    final updatedList = <QuestionPrompt>[];
+    for (final p in all) {
+      if (p.id != id) {
+        updatedList.add(p);
+        continue;
+      }
+      current = p;
+      updatedList.add(
+        p.copyWith(
+          body: body,
+          situationCondition: situationCondition,
+          clearSituationCondition: situationCondition == null,
+          category: category,
+          tags: category == TopicCategory.situational ? const [] : tags,
+          contentEdited: true,
+        ),
+      );
+    }
+    if (current == null) return;
+    await _store.saveAll(updatedList);
+
+    if (current.source == QuestionPromptSource.builtIn ||
+        current.body == body) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    for (final storageKey in _rawImportKeysFor(current.category)) {
+      final key = '$topicsImportedKeyPrefix$storageKey';
+      final raw = prefs.getStringList(key);
+      if (raw == null) continue;
+      final idx = raw.indexOf(current.body);
+      if (idx == -1) continue;
+      final next = [...raw];
+      next[idx] = body;
+      await prefs.setStringList(key, next);
+      return;
+    }
+  }
+
+  /// [delete]・[updateContent]が生リスト（`topics.imported.*`）の本文を
+  /// 探すときに調べるstorageKey一覧。[TopicCategory.general]は
+  /// [TopicService.importTopics]（Step 4〜）が書く`一般`キーに加え、
+  /// [loadAll]の移行スキャンでgeneralに正規化された旧`daily`/`business`行の
+  /// 本文がまだ残っている`日常`/`ビジネス`キーも対象にする（Step 6）。
+  /// それ以外のカテゴリは自身のstorageKeyのみ。
+  static List<String> _rawImportKeysFor(TopicCategory category) =>
+      category == TopicCategory.general
+      ? [
+          TopicCategory.general.storageKey,
+          TopicCategory.daily.storageKey,
+          TopicCategory.business.storageKey,
+        ]
+      : [category.storageKey];
 
   Future<void> delete(String id) async {
     final all = await loadAll();
@@ -117,24 +236,31 @@ class QuestionPromptService {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
-    final key = '$topicsImportedKeyPrefix${target.category.storageKey}';
-    final raw = prefs.getStringList(key);
-    if (raw == null || raw.isEmpty) return;
-    final next = raw.where((body) => body != target.body).toList();
-    if (next.length == raw.length) return;
-    if (next.isEmpty) {
-      await prefs.remove(key);
-    } else {
-      await prefs.setStringList(key, next);
+    for (final storageKey in _rawImportKeysFor(target.category)) {
+      final key = '$topicsImportedKeyPrefix$storageKey';
+      final raw = prefs.getStringList(key);
+      if (raw == null || raw.isEmpty) continue;
+      final next = raw.where((body) => body != target.body).toList();
+      if (next.length == raw.length) continue;
+      if (next.isEmpty) {
+        await prefs.remove(key);
+      } else {
+        await prefs.setStringList(key, next);
+      }
+      return;
     }
   }
 
   /// [TopicService.importTopics]から呼ばれる。新規追加分（重複除外済み）を
-  /// 正しい[source]付きで構造化ストアへミラーする。
+  /// 正しい[source]付きで構造化ストアへミラーする。[tagsForBody]を渡すと
+  /// （[category]が[TopicCategory.situational]以外のとき）本文ごとにタブを
+  /// 付与する（Step 4、手入力・AI取込の自動タグ付け用。呼び出し側が
+  /// [QuestionPromptAutoTagService.suggestTags]を渡す想定）。
   Future<void> recordImport({
     required TopicCategory category,
     required List<String> bodies,
     required QuestionPromptSource source,
+    List<String> Function(String body)? tagsForBody,
   }) async {
     if (bodies.isEmpty) return;
     final stored = await loadAll();
@@ -146,7 +272,14 @@ class QuestionPromptService {
     final additions = [
       for (final body in bodies)
         if (existingBodies.add(body))
-          QuestionPrompt.create(category: category, body: body, source: source),
+          QuestionPrompt.create(
+            category: category,
+            body: body,
+            source: source,
+            tags: category == TopicCategory.situational
+                ? const []
+                : (tagsForBody?.call(body) ?? const []),
+          ),
     ];
     if (additions.isEmpty) return;
     await _store.saveAll([...stored, ...additions]);
@@ -284,19 +417,24 @@ class QuestionPromptService {
     await _store.saveAll(kept);
   }
 
-  /// [category]・[source]・[layer1Done]のいずれかで絞り込む（未指定の軸は無視）。
-  /// 一覧画面のフィルタ用途を想定した単純な同期フィルタ。[layer1Done]は
-  /// [QuestionPrompt.isLayer1Done]（レイヤーⅠ語彙テスト実施済みか）で判定する。
+  /// [category]・[source]・[layer1Done]・[tag]のいずれかで絞り込む
+  /// （未指定の軸は無視）。一覧画面のフィルタ用途を想定した単純な同期フィルタ。
+  /// [layer1Done]は[QuestionPrompt.isLayer1Done]（レイヤーⅠ語彙テスト実施済みか）
+  /// で判定する。[tag]指定時は[QuestionPrompt.tags]に含むものだけ残す
+  /// （シチュエーションは[QuestionPrompt.tags]が常に空のため、tag指定時は
+  /// 必ず除外される）。
   List<QuestionPrompt> filter(
     List<QuestionPrompt> prompts, {
     TopicCategory? category,
     QuestionPromptSource? source,
     bool? layer1Done,
+    String? tag,
   }) {
     return prompts.where((p) {
       if (category != null && p.category != category) return false;
       if (source != null && p.source != source) return false;
       if (layer1Done != null && p.isLayer1Done != layer1Done) return false;
+      if (tag != null && !p.tags.contains(tag)) return false;
       return true;
     }).toList();
   }
@@ -322,6 +460,11 @@ class QuestionPromptService {
   /// [TopicBank]側であり続けるため、内容そのものは複製しても、アプリ更新で
   /// [TopicBank]が変わった場合は新しいIDの項目が追加取り込みされるだけで、
   /// 削除された項目は（ユーザーの理解フラグ等を失わないよう）ストアに残り続ける。
+  ///
+  /// 旧`daily`/`business`（[TopicBank.dailyTopics]/[TopicBank.businessTopics]）は
+  /// Step 2から[TopicCategory.general]＋[QuestionPromptBuiltinTags]のタブで
+  /// 生成する（IDの`builtin_daily_*`/`builtin_business_*`という文字列自体は
+  /// 変えない。あくまで由来を示すラベルとして残す）。
   static List<QuestionPrompt> _builtInPrompts() {
     final prompts = <QuestionPrompt>[];
     for (var i = 0; i < TopicBank.dailyTopics.length; i++) {
@@ -329,8 +472,9 @@ class QuestionPromptService {
         QuestionPrompt(
           id: 'builtin_daily_$i',
           source: QuestionPromptSource.builtIn,
-          category: TopicCategory.daily,
+          category: TopicCategory.general,
           body: TopicBank.dailyTopics[i],
+          tags: QuestionPromptBuiltinTags.forDailyIndex(i),
           createdAt: _builtInCreatedAt,
         ),
       );
@@ -340,8 +484,9 @@ class QuestionPromptService {
         QuestionPrompt(
           id: 'builtin_business_$i',
           source: QuestionPromptSource.builtIn,
-          category: TopicCategory.business,
+          category: TopicCategory.general,
           body: TopicBank.businessTopics[i],
+          tags: QuestionPromptBuiltinTags.forBusinessIndex(i),
           createdAt: _builtInCreatedAt,
         ),
       );

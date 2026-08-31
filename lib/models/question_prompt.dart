@@ -11,9 +11,14 @@ final _idRandom = Random();
 
 /// 「お題」を発展させた、レイヤーⅠ〜Ⅴを横断する問題文1件。
 ///
-/// [category]は既存[TopicCategory]のうち[TopicCategory.daily]/[TopicCategory.business]/
-/// [TopicCategory.situational]のみを取る（[TopicCategory.random]は問題文自体の
-/// カテゴリにはならない抽選専用カテゴリのため）。
+/// [category]は[TopicCategory.random]以外を取る（[TopicCategory.random]は問題文
+/// 自体のカテゴリにはならない抽選専用カテゴリのため）。[TopicCategory.daily]/
+/// [TopicCategory.business]は25マス専用のレガシー値で、問題文の新規生成では
+/// 使わない方針（`docs/prompts/question-prompt-tabs.md`）だが、Step 1時点では
+/// 既存の[QuestionPromptService]・[TopicService]がまだこの2値を使い続けるため、
+/// データ型としては引き続き受け付ける。[TopicCategory.general]（同ドキュメント
+/// Step 1で追加）が「シチュエーション以外」の新しい正式カテゴリで、[tags]と
+/// 組み合わせて使う。
 ///
 /// レイヤーⅣ・Ⅴの採点結果（[jsstScore]・[hitScore]・[prepScore]・
 /// [pronunciationScores]）は、Step 1時点では[ScoringResultStorage]・
@@ -23,12 +28,14 @@ final _idRandom = Random();
 /// 生成時点で確定し、以後変わらない安定値として扱う（[SavedPronunciationCheck]の
 /// `longArticleId`と同じ「参照先が消えてもIDは残す」方針を踏襲する想定）。
 class QuestionPrompt {
-  const QuestionPrompt({
+  QuestionPrompt({
     required this.id,
     required this.source,
     required this.category,
     required this.body,
     this.situationCondition,
+    this.tags = const [],
+    this.contentEdited = false,
     this.understood = false,
     this.vocabTestWords = const [],
     this.vocabTestCorrectCount,
@@ -49,6 +56,10 @@ class QuestionPrompt {
   }) : assert(
          category != TopicCategory.random,
          'QuestionPrompt.category はrandomを取らない（問題文自体のカテゴリにはならない抽選専用カテゴリのため）',
+       ),
+       assert(
+         category != TopicCategory.situational || tags.isEmpty,
+         'QuestionPrompt.tags はsituationalのとき常に空（タブ分類は[TopicCategory.general]専用）',
        );
 
   final String id;
@@ -61,6 +72,20 @@ class QuestionPrompt {
   /// [category]が[TopicCategory.situational]のときのみ使う条件文。
   /// それ以外のカテゴリ、または条件を持たない旧データではnull。
   final String? situationCondition;
+
+  /// 問題文タブ分類（`question-prompt-tabs.md`）。[TopicCategory.general]の
+  /// 問題文にのみ複数付けられる（[QuestionPromptTabRegistry]の組み込み6タブ＋
+  /// ユーザー独自タブ）。[category]が[TopicCategory.situational]のときは
+  /// 常に空（コンストラクタのassertで強制、[fromJson]でも捨てる）。
+  final List<String> tags;
+
+  /// 長押し編集画面（`question-prompt-tabs.md` Step 5）でbody/situationCondition/
+  /// category/tagsのいずれかをユーザーが変更済みか。[source]が
+  /// [QuestionPromptSource.builtIn]の行で、[QuestionPromptService.loadAll]が
+  /// バンク側の値へ上書きし直さないようにするためのフラグ（Step 2で追加した
+  /// 組み込み行のcategory/tags追随ロジックが、ユーザー編集を巻き戻さないよう
+  /// ガードする）。組み込み以外の行では意味を持たないが、区別せず立てる。
+  final bool contentEdited;
 
   /// レイヤーⅠ旧「理解した」トグルの値。Step 1時点で[isLayer1Done]の判定からは
   /// 外れており、新規UIからは書かない（Step 2でボタン自体を廃止）。JSONの
@@ -128,16 +153,24 @@ class QuestionPrompt {
     required String body,
     required QuestionPromptSource source,
     String? situationCondition,
+    List<String> tags = const [],
   }) => QuestionPrompt(
     id: 'qp_${DateTime.now().microsecondsSinceEpoch}_${_idRandom.nextInt(1 << 32)}',
     source: source,
     category: category,
     body: body,
     situationCondition: situationCondition,
+    tags: tags,
     createdAt: DateTime.now(),
   );
 
   QuestionPrompt copyWith({
+    TopicCategory? category,
+    String? body,
+    String? situationCondition,
+    bool clearSituationCondition = false,
+    List<String>? tags,
+    bool? contentEdited,
     bool? understood,
     List<QuestionPromptVocabWord>? vocabTestWords,
     int? vocabTestCorrectCount,
@@ -162,9 +195,13 @@ class QuestionPrompt {
   }) => QuestionPrompt(
     id: id,
     source: source,
-    category: category,
-    body: body,
-    situationCondition: situationCondition,
+    category: category ?? this.category,
+    body: body ?? this.body,
+    situationCondition: clearSituationCondition
+        ? null
+        : (situationCondition ?? this.situationCondition),
+    tags: tags ?? this.tags,
+    contentEdited: contentEdited ?? this.contentEdited,
     understood: understood ?? this.understood,
     vocabTestWords: vocabTestWords ?? this.vocabTestWords,
     vocabTestCorrectCount: clearVocabTestCorrectCount
@@ -270,38 +307,45 @@ class QuestionPrompt {
       hasPronunciationScore ||
       advice.isNotEmpty;
 
-  factory QuestionPrompt.fromJson(Map<String, dynamic> json) => QuestionPrompt(
-    id: json['id'] as String,
-    source: QuestionPromptSourceLabel.fromStorageKey(json['source'] as String?),
-    category: _categoryFromJson(json['category'] ?? json['field']),
-    body: json['body'] as String? ?? '',
-    situationCondition: json['situationCondition'] as String?,
-    understood: json['understood'] as bool? ?? false,
-    vocabTestWords: _vocabTestWordsFromJson(json['vocabTestWords']),
-    vocabTestCorrectCount: (json['vocabTestCorrectCount'] as num?)?.toInt(),
-    vocabTestQuestionCount: (json['vocabTestQuestionCount'] as num?)?.toInt(),
-    pronunciationSentences: _pronunciationSentencesFromJson(
-      json['pronunciationSentences'],
-    ),
-    registeredWordIds:
-        (json['registeredWordIds'] as List<dynamic>?)?.cast<String>() ??
-        const [],
-    summary: json['summary'] as String? ?? '',
-    sampleAnswer: json['sampleAnswer'] as String? ?? '',
-    conclusion: json['conclusion'] as String? ?? '',
-    reason: json['reason'] as String? ?? '',
-    example: json['example'] as String? ?? '',
-    jsstScore: (json['jsstScore'] as num?)?.toInt(),
-    hitScore: (json['hitScore'] as num?)?.toInt(),
-    prepScore: (json['prepScore'] as num?)?.toInt(),
-    pronunciationScores: _pronunciationScoresFromJson(
-      json['pronunciationScores'],
-    ),
-    advice: json['advice'] as String? ?? '',
-    createdAt: json['createdAt'] == null
-        ? DateTime.now()
-        : DateTime.parse(json['createdAt'] as String),
-  );
+  factory QuestionPrompt.fromJson(Map<String, dynamic> json) {
+    final category = _categoryFromJson(json['category'] ?? json['field']);
+    return QuestionPrompt(
+      id: json['id'] as String,
+      source: QuestionPromptSourceLabel.fromStorageKey(
+        json['source'] as String?,
+      ),
+      category: category,
+      body: json['body'] as String? ?? '',
+      situationCondition: json['situationCondition'] as String?,
+      tags: _tagsFromJson(json['tags'], category),
+      contentEdited: json['contentEdited'] as bool? ?? false,
+      understood: json['understood'] as bool? ?? false,
+      vocabTestWords: _vocabTestWordsFromJson(json['vocabTestWords']),
+      vocabTestCorrectCount: (json['vocabTestCorrectCount'] as num?)?.toInt(),
+      vocabTestQuestionCount: (json['vocabTestQuestionCount'] as num?)?.toInt(),
+      pronunciationSentences: _pronunciationSentencesFromJson(
+        json['pronunciationSentences'],
+      ),
+      registeredWordIds:
+          (json['registeredWordIds'] as List<dynamic>?)?.cast<String>() ??
+          const [],
+      summary: json['summary'] as String? ?? '',
+      sampleAnswer: json['sampleAnswer'] as String? ?? '',
+      conclusion: json['conclusion'] as String? ?? '',
+      reason: json['reason'] as String? ?? '',
+      example: json['example'] as String? ?? '',
+      jsstScore: (json['jsstScore'] as num?)?.toInt(),
+      hitScore: (json['hitScore'] as num?)?.toInt(),
+      prepScore: (json['prepScore'] as num?)?.toInt(),
+      pronunciationScores: _pronunciationScoresFromJson(
+        json['pronunciationScores'],
+      ),
+      advice: json['advice'] as String? ?? '',
+      createdAt: json['createdAt'] == null
+          ? DateTime.now()
+          : DateTime.parse(json['createdAt'] as String),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -309,6 +353,8 @@ class QuestionPrompt {
     'category': category.storageKey,
     'body': body,
     if (situationCondition != null) 'situationCondition': situationCondition,
+    if (category != TopicCategory.situational && tags.isNotEmpty) 'tags': tags,
+    if (contentEdited) 'contentEdited': contentEdited,
     'understood': understood,
     if (vocabTestWords.isNotEmpty)
       'vocabTestWords': vocabTestWords.map((w) => w.toJson()).toList(),
@@ -338,14 +384,34 @@ class QuestionPrompt {
     'createdAt': createdAt.toIso8601String(),
   };
 
+  /// 旧`"category": "日常"`/`"ビジネス"`（新旧storageKeyどちらも）は
+  /// [normalizeToGeneral]で`general`に正規化する（Step 6）。この正規化は
+  /// Step 1〜5の間は[QuestionPromptService]側の書き込み経路（組み込み・
+  /// recordImport・移行スキャン）がすべて`general`だけを書くよう揃うまで
+  /// 保留していた（ここだけ先に正規化すると、揃う前は読み直すたびに
+  /// category が daily/business↔general でフラつき、`topics.imported.*`の
+  /// 重複除外判定が壊れて再取り込みが起きていた）。今はどの書き込み経路も
+  /// generalのみを書くため、読み込み側のこの正規化と矛盾しない。
   static TopicCategory _categoryFromJson(Object? raw) {
-    if (raw is! String) return TopicCategory.daily;
+    if (raw is! String) return TopicCategory.general;
     try {
-      final category = TopicCategoryLabel.fromStorageKey(raw);
-      return category == TopicCategory.random ? TopicCategory.daily : category;
+      final category = normalizeToGeneral(
+        TopicCategoryLabel.fromStorageKey(raw),
+      );
+      return category == TopicCategory.random
+          ? TopicCategory.general
+          : category;
     } on ArgumentError {
-      return TopicCategory.daily;
+      return TopicCategory.general;
     }
+  }
+
+  /// situationalは常に空（不正データ・旧仕様データ問わず読んだtagsを捨てる）。
+  /// それ以外は文字列のリストとして読み、欠落・不正な形は空配列。
+  static List<String> _tagsFromJson(Object? raw, TopicCategory category) {
+    if (category == TopicCategory.situational) return const [];
+    if (raw is! List) return const [];
+    return raw.whereType<String>().toList();
   }
 
   static List<QuestionPromptVocabWord> _vocabTestWordsFromJson(Object? raw) {

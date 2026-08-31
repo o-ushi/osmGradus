@@ -406,6 +406,44 @@ void main() {
     expect(find.text(_t('問題文がありません')), findsOneWidget);
   });
 
+  testWidgets('フィルタでカテゴリ「その他」＋タブ「趣味」を選ぶと、趣味タグ付きのgeneral問題だけに絞れる'
+      '（question-prompt-tabs.md Step 3）', (tester) async {
+    await _openQuestionPromptList(tester);
+
+    await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pumpAndSettle();
+
+    // 「その他」を選ぶとタブ軸が現れる（日常／ビジネスはもう出ない）。
+    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
+    await tester.pumpAndSettle();
+    expect(find.text(_t('タブ')), findsOneWidget);
+    expect(find.text(_t('日常')), findsNothing);
+    expect(find.text(_t('ビジネス')), findsNothing);
+
+    // 背後の一覧行にも「趣味」タグチップが出ているため、シート内の
+    // チップに絞ってタップする。
+    await tester.tap(
+      find.descendant(
+        of: find.byType(QuestionPromptFilterSheet),
+        matching: find.text(_t('趣味')),
+      ),
+    );
+    await tester.tap(find.text(_t('完了')));
+    await tester.pumpAndSettle();
+
+    final all = await QuestionPromptService().loadAll();
+    final expectedBodies = all
+        .where((p) => p.tags.contains('趣味'))
+        .map((p) => p.body)
+        .toSet();
+    final shownBodies = tester
+        .widgetList<QuestionPromptListRow>(find.byType(QuestionPromptListRow))
+        .map((row) => row.body)
+        .toSet();
+    expect(shownBodies, expectedBodies);
+    expect(shownBodies, isNotEmpty);
+  });
+
   testWidgets('「II」をタップするとレイヤーⅡの同じ問題文の詳細へスキップ遷移する', (tester) async {
     final all = await QuestionPromptService().loadAll();
     final firstBody = all.first.body;

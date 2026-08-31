@@ -11,6 +11,7 @@ import 'package:osm_gradus/services/dashboard_advice_storage.dart';
 import 'package:osm_gradus/services/gradus_backup.dart';
 import 'package:osm_gradus/services/long_article_service.dart';
 import 'package:osm_gradus/services/pronunciation_exercise_service.dart';
+import 'package:osm_gradus/services/question_prompt_service.dart';
 import 'package:osm_gradus/services/thinking_matrix_service.dart';
 import 'package:osm_gradus/services/topic_service.dart';
 import 'package:osm_gradus/services/vocabulary_check_storage.dart';
@@ -115,6 +116,41 @@ void main() {
     await expectLater(GradusBackup.importFromContent(legacy), completes);
   });
 
+  test('旧バックアップのquestionPrompts（"category": "日常"/"ビジネス"）もgeneralとして復元できる'
+      '（question-prompt-tabs.md Step 6）', () async {
+    final legacy = jsonEncode({
+      'version': 5,
+      'questionPrompts': [
+        {
+          'id': 'legacy-qp-daily',
+          'source': 'manual',
+          'category': '日常',
+          'body': '旧バックアップの日常問題文',
+          'understood': false,
+          'createdAt': DateTime(2025, 1, 1).toIso8601String(),
+        },
+        {
+          'id': 'legacy-qp-business',
+          'source': 'manual',
+          'category': 'ビジネス',
+          'body': '旧バックアップのビジネス問題文',
+          'understood': false,
+          'createdAt': DateTime(2025, 1, 1).toIso8601String(),
+        },
+      ],
+    });
+
+    await GradusBackup.importFromContent(legacy);
+
+    final all = await QuestionPromptService().loadAll();
+    final restoredDaily = all.singleWhere((p) => p.id == 'legacy-qp-daily');
+    final restoredBusiness = all.singleWhere(
+      (p) => p.id == 'legacy-qp-business',
+    );
+    expect(restoredDaily.category, TopicCategory.general);
+    expect(restoredBusiness.category, TopicCategory.general);
+  });
+
   test('単語テスト履歴（レイヤーⅠ）をエクスポート/インポートできる', () async {
     await VocabularyCheckStorage().save(
       SavedVocabularyCheck(
@@ -136,6 +172,7 @@ void main() {
   });
 
   test('レイヤーⅡ〜Ⅳの取り込み済みお題をエクスポート/インポートできる', () async {
+    // Step 4からdaily引数はgeneralへ正規化される。
     await TopicService().importTopics(TopicCategory.daily, ['お題A', 'お題B']);
     await TopicService().importTopics(TopicCategory.situational, ['状況A']);
 
@@ -143,7 +180,7 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     await GradusBackup.importFromContent(exported);
 
-    expect(await TopicService().loadImported(TopicCategory.daily), [
+    expect(await TopicService().loadImported(TopicCategory.general), [
       'お題A',
       'お題B',
     ]);
@@ -269,10 +306,13 @@ void main() {
     expect(restored, hasLength(1));
     expect(restored.single.title, 'セット1');
     expect(restored.single.category, isNull);
-    expect(
-      restored.single.themes.map((t) => t.name),
-      ['メロンパン', 'カフェのバイト', '猫', '旅行', '資格試験'],
-    );
+    expect(restored.single.themes.map((t) => t.name), [
+      'メロンパン',
+      'カフェのバイト',
+      '猫',
+      '旅行',
+      '資格試験',
+    ]);
     final restoredCell = restored.single.cellFor(
       restored.single.themes.first.id,
       'time',
@@ -359,53 +399,50 @@ void main() {
     expect(await ThinkingMatrixService().loadAll(), isEmpty);
   });
 
-  test(
-    '旧形式（netas/netaId/perspective、category・columns無し）の25マスセットを含む'
-    'バックアップ全体をインポートすると、新汎用5列のオリジナルとして復元される',
-    () async {
-      final now = DateTime.now().toIso8601String();
-      final legacyThemeId = 'tm_theme_legacy_1';
-      final legacy = jsonEncode({
-        'version': 5,
-        'thinkingMatrixSets': [
-          {
-            'id': 'tm_legacy_backup',
-            'title': '旧セット',
-            'netas': [
-              {'id': legacyThemeId, 'name': 'メロンパン'},
-              {'id': 'tm_theme_legacy_2', 'name': 'カフェのバイト'},
-              {'id': 'tm_theme_legacy_3', 'name': '猫'},
-              {'id': 'tm_theme_legacy_4', 'name': '旅行'},
-              {'id': 'tm_theme_legacy_5', 'name': '資格試験'},
-            ],
-            'cells': [
-              {
-                'netaId': legacyThemeId,
-                'perspective': 'stance',
-                'keyword': '立場のキーワード',
-                'status': 'filled',
-                'updatedAt': now,
-              },
-            ],
-            'createdAt': now,
-            'updatedAt': now,
-          },
-        ],
-      });
+  test('旧形式（netas/netaId/perspective、category・columns無し）の25マスセットを含む'
+      'バックアップ全体をインポートすると、新汎用5列のオリジナルとして復元される', () async {
+    final now = DateTime.now().toIso8601String();
+    final legacyThemeId = 'tm_theme_legacy_1';
+    final legacy = jsonEncode({
+      'version': 5,
+      'thinkingMatrixSets': [
+        {
+          'id': 'tm_legacy_backup',
+          'title': '旧セット',
+          'netas': [
+            {'id': legacyThemeId, 'name': 'メロンパン'},
+            {'id': 'tm_theme_legacy_2', 'name': 'カフェのバイト'},
+            {'id': 'tm_theme_legacy_3', 'name': '猫'},
+            {'id': 'tm_theme_legacy_4', 'name': '旅行'},
+            {'id': 'tm_theme_legacy_5', 'name': '資格試験'},
+          ],
+          'cells': [
+            {
+              'netaId': legacyThemeId,
+              'perspective': 'stance',
+              'keyword': '立場のキーワード',
+              'status': 'filled',
+              'updatedAt': now,
+            },
+          ],
+          'createdAt': now,
+          'updatedAt': now,
+        },
+      ],
+    });
 
-      await GradusBackup.importFromContent(legacy);
+    await GradusBackup.importFromContent(legacy);
 
-      final restored = await ThinkingMatrixService().loadAll();
-      expect(restored, hasLength(1));
-      expect(restored.single.category, isNull);
-      expect(restored.single.columns.map((c) => c.id), [
-        'time',
-        'view',
-        'compare',
-        'scale',
-        'reason',
-      ]);
-      expect(restored.single.cellFor(legacyThemeId, 'view').keyword, '立場のキーワード');
-    },
-  );
+    final restored = await ThinkingMatrixService().loadAll();
+    expect(restored, hasLength(1));
+    expect(restored.single.category, isNull);
+    expect(restored.single.columns.map((c) => c.id), [
+      'time',
+      'view',
+      'compare',
+      'scale',
+      'reason',
+    ]);
+    expect(restored.single.cellFor(legacyThemeId, 'view').keyword, '立場のキーワード');
+  });
 }

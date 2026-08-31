@@ -197,13 +197,6 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
     }
   }
 
-  /// [QuestionPrompt.category]は[TopicCategory.random]を取らないため、Ⅱランダム
-  /// と同じくカテゴリは日常／ビジネス／シチュエーションの3つに絞る（Step 4）。
-  @override
-  List<TopicCategory> get availableCategories => super.availableCategories
-      .where((c) => c != TopicCategory.random)
-      .toList();
-
   /// [fixedPrompt]モードでの抽選スキップ。固定の問題文をそのまま
   /// [DrawnTopic]として返す（カテゴリ・シチュエーション条件も引き継ぐ）。
   /// ランダムモードでは[drawAndSpeak]が事前に[_drawnPrompt]を確定させて

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
@@ -5,10 +7,13 @@ import '../../main.dart' show appSettings;
 import '../../models/question_prompt_filter.dart';
 import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
+import '../../services/question_prompt_tab_registry.dart';
 import '../../theme/app_colors.dart';
 
-/// 問題文一覧のフィルタシート（入手元／カテゴリ／実施状況の3軸）。
-/// [CategorySelectSheet]と違い、3軸をまとめて1枚のシートで選ぶため、
+/// 問題文一覧のフィルタシート（入手元／カテゴリ／タブ／実施状況の4軸、
+/// `question-prompt-tabs.md` Step 3）。タブ軸は[TopicCategory.general]選択時
+/// のみ表示する（シチュエーションは[QuestionPrompt.tags]を持たないため）。
+/// [CategorySelectSheet]と違い、複数軸をまとめて1枚のシートで選ぶため、
 /// タップ即pop（単一選択のみ）ではなく「完了」で確定する。
 class QuestionPromptFilterSheet extends StatefulWidget {
   const QuestionPromptFilterSheet({
@@ -52,6 +57,19 @@ class QuestionPromptFilterSheet extends StatefulWidget {
 
 class _QuestionPromptFilterSheetState extends State<QuestionPromptFilterSheet> {
   late QuestionPromptFilter _draft = widget.initial;
+  List<String> _tabKeys = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadTabKeys());
+  }
+
+  Future<void> _loadTabKeys() async {
+    final tabKeys = await QuestionPromptTabRegistry().allTabKeys();
+    if (!mounted) return;
+    setState(() => _tabKeys = tabKeys);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,26 +140,53 @@ class _QuestionPromptFilterSheetState extends State<QuestionPromptFilterSheet> {
                             label: 'すべて'.tr(lang),
                             selected: _draft.category == null,
                             onTap: () => setState(
-                              () =>
-                                  _draft = _draft.copyWith(clearCategory: true),
+                              () => _draft = _draft.copyWith(
+                                clearCategory: true,
+                                clearTag: true,
+                              ),
                             ),
                           ),
                           for (final category in const [
-                            TopicCategory.daily,
-                            TopicCategory.business,
+                            TopicCategory.general,
                             TopicCategory.situational,
                           ])
                             _FilterChip(
                               label: category.labelKey().tr(lang),
                               selected: _draft.category == category,
-                              onTap: () => setState(
-                                () => _draft = _draft.copyWith(
+                              onTap: () => setState(() {
+                                _draft = _draft.copyWith(
                                   category: category,
-                                ),
-                              ),
+                                  // タブはgeneral選択時のみ意味を持つため、
+                                  // シチュエーションへ切り替えたら外す。
+                                  clearTag: category != TopicCategory.general,
+                                );
+                              }),
                             ),
                         ],
                       ),
+                      if (_draft.category == TopicCategory.general) ...[
+                        const SizedBox(height: 16),
+                        _FilterSection(
+                          title: 'タブ'.tr(lang),
+                          children: [
+                            _FilterChip(
+                              label: 'すべて'.tr(lang),
+                              selected: _draft.tag == null,
+                              onTap: () => setState(
+                                () => _draft = _draft.copyWith(clearTag: true),
+                              ),
+                            ),
+                            for (final tag in _tabKeys)
+                              _FilterChip(
+                                label: tag.tr(lang),
+                                selected: _draft.tag == tag,
+                                onTap: () => setState(
+                                  () => _draft = _draft.copyWith(tag: tag),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 16),
                       _FilterSection(
                         title: widget.doneAxisLabel,

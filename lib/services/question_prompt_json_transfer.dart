@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/question_prompt.dart';
+import '../models/topic_category.dart';
+import 'question_prompt_auto_tag_service.dart';
 import 'question_prompt_service.dart';
 
 /// [QuestionPromptJsonTransfer.importFromContent]の結果。
@@ -88,6 +90,7 @@ abstract final class QuestionPromptJsonTransfer {
       throw const FormatException('missing questionPrompts');
     }
 
+    final autoTagService = QuestionPromptAutoTagService();
     final parsed = <QuestionPrompt>[];
     var skipped = 0;
     for (final item in promptsRaw) {
@@ -96,7 +99,14 @@ abstract final class QuestionPromptJsonTransfer {
         continue;
       }
       try {
-        parsed.add(QuestionPrompt.fromJson(Map<String, dynamic>.from(item)));
+        var prompt = QuestionPrompt.fromJson(Map<String, dynamic>.from(item));
+        // tags欠落のgeneralはStep 4の自動タグ付けを適用する（空タブ禁止）。
+        if (prompt.category == TopicCategory.general && prompt.tags.isEmpty) {
+          prompt = prompt.copyWith(
+            tags: autoTagService.suggestTags(prompt.body),
+          );
+        }
+        parsed.add(prompt);
       } catch (_) {
         skipped++;
       }

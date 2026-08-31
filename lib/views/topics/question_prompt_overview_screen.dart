@@ -90,7 +90,10 @@ class _QuestionPromptOverviewScreenState
   }
 
   Future<void> _addPrompt() async {
-    await showTopicAddChoiceFlow(context, initialCategory: TopicCategory.daily);
+    await showTopicAddChoiceFlow(
+      context,
+      initialCategory: TopicCategory.general,
+    );
     await _reload();
   }
 
@@ -220,7 +223,12 @@ class _QuestionPromptOverviewScreenState
   }
 
   List<QuestionPrompt> get _filtered => _service
-      .filter(_all, category: _filter.category, source: _filter.source)
+      .filter(
+        _all,
+        category: _filter.category,
+        source: _filter.source,
+        tag: _filter.tag,
+      )
       .where(
         (p) =>
             _filter.done == null ||

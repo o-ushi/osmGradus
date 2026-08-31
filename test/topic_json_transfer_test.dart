@@ -15,6 +15,7 @@ void main() {
   group('TopicJsonTransfer', () {
     test('buildExportJsonは取り込み済みお題だけを含み、組み込みお題バンクは含まない', () async {
       final service = TopicService();
+      // Step 4からdaily/businessはgeneralに正規化される。
       await service.importTopics(TopicCategory.daily, ['取り込んだ日常お題']);
       await service.importTopics(TopicCategory.business, ['取り込んだビジネスお題']);
 
@@ -27,8 +28,8 @@ void main() {
       expect(
         topics,
         containsAll([
-          {'category': '日常', 'text': '取り込んだ日常お題'},
-          {'category': 'ビジネス', 'text': '取り込んだビジネスお題'},
+          {'category': '一般', 'text': '取り込んだ日常お題'},
+          {'category': '一般', 'text': '取り込んだビジネスお題'},
         ]),
       );
       // 組み込みバンク（TopicBank.dailyTopics等）の文言は含まれない。
@@ -57,7 +58,7 @@ void main() {
       expect(result.skipped, 0);
 
       expect(
-        await service.loadImported(TopicCategory.daily),
+        await service.loadImported(TopicCategory.general),
         containsAll(['お題A', 'お題B']),
       );
       expect(await service.loadImported(TopicCategory.situational), ['お題C']);
@@ -79,7 +80,7 @@ void main() {
 
       expect(result.added, 1);
       expect(result.skipped, 1);
-      expect(await service.loadImported(TopicCategory.daily), [
+      expect(await service.loadImported(TopicCategory.general), [
         '既存のお題',
         '新しいお題',
       ]);
@@ -102,7 +103,7 @@ void main() {
 
       expect(result.added, 1);
       expect(result.skipped, 0);
-      expect(await TopicService().loadImported(TopicCategory.business), [
+      expect(await TopicService().loadImported(TopicCategory.general), [
         '有効なお題',
       ]);
     });

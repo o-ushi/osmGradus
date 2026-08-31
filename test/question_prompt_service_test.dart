@@ -57,6 +57,94 @@ void main() {
       );
     });
 
+    test('situationalにtagsを渡すとassertで弾かれる（タブ分類はgeneral専用・Step 1）', () {
+      expect(
+        () => QuestionPrompt.create(
+          category: TopicCategory.situational,
+          body: '状況文',
+          source: QuestionPromptSource.manual,
+          tags: const ['趣味'],
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('generalのtoJson/fromJsonでtagsが往復する（Step 1で追加したタブ分類）', () {
+      final original = QuestionPrompt.create(
+        category: TopicCategory.general,
+        body: 'リモートワークについて',
+        source: QuestionPromptSource.manual,
+        tags: const ['会社', '環境'],
+      );
+
+      final restored = QuestionPrompt.fromJson(original.toJson());
+
+      expect(restored.category, TopicCategory.general);
+      expect(restored.tags, const ['会社', '環境']);
+      expect(original.toJson()['category'], '一般');
+      expect(original.toJson()['tags'], const ['会社', '環境']);
+    });
+
+    test('generalでtagsが空ならtoJsonにtagsキーを含めない', () {
+      final prompt = QuestionPrompt.create(
+        category: TopicCategory.general,
+        body: 'タグ未設定',
+        source: QuestionPromptSource.manual,
+      );
+      expect(prompt.toJson().containsKey('tags'), false);
+    });
+
+    test('situationalのJSONにtagsが含まれていても読み込み時に捨てる（不正データ防御）', () {
+      final legacy = QuestionPrompt.fromJson({
+        'id': 'legacy-situational',
+        'source': 'imported',
+        'category': 'シチュエーション',
+        'body': '状況文',
+        'tags': ['趣味'],
+      });
+
+      expect(legacy.category, TopicCategory.situational);
+      expect(legacy.tags, isEmpty);
+    });
+
+    test('tags欠落のJSONは空配列になる', () {
+      final legacy = QuestionPrompt.fromJson({
+        'id': 'legacy-no-tags',
+        'source': 'imported',
+        'category': '一般',
+        'body': 'タグなしの旧データ',
+      });
+
+      expect(legacy.category, TopicCategory.general);
+      expect(legacy.tags, isEmpty);
+    });
+
+    test('旧JSON "category": "日常"/"ビジネス"はgeneralに正規化される（Step 6）', () {
+      final daily = QuestionPrompt.fromJson({
+        'id': 'legacy-daily',
+        'source': 'imported',
+        'category': '日常',
+        'body': '旧日常データ',
+      });
+      final business = QuestionPrompt.fromJson({
+        'id': 'legacy-business',
+        'source': 'imported',
+        'category': 'ビジネス',
+        'body': '旧ビジネスデータ',
+      });
+      // 旧英語storageKeyのJSONも同様に読める。
+      final legacyEnglish = QuestionPrompt.fromJson({
+        'id': 'legacy-daily-en',
+        'source': 'imported',
+        'category': 'daily',
+        'body': '旧英語キーのデータ',
+      });
+
+      expect(daily.category, TopicCategory.general);
+      expect(business.category, TopicCategory.general);
+      expect(legacyEnglish.category, TopicCategory.general);
+    });
+
     test('toJson/fromJsonで全フィールドが往復する', () {
       final original =
           QuestionPrompt.create(
@@ -81,6 +169,7 @@ void main() {
             vocabTestQuestionCount: 1,
             registeredWordIds: const ['w1', 'w2'],
             summary: '要約',
+            sampleAnswer: '解答例テキスト',
             conclusion: '結論',
             reason: '理由',
             example: '具体例',
@@ -112,6 +201,7 @@ void main() {
       expect(restored.vocabTestAccuracy, 1.0);
       expect(restored.registeredWordIds, const ['w1', 'w2']);
       expect(restored.summary, '要約');
+      expect(restored.sampleAnswer, '解答例テキスト');
       expect(restored.conclusion, '結論');
       expect(restored.reason, '理由');
       expect(restored.example, '具体例');
@@ -141,6 +231,7 @@ void main() {
       expect(legacy.isLayer1Done, false);
       expect(legacy.registeredWordIds, isEmpty);
       expect(legacy.summary, '');
+      expect(legacy.sampleAnswer, '');
       expect(legacy.jsstScore, isNull);
       expect(legacy.hitScore, isNull);
       expect(legacy.prepScore, isNull);
@@ -246,23 +337,80 @@ void main() {
     });
   });
 
-  group('QuestionPromptService.loadAll（組み込みバンクの取り込み）', () {
-    test('組み込み30件（日常10・ビジネス10・シチュエーション10）がsource=builtInで読める', () async {
-      final all = await QuestionPromptService().loadAll();
+  group('TopicCategory.general（Step 1で追加）', () {
+    test('storageKeyは一般、旧英語legacyStorageKeyはgeneral', () {
+      expect(TopicCategory.general.storageKey, '一般');
+      expect(TopicCategory.general.legacyStorageKey, 'general');
+    });
 
-      final daily = all.where((p) => p.category == TopicCategory.daily);
-      final business = all.where((p) => p.category == TopicCategory.business);
-      final situational = all.where(
-        (p) => p.category == TopicCategory.situational,
+    test('fromStorageKeyで一般からgeneralへ復元できる', () {
+      expect(TopicCategoryLabel.fromStorageKey('一般'), TopicCategory.general);
+    });
+
+    test('labelKeyはstorageKeyと異なる専用キーを返す（既存のその他キーと衝突させない）', () {
+      expect(TopicCategory.general.labelKey(), '問題文カテゴリ_その他');
+      expect(
+        TopicCategory.general.labelKey(),
+        isNot(TopicCategory.general.storageKey),
       );
+    });
 
-      expect(daily, hasLength(10));
-      expect(business, hasLength(10));
-      expect(situational, hasLength(10));
-      expect(all.every((p) => p.source == QuestionPromptSource.builtIn), true);
-      expect(all.every((p) => p.understood == false), true);
-      // シチュエーションは状況＋条件の両方を保持する。
-      expect(situational.every((p) => p.situationCondition != null), true);
+    test('日常/ビジネス/シチュエーションのlabelKeyはstorageKeyのまま（既存挙動を維持）', () {
+      expect(TopicCategory.daily.labelKey(), TopicCategory.daily.storageKey);
+      expect(
+        TopicCategory.business.labelKey(),
+        TopicCategory.business.storageKey,
+      );
+      expect(
+        TopicCategory.situational.labelKey(),
+        TopicCategory.situational.storageKey,
+      );
+    });
+  });
+
+  group('QuestionPromptService.loadAll（組み込みバンクの取り込み）', () {
+    test(
+      '組み込み30件（日常10・ビジネス10がgeneralに統合・シチュエーション10）がsource=builtInで読める（Step 2）',
+      () async {
+        final all = await QuestionPromptService().loadAll();
+
+        // Step 2から組み込みの日常/ビジネスはgeneral＋タブに統合される
+        // （TopicCategory.daily/businessは25マス専用のレガシー値として残るのみで、
+        // 問題文の組み込みには新規に使わない）。
+        final general = all.where((p) => p.category == TopicCategory.general);
+        final situational = all.where(
+          (p) => p.category == TopicCategory.situational,
+        );
+
+        expect(general, hasLength(20));
+        expect(situational, hasLength(10));
+        expect(
+          all.every((p) => p.source == QuestionPromptSource.builtIn),
+          true,
+        );
+        expect(all.every((p) => p.understood == false), true);
+        // generalの組み込みはすべて非空タグを持つ（Step 2の受け入れ条件）。
+        expect(general.every((p) => p.tags.isNotEmpty), true);
+        // シチュエーションはタグを持たず、状況＋条件の両方を保持する。
+        expect(situational.every((p) => p.tags.isEmpty), true);
+        expect(situational.every((p) => p.situationCondition != null), true);
+      },
+    );
+
+    test('builtin_daily_0のtagsは趣味（マッピング表どおり）', () async {
+      final all = await QuestionPromptService().loadAll();
+      final prompt = all.singleWhere((p) => p.id == 'builtin_daily_0');
+      expect(prompt.category, TopicCategory.general);
+      expect(prompt.tags, ['趣味']);
+    });
+
+    test('組み込みビジネス問題は全問「会社」タグを持つ', () async {
+      final all = await QuestionPromptService().loadAll();
+      final businessOrigin = all.where(
+        (p) => p.id.startsWith('builtin_business_'),
+      );
+      expect(businessOrigin, hasLength(10));
+      expect(businessOrigin.every((p) => p.tags.contains('会社')), true);
     });
 
     test('2回読んでも組み込みが重複して増えない（IDでdiffするため冪等）', () async {
@@ -277,27 +425,27 @@ void main() {
   });
 
   group('TopicService.importTopics → QuestionPromptServiceへのミラー', () {
-    test('AI取り込みはsource=aiで記録される', () async {
+    test('AI取り込みはsource=aiで記録される（daily引数はgeneralへ正規化、Step 4）', () async {
       await TopicService().importTopics(TopicCategory.daily, [
         'AIが生成した問題文',
       ], source: QuestionPromptSource.ai);
 
-      final daily = await QuestionPromptService().loadByCategory(
-        TopicCategory.daily,
+      final general = await QuestionPromptService().loadByCategory(
+        TopicCategory.general,
       );
-      final added = daily.singleWhere((p) => p.body == 'AIが生成した問題文');
+      final added = general.singleWhere((p) => p.body == 'AIが生成した問題文');
       expect(added.source, QuestionPromptSource.ai);
     });
 
-    test('手入力はsource=manualで記録される', () async {
+    test('手入力はsource=manualで記録される（business引数はgeneralへ正規化、Step 4）', () async {
       await TopicService().importTopics(TopicCategory.business, [
         '手入力した問題文',
       ], source: QuestionPromptSource.manual);
 
-      final business = await QuestionPromptService().loadByCategory(
-        TopicCategory.business,
+      final general = await QuestionPromptService().loadByCategory(
+        TopicCategory.general,
       );
-      final added = business.singleWhere((p) => p.body == '手入力した問題文');
+      final added = general.singleWhere((p) => p.body == '手入力した問題文');
       expect(added.source, QuestionPromptSource.manual);
     });
 
@@ -311,6 +459,7 @@ void main() {
       expect(added.source, QuestionPromptSource.imported);
       // 単体インポートなので状況のみで条件は持たない。
       expect(added.situationCondition, isNull);
+      expect(added.tags, isEmpty);
     });
 
     test('同じ本文を2回取り込んでも1件のまま（重複除外）', () async {
@@ -319,10 +468,10 @@ void main() {
       final second = await service.importTopics(TopicCategory.daily, ['重複お題']);
 
       expect(second, 0);
-      final daily = await QuestionPromptService().loadByCategory(
-        TopicCategory.daily,
+      final general = await QuestionPromptService().loadByCategory(
+        TopicCategory.general,
       );
-      expect(daily.where((p) => p.body == '重複お題'), hasLength(1));
+      expect(general.where((p) => p.body == '重複お題'), hasLength(1));
     });
 
     test('clearImportedで取り込み分だけ消え、組み込みは残る', () async {
@@ -330,13 +479,16 @@ void main() {
       await service.importTopics(TopicCategory.daily, ['消される問題文']);
       await service.clearImported(TopicCategory.daily);
 
-      final daily = await QuestionPromptService().loadByCategory(
-        TopicCategory.daily,
+      // Step 4からTopicService.importTopics(daily/business, ...)はgeneralへ
+      // 正規化されるため、取り込み・削除の確認もgeneralで行う。
+      final general = await QuestionPromptService().loadByCategory(
+        TopicCategory.general,
       );
-      expect(daily.any((p) => p.body == '消される問題文'), false);
+      expect(general.any((p) => p.body == '消される問題文'), false);
+      // 組み込みの日常/ビジネス20件（Step 2からgeneralに統合）は残る。
       expect(
-        daily.where((p) => p.source == QuestionPromptSource.builtIn),
-        hasLength(10),
+        general.where((p) => p.source == QuestionPromptSource.builtIn),
+        hasLength(20),
       );
     });
   });
@@ -346,12 +498,15 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList('topics.imported.daily', ['旧データA', '旧データB']);
 
-      final daily = await QuestionPromptService().loadByCategory(
-        TopicCategory.daily,
+      // 旧`topics.imported.daily`の生データはloadAllの移行スキャン
+      // （_importableCategories）でgeneralに正規化して取り込まれる（Step 6で
+      // TopicService.importTopics経由の正規化と揃えた）。
+      final general = await QuestionPromptService().loadByCategory(
+        TopicCategory.general,
       );
 
       expect(
-        daily
+        general
             .where((p) => p.source == QuestionPromptSource.imported)
             .map((p) => p.body),
         containsAll(['旧データA', '旧データB']),
@@ -372,10 +527,29 @@ void main() {
   });
 
   group('QuestionPromptService.update / delete', () {
+    test('Step 1〜3時代の旧daily生データ由来（generalに正規化済み）の問題文もdeleteで'
+        'topics.imported.dailyから正しく消える（Step 6）', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('topics.imported.日常', ['旧daily経由の問題文']);
+
+      final service = QuestionPromptService();
+      final all = await service.loadAll();
+      final target = all.singleWhere((p) => p.body == '旧daily経由の問題文');
+      expect(target.category, TopicCategory.general);
+
+      await service.delete(target.id);
+
+      final rawAfter = prefs.getStringList('topics.imported.日常');
+      expect(rawAfter?.contains('旧daily経由の問題文') ?? false, false);
+
+      final afterReload = await service.loadAll();
+      expect(afterReload.any((p) => p.body == '旧daily経由の問題文'), false);
+    });
+
     test('理解フラグ・要約・PREP・スコア・アドバイスを書き換えて読み直せる', () async {
       final service = QuestionPromptService();
       final all = await service.loadAll();
-      final target = all.firstWhere((p) => p.category == TopicCategory.daily);
+      final target = all.firstWhere((p) => p.category == TopicCategory.general);
 
       final updated = target.copyWith(
         understood: true,
@@ -409,16 +583,18 @@ void main() {
     test('deleteで指定IDだけが消える', () async {
       final service = QuestionPromptService();
       await TopicService().importTopics(TopicCategory.daily, ['削除対象']);
-      final before = await service.loadByCategory(TopicCategory.daily);
+      final before = await service.loadByCategory(TopicCategory.general);
       final target = before.firstWhere((p) => p.body == '削除対象');
 
       await service.delete(target.id);
 
-      final after = await service.loadByCategory(TopicCategory.daily);
+      final after = await service.loadByCategory(TopicCategory.general);
       expect(after.any((p) => p.id == target.id), false);
+
+      // 組み込みの日常/ビジネス20件はStep 2からgeneralに統合されている。
       expect(
         after.where((p) => p.source == QuestionPromptSource.builtIn),
-        hasLength(10),
+        hasLength(20),
       );
     });
 
@@ -426,12 +602,14 @@ void main() {
       final service = QuestionPromptService();
       await TopicService().importTopics(TopicCategory.daily, ['復活させない']);
       final target = (await service.loadByCategory(
-        TopicCategory.daily,
+        TopicCategory.general,
       )).firstWhere((p) => p.body == '復活させない');
 
       await service.delete(target.id);
 
-      final imported = await TopicService().loadImported(TopicCategory.daily);
+      // Step 4からTopicService.importTopics(daily,...)はgeneralの生リスト
+      // （topics.imported.一般）へ正規化して書き込まれる。
+      final imported = await TopicService().loadImported(TopicCategory.general);
       expect(imported.contains('復活させない'), false);
 
       final afterReload = await service.loadAll();
@@ -449,7 +627,7 @@ void main() {
 
       final filtered = service.filter(
         all,
-        category: TopicCategory.daily,
+        category: TopicCategory.general,
         source: QuestionPromptSource.manual,
       );
 
@@ -459,13 +637,13 @@ void main() {
       // layer1Done: 語彙テスト未実施のためfalseだけが残る。
       final notDone = service.filter(
         all,
-        category: TopicCategory.daily,
+        category: TopicCategory.general,
         layer1Done: false,
       );
       expect(notDone.any((p) => p.body == '絞り込み対象'), true);
       final done = service.filter(
         all,
-        category: TopicCategory.daily,
+        category: TopicCategory.general,
         layer1Done: true,
       );
       expect(done, isEmpty);
@@ -476,20 +654,62 @@ void main() {
       expect(service.progressRatio(const [], (p) => true), 0);
 
       final all = await service.loadAll();
-      final daily = service.filter(all, category: TopicCategory.daily);
-      // 組み込み10件は全てunderstood=false。
-      expect(service.progressRatio(daily, (p) => p.understood), 0);
+      // 組み込みの日常/ビジネス20件はStep 2からgeneralに統合されている。
+      final general = service.filter(all, category: TopicCategory.general);
+      // 組み込み20件は全てunderstood=false。
+      expect(service.progressRatio(general, (p) => p.understood), 0);
 
-      await service.update(daily.first.copyWith(understood: true));
+      await service.update(general.first.copyWith(understood: true));
       final reloaded = service.filter(
         await service.loadAll(),
-        category: TopicCategory.daily,
+        category: TopicCategory.general,
       );
       expect(
         service.progressRatio(reloaded, (p) => p.understood),
-        closeTo(0.1, 0.0001),
+        closeTo(0.05, 0.0001),
       );
     });
+
+    test(
+      'filter(tag:)はgeneralのtagsに含むものだけ残し、situationalは除外する（Step 1〜2）',
+      () async {
+        final service = QuestionPromptService();
+        final hobby = QuestionPrompt.create(
+          category: TopicCategory.general,
+          body: '趣味の問題文（追加分）',
+          source: QuestionPromptSource.manual,
+          tags: const ['趣味'],
+        );
+        final company = QuestionPrompt.create(
+          category: TopicCategory.general,
+          body: '会社の問題文（追加分）',
+          source: QuestionPromptSource.manual,
+          tags: const ['会社'],
+        );
+        final situational = QuestionPrompt.create(
+          category: TopicCategory.situational,
+          body: '状況文',
+          source: QuestionPromptSource.manual,
+          situationCondition: '条件文',
+        );
+        await service.importPrompts([hobby, company, situational]);
+        final all = await service.loadAll();
+
+        // 組み込みの日常にも「趣味」タグ付きが複数あるため（Step 2）、
+        // 追加分を含むかどうかと、シチュエーション・無関係タグの除外だけを見る。
+        final hobbyOnly = service.filter(all, tag: '趣味');
+        expect(hobbyOnly.map((p) => p.body), contains('趣味の問題文（追加分）'));
+        expect(
+          hobbyOnly.every((p) => p.category != TopicCategory.situational),
+          true,
+        );
+        expect(hobbyOnly.any((p) => p.body == '会社の問題文（追加分）'), false);
+        expect(hobbyOnly.any((p) => p.body == '状況文'), false);
+
+        final none = service.filter(all, tag: '存在しないタブ');
+        expect(none, isEmpty);
+      },
+    );
   });
 
   group('TopicService.drawRandom（既存の抽選が壊れていないこと）', () {

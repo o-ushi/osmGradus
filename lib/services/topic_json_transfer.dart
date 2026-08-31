@@ -30,12 +30,12 @@ abstract final class TopicJsonTransfer {
   static const filePrefix = 'osmGradus_topics_';
 
   /// エクスポート対象のカテゴリ（[TopicCategory.random]は取り込み専用の
-  /// ストアを持たない派生カテゴリのため対象外）。
-  static const _categories = [
-    TopicCategory.daily,
-    TopicCategory.business,
-    TopicCategory.situational,
-  ];
+  /// ストアを持たない派生カテゴリのため対象外）。Step 4から
+  /// [TopicCategory.daily]/[TopicCategory.business]は書き込まれなくなった
+  /// ため、対象は[TopicCategory.general]/[TopicCategory.situational]の2つ
+  /// （旧daily/businessは[_categoryFromStorageKey]で読み込み時のみgeneralに
+  /// マップし、古いエクスポートファイルも読める）。
+  static const _categories = [TopicCategory.general, TopicCategory.situational];
 
   static Future<int> itemCount() async {
     final service = TopicService();
@@ -127,11 +127,16 @@ abstract final class TopicJsonTransfer {
   }
 
   /// 新storageKey（日本語）に加え、旧英語storageKeyの取り込み済みJSONファイルも
-  /// 読める（[TopicCategoryLabel.fromStorageKey]に委譲）。`random`・未知の
-  /// キーはnull（このtransferの対象カテゴリではないため読み飛ばす）。
+  /// 読める（[TopicCategoryLabel.fromStorageKey]に委譲）。旧`daily`/`business`
+  /// （日本語・英語どちらのstorageKeyでも）は[TopicService.normalizeCategory]で
+  /// `general`にマップする（Step 4以前にエクスポートされたファイルも読める
+  /// ようにする互換対応）。`random`・未知のキーはnull（このtransferの対象
+  /// カテゴリではないため読み飛ばす）。
   static TopicCategory? _categoryFromStorageKey(String key) {
     try {
-      final category = TopicCategoryLabel.fromStorageKey(key);
+      final category = TopicService.normalizeCategory(
+        TopicCategoryLabel.fromStorageKey(key),
+      );
       return _categories.contains(category) ? category : null;
     } on ArgumentError {
       return null;

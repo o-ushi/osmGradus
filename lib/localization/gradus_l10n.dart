@@ -173,6 +173,9 @@ abstract final class GradusL10n {
     '健康': '健康',
     '買い物': '買い物',
     '旅行': '旅行',
+    '家族': '家族',
+    '環境': '環境',
+    '会社': '会社',
     '季節': '季節',
     'チーム': 'チーム',
     '成長': '成長',
@@ -328,6 +331,7 @@ abstract final class GradusL10n {
     '日常': '日常',
     'ビジネス': 'ビジネス',
     'シチュエーション': 'シチュエーション',
+    '問題文カテゴリ_その他': 'その他',
     'ランダム': 'ランダム',
     'ボタンを押してお題を引いてください': 'ボタンを押して問題文を引いてください',
     'なんて回答するかイメージして': 'なんて回答するかイメージして',
@@ -351,14 +355,23 @@ abstract final class GradusL10n {
     '前の問題文': '前の問題文',
     '次の問題文': '次の問題文',
     '問題文一覧_使い方_追加': '1️⃣ {{icon}} で問題文を追加できる',
-    '問題文一覧_使い方_フィルタ': '2️⃣ {{icon}} で入手元・カテゴリ・実施状況を絞り込める',
+    '問題文一覧_使い方_フィルタ': '2️⃣ {{icon}} で入手元・カテゴリ・タブ・実施状況を絞り込める',
     '問題文一覧_使い方_詳細': '3️⃣ 行をタップすると詳細が開く',
-    '問題文一覧_使い方_削除': '4️⃣ 行を左スワイプすると削除できる（標準問題文は削除できません）',
+    '問題文一覧_使い方_編集': '4️⃣ 本文を長押しすると問題文を編集できる',
+    '問題文一覧_使い方_削除': '5️⃣ 行を左スワイプすると削除できる（標準問題文は削除できません）',
     '問題文横断一覧_使い方_総評': '3️⃣ 総評列の「⭕️」（Ⅰ〜Ⅴのいずれか実施済み）をタップすると総評画面が開く',
     '問題文横断一覧_使い方_レイヤー': '4️⃣ Ⅰ〜Ⅴのマークをタップすると、その問題文の該当レイヤー詳細が開く（右スワイプでこの一覧に戻れる）',
     '本文': '本文',
     '総評実施状況': '総評実施状況',
     '入手元': '入手元',
+    'タブ': 'タブ',
+    '問題文を編集': '問題文を編集',
+    '状況': '状況',
+    '条件': '条件',
+    '新しいタブ': '新しいタブ',
+    'タブ名を入力': 'タブ名を入力',
+    'タブを1つ以上選択してください': 'タブを1つ以上選択してください',
+    '問題文を入力してください': '問題文を入力してください',
     'すべて': 'すべて',
     '組み込み': '組み込み',
     'AI': 'AI',
@@ -716,6 +729,11 @@ abstract final class GradusL10n {
     'Chrome AIの解析結果を読み取れませんでした': 'Chrome AIの解析結果を読み取れませんでした',
     '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
         '日常・ビジネス・シチュエーションすべての取り込み済み問題文を削除します。この操作は取り消せません。',
+    'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
+        'その他・シチュエーションすべての取り込み済み問題文を削除します。この操作は取り消せません。',
+    'その他 %lld 件、シチュエーション %lld 件を追加しました。': 'その他 %lld 件、シチュエーション %lld 件を追加しました。',
+    'お題を読み取れませんでした。【その他】【シチュエーション】の見出し付きで貼り付けてください。':
+        'お題を読み取れませんでした。【その他】【シチュエーション】の見出し付きで貼り付けてください。',
     '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。':
         '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。',
     'Chromeから戻るとクリップボードから自動で読み込みます。空のときは「クリップボードから読み込む」を使ってください。内容を確認・編集してから「取り込む」を押してください。':
@@ -1013,6 +1031,9 @@ abstract final class GradusL10n {
     '健康': 'Health',
     '買い物': 'Shopping',
     '旅行': 'Travel',
+    '家族': 'Family',
+    '環境': 'Environment',
+    '会社': 'Company',
     '季節': 'Season',
     'チーム': 'Team',
     '成長': 'Growth',
@@ -1187,6 +1208,7 @@ abstract final class GradusL10n {
     '日常': 'Daily',
     'ビジネス': 'Business',
     'シチュエーション': 'Situations',
+    '問題文カテゴリ_その他': 'General',
     'ランダム': 'Random',
     'ボタンを押してお題を引いてください': 'Tap the button to draw a prompt',
     'なんて回答するかイメージして': 'Imagine how you would answer',
@@ -1210,10 +1232,12 @@ abstract final class GradusL10n {
     '前の問題文': 'Previous prompt',
     '次の問題文': 'Next prompt',
     '問題文一覧_使い方_追加': '1️⃣ {{icon}} to add a prompt',
-    '問題文一覧_使い方_フィルタ': '2️⃣ {{icon}} to narrow by source, category, or status',
+    '問題文一覧_使い方_フィルタ':
+        '2️⃣ {{icon}} to narrow by source, category, tag, or status',
     '問題文一覧_使い方_詳細': '3️⃣ Tap a row to open its details',
+    '問題文一覧_使い方_編集': '4️⃣ Long-press the body to edit the prompt',
     '問題文一覧_使い方_削除':
-        '4️⃣ Swipe a row left to delete it (built-in prompts can\'t be deleted)',
+        '5️⃣ Swipe a row left to delete it (built-in prompts can\'t be deleted)',
     '問題文横断一覧_使い方_総評':
         '3️⃣ Tap “⭕️” in the Summary column (shown when any of Ⅰ–Ⅴ is done) to open the summary',
     '問題文横断一覧_使い方_レイヤー':
@@ -1221,6 +1245,14 @@ abstract final class GradusL10n {
     '本文': 'Body',
     '総評実施状況': 'Summary status',
     '入手元': 'Source',
+    'タブ': 'Tags',
+    '問題文を編集': 'Edit prompt',
+    '状況': 'Situation',
+    '条件': 'Condition',
+    '新しいタブ': 'New tag',
+    'タブ名を入力': 'Enter a tag name',
+    'タブを1つ以上選択してください': 'Please select at least one tag',
+    '問題文を入力してください': 'Please enter the prompt text',
     'すべて': 'All',
     '組み込み': 'Built-in',
     'AI': 'AI',
@@ -1652,6 +1684,12 @@ abstract final class GradusL10n {
     'Chrome AIの解析結果を読み取れませんでした': 'Could not read Chrome AI analysis result',
     '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
         'This deletes all imported prompts (Daily, Business, Situation). This cannot be undone.',
+    'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
+        'This deletes all imported prompts (General, Situation). This cannot be undone.',
+    'その他 %lld 件、シチュエーション %lld 件を追加しました。':
+        'Added %lld general and %lld situational prompts.',
+    'お題を読み取れませんでした。【その他】【シチュエーション】の見出し付きで貼り付けてください。':
+        'Could not read the prompts. Please paste text with 【General】/【Situation】 headings.',
     '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。':
         'Tap "Open Chrome AI" to open Google AI mode with this prompt. Copy the answer and paste it below.',
     'Chromeから戻るとクリップボードから自動で読み込みます。空のときは「クリップボードから読み込む」を使ってください。内容を確認・編集してから「取り込む」を押してください。':
@@ -1959,6 +1997,9 @@ abstract final class GradusL10n {
     '健康': 'Sức khỏe',
     '買い物': 'Mua sắm',
     '旅行': 'Du lịch',
+    '家族': 'Gia đình',
+    '環境': 'Môi trường',
+    '会社': 'Công ty',
     '季節': 'Mùa',
     'チーム': 'Nhóm',
     '成長': 'Phát triển',
@@ -2128,6 +2169,7 @@ abstract final class GradusL10n {
     '日常': 'Hàng ngày',
     'ビジネス': 'Công việc',
     'シチュエーション': 'Tình huống',
+    '問題文カテゴリ_その他': 'Chung',
     'ランダム': 'Ngẫu nhiên',
     'ボタンを押してお題を引いてください': 'Nhấn nút để rút đề bài',
     'なんて回答するかイメージして': 'Hình dung cách bạn sẽ trả lời',
@@ -2152,9 +2194,10 @@ abstract final class GradusL10n {
     '次の問題文': 'Đề bài tiếp theo',
     '問題文一覧_使い方_追加': '1️⃣ Nhấn {{icon}} để thêm đề bài',
     '問題文一覧_使い方_フィルタ':
-        '2️⃣ Nhấn {{icon}} để lọc theo nguồn, danh mục, tình trạng',
+        '2️⃣ Nhấn {{icon}} để lọc theo nguồn, danh mục, thẻ, tình trạng',
     '問題文一覧_使い方_詳細': '3️⃣ Nhấn vào một dòng để xem chi tiết',
-    '問題文一覧_使い方_削除': '4️⃣ Vuốt sang trái để xóa (không thể xóa đề bài mặc định)',
+    '問題文一覧_使い方_編集': '4️⃣ Nhấn giữ nội dung để chỉnh sửa đề bài',
+    '問題文一覧_使い方_削除': '5️⃣ Vuốt sang trái để xóa (không thể xóa đề bài mặc định)',
     '問題文横断一覧_使い方_総評':
         '3️⃣ Nhấn “⭕️” ở cột Tổng kết (hiện khi đã làm bất kỳ lớp Ⅰ–Ⅴ) để mở tổng kết',
     '問題文横断一覧_使い方_レイヤー':
@@ -2162,6 +2205,14 @@ abstract final class GradusL10n {
     '本文': 'Nội dung',
     '総評実施状況': 'Tình trạng tổng kết',
     '入手元': 'Nguồn',
+    'タブ': 'Thẻ',
+    '問題文を編集': 'Chỉnh sửa đề bài',
+    '状況': 'Tình huống',
+    '条件': 'Điều kiện',
+    '新しいタブ': 'Thẻ mới',
+    'タブ名を入力': 'Nhập tên thẻ',
+    'タブを1つ以上選択してください': 'Vui lòng chọn ít nhất một thẻ',
+    '問題文を入力してください': 'Vui lòng nhập nội dung đề bài',
     'すべて': 'Tất cả',
     '組み込み': 'Có sẵn',
     'AI': 'AI',
@@ -2588,6 +2639,12 @@ abstract final class GradusL10n {
         'Không đọc được kết quả phân tích từ Chrome AI',
     '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
         'Xóa tất cả đề bài đã nhập (Đời sống, Công việc, Tình huống). Không thể hoàn tác.',
+    'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
+        'Xóa tất cả đề bài đã nhập (Chung, Tình huống). Không thể hoàn tác.',
+    'その他 %lld 件、シチュエーション %lld 件を追加しました。':
+        'Đã thêm %lld đề chung và %lld đề tình huống.',
+    'お題を読み取れませんでした。【その他】【シチュエーション】の見出し付きで貼り付けてください。':
+        'Không đọc được đề bài. Vui lòng dán văn bản có tiêu đề 【Chung】/【Tình huống】.',
     '「Chrome AIで開く」をタップすると、この内容でGoogleのAIモード検索が開きます。回答をコピーして下の欄に貼り付けてください。':
         'Nhấn "Mở Chrome AI" để mở chế độ AI của Google với prompt này. Sao chép câu trả lời và dán bên dưới.',
     'Chromeから戻るとクリップボードから自動で読み込みます。空のときは「クリップボードから読み込む」を使ってください。内容を確認・編集してから「取り込む」を押してください。':

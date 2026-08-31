@@ -14,6 +14,7 @@ import '../../widgets/confirm_history_delete_dialog.dart';
 import '../../widgets/history_delete_background.dart';
 import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/question_prompt_list_row.dart';
+import 'question_prompt_edit_screen.dart';
 import 'question_prompt_filter_sheet.dart';
 import 'topic_add_flow.dart';
 
@@ -96,13 +97,16 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
   /// 取込・書き出しの選択シートへ（[showTopicAddChoiceFlow]、Step 1で
   /// 確立した[TopicService]→[QuestionPromptService]のミラー経由で反映される）。
   /// この一覧は分野をまたぐため、追加後にどの分野を選んでいたかに関わらず
-  /// 日常会話をデフォルトにする。
+  /// その他（[TopicCategory.general]）をデフォルトにする（Step 4）。
   Future<void> _addPrompt() async {
-    await showTopicAddChoiceFlow(context, initialCategory: TopicCategory.daily);
+    await showTopicAddChoiceFlow(
+      context,
+      initialCategory: TopicCategory.general,
+    );
     await reload();
   }
 
-  /// 「＋」長押し：この一覧画面自体（フィルタ・追加・削除・詳細）の使い方。
+  /// 「＋」長押し：この一覧画面自体（フィルタ・追加・編集・削除・詳細）の使い方。
   void _showUsageHelp() {
     final lang = appSettings.language;
     LayerHelpSheet.show(
@@ -112,9 +116,16 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
         LayerHelpLine(text: '問題文一覧_使い方_追加'.tr(lang), icon: Icons.add),
         LayerHelpLine(text: '問題文一覧_使い方_フィルタ'.tr(lang), icon: Icons.filter_list),
         LayerHelpLine(text: '問題文一覧_使い方_詳細'.tr(lang)),
+        LayerHelpLine(text: '問題文一覧_使い方_編集'.tr(lang)),
         LayerHelpLine(text: '問題文一覧_使い方_削除'.tr(lang)),
       ],
     );
+  }
+
+  /// 本文長押し：編集画面（Step 5）。戻ったら一覧を再読み込みする。
+  Future<void> _editPrompt(QuestionPrompt prompt) async {
+    await QuestionPromptEditScreen.push(context, prompt: prompt);
+    await reload();
   }
 
   Future<void> _deletePrompt(QuestionPrompt prompt) async {
@@ -144,7 +155,12 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
     final lang = appSettings.language;
     final palette = AppColors.current;
     final filtered = _service
-        .filter(_all, category: _filter.category, source: _filter.source)
+        .filter(
+          _all,
+          category: _filter.category,
+          source: _filter.source,
+          tag: _filter.tag,
+        )
         .where((p) => _filter.done == null || widget.isDone(p) == _filter.done)
         .toList();
     final doneCount = _all.where(widget.isDone).length;
@@ -249,8 +265,10 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
                             child: QuestionPromptListRow(
                               done: widget.isDone(prompt),
                               body: prompt.body,
+                              tags: prompt.tags,
                               onTap: () =>
                                   widget.onTap(context, prompt, filtered),
+                              onBodyLongPress: () => _editPrompt(prompt),
                               trailing: widget.trailingBuilder?.call(prompt),
                             ),
                           );

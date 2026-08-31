@@ -30,10 +30,19 @@ import '../services/vocabulary_service.dart';
 /// お題の取り込み（[TopicService]）はカテゴリを問わず全件バックアップ対象に
 /// なるが、「ランダム」は日常・ビジネスの取り込み分から都度合成される
 /// 抽選専用カテゴリで、それ自体には取り込み先が無いため対象外。
+/// `question-prompt-tabs.md` Step 4から[TopicCategory.daily]/[TopicCategory.business]
+/// はもう書き込まれないため、対象は[TopicCategory.general]/[TopicCategory.situational]
+/// の2つ（旧バックアップの日常/ビジネス節は[_mergeTopics]で読み込み時のみ
+/// generalへ正規化して復元する）。
 const _backedUpTopicCategories = [
+  TopicCategory.general,
+  TopicCategory.situational,
+];
+
+/// Step 4以前のバックアップに残る旧節（読み込み時のみ）。
+const _legacyBackedUpTopicCategories = [
   TopicCategory.daily,
   TopicCategory.business,
-  TopicCategory.situational,
 ];
 
 /// 既に専用のマージ処理（重複除外・追記）を持つSharedPreferencesキー。
@@ -50,7 +59,10 @@ Set<String> get _explicitlyMergedPrefKeys => {
   'longArticles.entries',
   'questionPrompts.entries',
   'thinkingMatrix.sets',
-  for (final category in _backedUpTopicCategories)
+  for (final category in [
+    ..._backedUpTopicCategories,
+    ..._legacyBackedUpTopicCategories,
+  ])
     'topics.imported.${category.storageKey}',
   for (final category in PronunciationCategory.values)
     'pronunciation.imported.${category.storageKey}',
@@ -503,7 +515,12 @@ Future<_Tally> _mergeTopics(Map<dynamic, dynamic> raw) async {
   final service = TopicService();
   var added = 0;
   var skipped = 0;
-  for (final category in _backedUpTopicCategories) {
+  for (final category in [
+    ..._backedUpTopicCategories,
+    // 旧バックアップ（Step 4以前）の日常/ビジネス節。importTopics側で
+    // generalへ正規化されるため、現行のgeneral節と同じ扱いで復元できる。
+    ..._legacyBackedUpTopicCategories,
+  ]) {
     final value = raw[category.storageKey];
     if (value is! List) continue;
     final topics = value.whereType<String>().toList();

@@ -38,8 +38,8 @@ abstract final class ThinkingMatrixPresets {
     TopicCategory.daily => dailyThemes,
     TopicCategory.business => businessThemes,
     TopicCategory.situational => situationThemes,
-    TopicCategory.random => throw ArgumentError(
-      'ThinkingMatrixPresets.themesFor()はrandomを取らない',
+    TopicCategory.general || TopicCategory.random => throw ArgumentError(
+      'ThinkingMatrixPresets.themesFor()はdaily/business/situationalのみ対応',
     ),
   };
 
@@ -48,8 +48,8 @@ abstract final class ThinkingMatrixPresets {
       switch (category) {
         TopicCategory.situational => situationColumns,
         TopicCategory.daily || TopicCategory.business => generalColumns,
-        TopicCategory.random => throw ArgumentError(
-          'ThinkingMatrixPresets.columnsFor()はrandomを取らない',
+        TopicCategory.general || TopicCategory.random => throw ArgumentError(
+          'ThinkingMatrixPresets.columnsFor()はdaily/business/situationalのみ対応',
         ),
       };
 }

@@ -200,7 +200,8 @@ void main() {
     expect(find.byType(CategorySelectField), findsOneWidget);
   });
 
-  testWidgets('ランダム：カテゴリ選択に「ランダム」は出ない（Ⅱと同じ問題文プール制約、Step 4）', (tester) async {
+  testWidgets('ランダム：カテゴリ選択はその他のみ（シチュエーション・日常・ビジネス・ランダムは出ない、'
+      'question-prompt-tabs.md Step 3）', (tester) async {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
@@ -209,12 +210,15 @@ void main() {
     await tester.tap(find.text(_t('ランダム')));
     await tester.pump();
 
-    await tester.tap(find.text(_t('日常')));
+    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
     await tester.pumpAndSettle();
 
-    // シチュエーションは既存どおり「15+60秒」モード専用（既定は45秒なので
-    // ここでは出ない）。Step 4で変わるのは「ランダム」が選べなくなる点だけ。
-    expect(find.text(_t('ビジネス')), findsOneWidget);
+    // 既定は45秒モード（シチュエーションは「15+60秒」専用のため出ない）。
+    // question-prompt-tabs.md Step 3で日常／ビジネスの3分類UIを廃止した
+    // ため、選択肢は「その他」のみになる。
+    expect(find.text(_t('シチュエーション')), findsNothing);
+    expect(find.text(_t('日常')), findsNothing);
+    expect(find.text(_t('ビジネス')), findsNothing);
     expect(find.text(_t('ランダム')), findsNothing);
   });
 
@@ -337,9 +341,7 @@ void main() {
       appSettings.layer4PromptRevealMode = Layer4PromptRevealMode.rapid;
     });
 
-    testWidgets('ランダム・ラピッド：サイコロは橙色で、1タップで問題文表示と読み上げが同時に始まる', (
-      tester,
-    ) async {
+    testWidgets('ランダム・ラピッド：サイコロは橙色で、1タップで問題文表示と読み上げが同時に始まる', (tester) async {
       await tester.pumpWidget(const OsmGradusApp());
       await tester.tap(find.text('Tầng I'));
       await tester.pumpAndSettle();

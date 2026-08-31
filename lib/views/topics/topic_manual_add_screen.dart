@@ -6,6 +6,7 @@ import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
+import '../../services/question_prompt_auto_tag_service.dart';
 import '../../services/topic_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
@@ -18,8 +19,9 @@ import '../../widgets/swipe_to_close_wrapper.dart';
 class TopicManualAddScreen extends StatefulWidget {
   const TopicManualAddScreen({super.key, required this.initialCategory});
 
-  /// 呼び出し元レイヤーで選択中だった分野。「ランダム」は保存先を持たない
-  /// ため、その場合は日常会話にフォールバックする（[_selectableCategories]）。
+  /// 呼び出し元レイヤーで選択中だった分野。[_selectableCategories]に
+  /// 含まれない値（「ランダム」や25マス専用の旧`daily`/`business`）は
+  /// その他（[TopicCategory.general]）にフォールバックする。
   final TopicCategory initialCategory;
 
   static Future<void> push(
@@ -43,18 +45,18 @@ class TopicManualAddScreen extends StatefulWidget {
 
 class _TopicManualAddScreenState extends State<TopicManualAddScreen> {
   static const _selectableCategories = [
-    TopicCategory.daily,
-    TopicCategory.business,
+    TopicCategory.general,
     TopicCategory.situational,
   ];
 
   final _service = TopicService();
+  final _autoTagService = QuestionPromptAutoTagService();
   final _textController = TextEditingController();
 
   late TopicCategory _category =
       _selectableCategories.contains(widget.initialCategory)
       ? widget.initialCategory
-      : TopicCategory.daily;
+      : TopicCategory.general;
 
   int _count = 0;
   String? _resultMessage;
@@ -89,9 +91,14 @@ class _TopicManualAddScreenState extends State<TopicManualAddScreen> {
   Future<void> _add() async {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
-    final added = await _service.importTopics(_category, [
-      text,
-    ], source: QuestionPromptSource.manual);
+    final added = await _service.importTopics(
+      _category,
+      [text],
+      source: QuestionPromptSource.manual,
+      tagsForBody: _category == TopicCategory.general
+          ? _autoTagService.suggestTags
+          : null,
+    );
     if (!mounted) return;
     if (added == 0) {
       setState(() {
