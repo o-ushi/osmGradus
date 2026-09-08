@@ -46,6 +46,15 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// スタートアップの「はじめる」後に使い方画面を出すか。
+  bool get showUsageScreen => _prefs.showUsageScreen;
+
+  set showUsageScreen(bool value) {
+    if (_prefs.showUsageScreen == value) return;
+    _prefs.showUsageScreen = value;
+    notifyListeners();
+  }
+
   /// レイヤーⅠの単語テスト／単語帳に標準JLPT語彙（各20語）を含めるか。
   bool get includeDefaultVocabulary => _prefs.includeDefaultVocabulary;
 

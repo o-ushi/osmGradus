@@ -361,8 +361,8 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
                 ],
               ),
 
-              // ─── スタートアップ ───────────────────────────────
-              SettingsSectionHeader('スタートアップ画面'.tr(lang)),
+              // ─── 案内（スタートアップ・使い方） ─────────────────
+              SettingsSectionHeader('案内'.tr(lang)),
               SettingsSectionCard(
                 children: [
                   SettingsSwitchRow(
@@ -370,6 +370,13 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
                     subtitle: 'スタートアップ画面_説明'.tr(lang),
                     value: appSettings.showStartupScreen,
                     onChanged: (value) => appSettings.showStartupScreen = value,
+                  ),
+                  const SettingsItemDivider(),
+                  SettingsSwitchRow(
+                    label: '使い方画面'.tr(lang),
+                    subtitle: '使い方画面_説明'.tr(lang),
+                    value: appSettings.showUsageScreen,
+                    onChanged: (value) => appSettings.showUsageScreen = value,
                   ),
                 ],
               ),

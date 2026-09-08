@@ -51,6 +51,7 @@ void main() {
     appSettings.buttonHintPersistUntilNextAction = false;
     appSettings.buttonHintDisplaySeconds =
         AppPreferences.defaultButtonHintDisplaySeconds;
+    appSettings.showUsageScreen = true;
   });
 
   testWidgets('ボタンヒントのセクションが既定値（OFF・3秒）で表示される（Step 8）', (tester) async {
@@ -110,5 +111,33 @@ void main() {
 
     expect(appSettings.buttonHintDisplaySeconds, 8);
     expect(find.text('ボタンヒント_表示期間_秒'.trFmt(_lang, ['8'])), findsOneWidget);
+  });
+
+  test('showUsageScreenは未設定なら既定true、設定するとリロード後も保持される（Step 1）', () async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await AppPreferences.load();
+    expect(prefs.showUsageScreen, isTrue);
+
+    prefs.showUsageScreen = false;
+    final reloaded = await AppPreferences.load();
+    expect(reloaded.showUsageScreen, isFalse);
+  });
+
+  testWidgets('設定画面に使い方画面スイッチが出て、トグルで値が変わる（Step 1）', (tester) async {
+    await _openSettings(tester);
+
+    expect(find.text(_t('使い方画面')), findsOneWidget);
+    final switchWidget = tester.widget<Switch>(
+      find.descendant(
+        of: find.widgetWithText(SettingsSwitchRow, _t('使い方画面')),
+        matching: find.byType(Switch),
+      ),
+    );
+    expect(switchWidget.value, isTrue);
+
+    await tester.tap(find.text(_t('使い方画面')));
+    await tester.pumpAndSettle();
+
+    expect(appSettings.showUsageScreen, isFalse);
   });
 }

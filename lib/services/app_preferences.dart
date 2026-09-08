@@ -13,6 +13,7 @@ class AppPreferences {
   static const layer5RecordingModeKey = 'osmGradus.layer5.recordingMode';
   static const vocabRecordingModeKey = 'osmGradus.layer1.vocabRecordingMode';
   static const showStartupScreenKey = 'osmGradus.showStartupScreen';
+  static const showUsageScreenKey = 'osmGradus.showUsageScreen';
   static const includeDefaultVocabularyKey =
       'osmGradus.includeDefaultVocabulary';
   static const vocabAnswerModeKey = 'osmGradus.layer1.vocabAnswerMode';
@@ -73,6 +74,11 @@ class AppPreferences {
 
   set showStartupScreen(bool value) =>
       _prefs.setBool(showStartupScreenKey, value);
+
+  /// スタートアップの「はじめる」後に使い方画面を出すか。未設定＝初回は true。
+  bool get showUsageScreen => _prefs.getBool(showUsageScreenKey) ?? true;
+
+  set showUsageScreen(bool value) => _prefs.setBool(showUsageScreenKey, value);
 
   /// レイヤーⅠ単語テスト／単語帳に標準JLPT語彙（各レベル20語）を含めるか。
   /// 未設定＝true（初めての人でもすぐ試験できるようにする）。

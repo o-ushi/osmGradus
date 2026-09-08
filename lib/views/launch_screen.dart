@@ -23,7 +23,7 @@ class LaunchScreen extends StatefulWidget {
     super.key,
     this.onOpenLayer,
     this.onOpenLayerInListMode,
-    this.onShowStartup,
+    this.onSwipeFromHome,
     this.onResume,
   });
 
@@ -43,10 +43,11 @@ class LaunchScreen extends StatefulWidget {
   /// 問題文一覧モードでそのレイヤーを開く。
   final void Function(int index)? onOpenLayerInListMode;
 
-  /// 左端からの右スワイプで[StartupScreen]へ戻る操作を呼ぶ。
+  /// 左端からの右スワイプで呼ぶ。着地先（使い方画面かスタートアップ画面か）
+  /// は呼び出し元（[AppRootShell]）が「使い方」フラグの現在値で決める。
   /// 設定の「スタートアップ画面」がONかつこれが指定されているときだけ
   /// [SwipeToCloseWrapper]を有効にする（OFFなら不要なため何もしない）。
-  final VoidCallback? onShowStartup;
+  final VoidCallback? onSwipeFromHome;
 
   /// スワイプで閉じる直前の[MainShell]をそのまま（レイヤー切替もモード
   /// リセットも行わず）再表示する「戻る」操作。まだ一度もレイヤーを
@@ -166,11 +167,11 @@ class _LaunchScreenState extends State<LaunchScreen> {
       ),
     );
 
-    final onShowStartup = widget.onShowStartup;
-    if (!appSettings.showStartupScreen || onShowStartup == null) {
+    final onSwipeFromHome = widget.onSwipeFromHome;
+    if (!appSettings.showStartupScreen || onSwipeFromHome == null) {
       return scaffold;
     }
-    return SwipeToCloseWrapper(onClose: onShowStartup, child: scaffold);
+    return SwipeToCloseWrapper(onClose: onSwipeFromHome, child: scaffold);
   }
 }
 

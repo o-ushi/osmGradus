@@ -15,6 +15,16 @@ abstract final class GradusL10n {
     'はじめる': 'はじめる',
     'スタートアップ画面': 'スタートアップ画面',
     'スタートアップ画面_説明': 'アプリ起動時に案内画面を表示します',
+    '案内': '案内',
+    '使い方画面': '使い方画面',
+    '使い方画面_説明': 'Chrome AIのコピー方法や、＋の長押し・ダブルタップなどの基本操作を表示します',
+    '使い方_タイトル': '使い方',
+    '使い方_コピー本文':
+        'ChromeのAIモードで答えが出たら、画面の下のほうにあるコピーボタンをタップしてください。重なった2つの四角のアイコンです（下の写真の赤丸）。\n\nこのボタンを押さずにアプリへ戻ると、貼り付けできません。コピーできたら、osmGradusに戻ってください。',
+    '使い方_プラス長押し': '各画面の＋ボタンを長押しすると、その画面の操作方法が表示されます。',
+    '使い方_ダブルタップ': 'ボタンをダブルタップすると、タップしたときと長押ししたときの動作がポップアップで表示されます。',
+    '使い方_コピー画像_説明': 'Chrome AIモードのコピーボタン（赤丸）',
+    'ホーム画面へ': 'ホーム画面へ',
     '標準のJLPT語彙を含める': '標準のJLPT語彙を含める',
     '標準のJLPT語彙を含める_説明':
         '語彙テストと単語帳に、あらかじめ用意したN1/N2/N3各20語（例文つき）を含めます。オフにすると自分で追加した語だけになります',
@@ -701,6 +711,9 @@ abstract final class GradusL10n {
     'help.gradus.gesture.tip1': '右スワイプで前の画面へ戻る',
     'help.gradus.gesture.tip2': 'ヘッダーのⅠ〜Ⅴでレイヤーを即切り替える',
     'help.gradus.gesture.tip3': 'アイコンボタンをダブルタップすると、タップと長押しの機能が表示される',
+    'help.gradus.gesture.tip4':
+        'ChromeのAIモードで答えが出たら、画面下のほうのコピーボタン'
+        '（重なった2つの四角）を押してから戻る。押さずに戻ると貼り付けできない',
     'help.gradus.sections.layers': '5つのレイヤー',
     'help.gradus.sections.more': 'その他',
     'バージョン %@ (%@)': 'バージョン %@ (%@)',
@@ -849,6 +862,17 @@ abstract final class GradusL10n {
     'はじめる': 'Get started',
     'スタートアップ画面': 'Startup screen',
     'スタートアップ画面_説明': 'Show the welcome screen when the app launches',
+    '案内': 'Onboarding',
+    '使い方画面': 'How-to screen',
+    '使い方画面_説明':
+        'Show how to copy from Chrome AI, long-press +, and double-tap for button hints',
+    '使い方_タイトル': 'How to use',
+    '使い方_コピー本文':
+        'When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom of the screen — the icon of two overlapping squares (red circle in the photo).\n\nIf you skip this and return to the app, you won’t be able to paste. After copying, come back to osmGradus.',
+    '使い方_プラス長押し': 'Long-press the + button on each screen to see how to use it.',
+    '使い方_ダブルタップ': 'Double-tap a button to see what tap and long-press do.',
+    '使い方_コピー画像_説明': 'Copy button in Chrome AI Mode (red circle)',
+    'ホーム画面へ': 'Go to Home',
     '標準のJLPT語彙を含める': 'Include built-in JLPT vocabulary',
     '標準のJLPT語彙を含める_説明':
         'Include 20 prepared words with example sentences for each of N1/N2/N3 in the vocab test and word book. Turn off to use only words you add',
@@ -1655,6 +1679,10 @@ abstract final class GradusL10n {
         'Tap I–V in the header to switch layers instantly',
     'help.gradus.gesture.tip3':
         'Double-tap an icon button to see its tap and long-press actions',
+    'help.gradus.gesture.tip4':
+        'When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom '
+        '(two overlapping squares) before returning — skip it and you won’t be able '
+        'to paste',
     'help.gradus.sections.layers': 'Five layers',
     'help.gradus.sections.more': 'More',
     'バージョン %@ (%@)': 'Version %@ (%@)',
@@ -1814,6 +1842,17 @@ abstract final class GradusL10n {
     'はじめる': 'Bắt đầu',
     'スタートアップ画面': 'Màn hình khởi động',
     'スタートアップ画面_説明': 'Hiện màn hình hướng dẫn khi mở ứng dụng',
+    '案内': 'Màn hình giới thiệu',
+    '使い方画面': 'Màn hình hướng dẫn',
+    '使い方画面_説明':
+        'Hiện cách sao chép từ Chrome AI, nhấn giữ +, và nhấn đúp để xem gợi ý nút',
+    '使い方_タイトル': 'Cách dùng',
+    '使い方_コピー本文':
+        'Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới màn hình — biểu tượng hai hình vuông chồng lên nhau (khoanh đỏ trong ảnh).\n\nNếu quay lại ứng dụng mà chưa chạm nút này, bạn sẽ không dán được. Sau khi sao chép, hãy quay lại osmGradus.',
+    '使い方_プラス長押し': 'Nhấn giữ nút + trên mỗi màn hình để xem cách sử dụng.',
+    '使い方_ダブルタップ': 'Nhấn đúp một nút để xem thao tác khi chạm và khi nhấn giữ.',
+    '使い方_コピー画像_説明': 'Nút sao chép trong Chrome AI Mode (khoanh đỏ)',
+    'ホーム画面へ': 'Về màn hình chính',
     '標準のJLPT語彙を含める': 'Bao gồm từ vựng JLPT có sẵn',
     '標準のJLPT語彙を含める_説明':
         'Đưa 20 từ sẵn có (kèm câu ví dụ) cho mỗi cấp N1/N2/N3 vào bài kiểm tra và sổ từ. Tắt để chỉ dùng từ bạn tự thêm',
@@ -2609,6 +2648,10 @@ abstract final class GradusL10n {
     'help.gradus.gesture.tip2': 'Chạm I–V trên thanh đầu để chuyển tầng ngay',
     'help.gradus.gesture.tip3':
         'Chạm đúp nút biểu tượng để xem chức năng chạm và chạm giữ',
+    'help.gradus.gesture.tip4':
+        'Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới '
+        '(hai hình vuông chồng nhau) trước khi quay lại — nếu bỏ qua bạn sẽ không '
+        'dán được',
     'help.gradus.sections.layers': 'Năm tầng',
     'help.gradus.sections.more': 'Khác',
     'バージョン %@ (%@)': 'Phiên bản %@ (%@)',

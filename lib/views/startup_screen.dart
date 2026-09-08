@@ -110,15 +110,6 @@ class _StartupScreenState extends State<StartupScreen> {
                                 color: palette.textOnSceneSecondary,
                               ),
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '起動_操作ヒント'.tr(lang),
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: palette.textOnSceneSecondary,
-                              ),
-                            ),
                             const SizedBox(height: 36),
                             InkWell(
                               onTap: () => setState(

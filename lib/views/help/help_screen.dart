@@ -88,6 +88,7 @@ class _HelpScreenState extends State<HelpScreen> {
         'help.gradus.gesture.tip1',
         'help.gradus.gesture.tip2',
         'help.gradus.gesture.tip3',
+        'help.gradus.gesture.tip4',
       ],
     ),
   ];

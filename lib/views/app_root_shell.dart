@@ -4,9 +4,10 @@ import '../main.dart' show appSettings;
 import 'launch_screen.dart';
 import 'main_shell.dart';
 import 'startup_screen.dart';
+import 'usage_screen.dart';
 
-/// アプリのルート。[StartupScreen]・[LaunchScreen]・[MainShell]を兄弟として
-/// 保持し、Navigatorのpush/popではなく表示切り替えだけで行き来する。
+/// アプリのルート。[StartupScreen]・[UsageScreen]・[LaunchScreen]・[MainShell]を
+/// 兄弟として保持し、Navigatorのpush/popではなく表示切り替えだけで行き来する。
 ///
 /// 以前は[LaunchScreen]がレイヤータイルのタップごとに[MainShell]を
 /// 新規にpushしていたため、スタート画面へ戻ってから同じレイヤーに戻ると
@@ -36,6 +37,11 @@ class _AppRootShellState extends State<AppRootShell> {
   /// 設定で再有効にしても、同じ起動セッションでは出し直さない
   /// （次回コールドスタートで表示する）。
   late bool _showingStartup = appSettings.showStartupScreen;
+
+  /// 使い方画面の表示状態。コールドスタート直後は常にfalse
+  /// （使い方だけを起動時に出す経路は作らない。スタートアップの
+  /// 「はじめる」を経由したときだけtrueになる）。
+  bool _showingUsage = false;
 
   void _openLayer(int index, {bool forceReset = false}) {
     if (_mainShellCreated) {
@@ -75,14 +81,31 @@ class _AppRootShellState extends State<AppRootShell> {
     if (dontShowAgain) {
       appSettings.showStartupScreen = false;
     }
-    setState(() => _showingStartup = false);
+    setState(() {
+      _showingStartup = false;
+      // 「はじめる」の着地は使い方フラグのみを見る（仕様B）。
+      _showingUsage = appSettings.showUsageScreen;
+    });
+  }
+
+  void _finishUsage(bool dontShowAgain) {
+    if (dontShowAgain) {
+      appSettings.showUsageScreen = false;
+    }
+    setState(() => _showingUsage = false);
   }
 
   /// レイヤー一覧画面（[LaunchScreen]）を左端からの右スワイプで閉じたときに
   /// 呼ぶ。設定の「スタートアップ画面」がONのときだけ[LaunchScreen]側から
-  /// 渡されるため、ここでは条件を見ずにそのまま表示し直せばよい。
-  void _showStartup() {
-    setState(() => _showingStartup = true);
+  /// 渡される。着地先は現在値の「使い方」フラグで分岐する（仕様D）。
+  void _onSwipeFromHome() {
+    setState(() {
+      if (appSettings.showUsageScreen) {
+        _showingUsage = true;
+      } else {
+        _showingStartup = true;
+      }
+    });
   }
 
   @override
@@ -95,11 +118,11 @@ class _AppRootShellState extends State<AppRootShell> {
     // 保持する。
     return Stack(
       children: [
-        if (!_showingMainShell && !_showingStartup)
+        if (!_showingMainShell && !_showingStartup && !_showingUsage)
           LaunchScreen(
             onOpenLayer: _openLayer,
             onOpenLayerInListMode: _openLayerInListMode,
-            onShowStartup: _showStartup,
+            onSwipeFromHome: _onSwipeFromHome,
             onResume: _mainShellCreated ? _resumeMainShell : null,
           ),
         if (_mainShellCreated)
@@ -114,6 +137,8 @@ class _AppRootShellState extends State<AppRootShell> {
               onClose: _backToStart,
             ),
           ),
+        if (!_showingStartup && _showingUsage)
+          UsageScreen(onContinue: _finishUsage),
         if (_showingStartup) StartupScreen(onContinue: _finishStartup),
       ],
     );

@@ -99,6 +99,7 @@ flutter:
   assets:
     - assets/vosk/vosk-model-small-ja-0.22.zip
     - assets/images/app_icon.png
+    - assets/images/chrome_ai_copy_button.png
     - assets/sounds/tick_beep.wav
 
   # To add assets to your application, add an assets section, like this:
