@@ -24,6 +24,7 @@ void main() {
       expect(text, contains('[質問]'));
       expect(text, contains('[日本語]'));
       expect(text, contains('[Romaji]'));
+      expect(text, contains('[ベトナム語]'));
     });
 
     test('シチュエーションの条件文があれば問題文に続けて含める', () {
@@ -64,16 +65,18 @@ void main() {
       expect(enText, contains('[質問]'));
       expect(enText, contains('[日本語]'));
       expect(enText, contains('[Romaji]'));
+      expect(enText, contains('[ベトナム語]'));
       expect(viText, contains('テスト本文'));
       expect(viText, contains('tiếng Nhật'));
       expect(viText, contains('[質問]'));
       expect(viText, contains('[日本語]'));
       expect(viText, contains('[Romaji]'));
+      expect(viText, contains('[ベトナム語]'));
     });
   });
 
-  group('Layer2SampleAnswerAiPromptTemplate 3ブロック見出し順序', () {
-    test('ja/en/viいずれも[質問]→[日本語]→[Romaji]の順で見出しを指示する', () {
+  group('Layer2SampleAnswerAiPromptTemplate 4ブロック見出し順序', () {
+    test('ja/en/viいずれも[質問]→[日本語]→[Romaji]→[ベトナム語]の順で見出しを指示する', () {
       final prompt = QuestionPrompt.create(
         category: TopicCategory.daily,
         body: '見出し順序確認用の問題文',
@@ -88,11 +91,45 @@ void main() {
         final questionIndex = text.indexOf('[質問]');
         final japaneseIndex = text.indexOf('[日本語]');
         final romajiIndex = text.indexOf('[Romaji]');
+        final vietnameseIndex = text.indexOf('[ベトナム語]');
 
         expect(questionIndex, greaterThanOrEqualTo(0), reason: lang);
         expect(japaneseIndex, greaterThan(questionIndex), reason: lang);
         expect(romajiIndex, greaterThan(japaneseIndex), reason: lang);
+        expect(vietnameseIndex, greaterThan(romajiIndex), reason: lang);
       }
+    });
+  });
+
+  group('Layer2SampleAnswerAiPromptTemplate 末尾の追記禁止', () {
+    final prompt = QuestionPrompt.create(
+      category: TopicCategory.daily,
+      body: '追記禁止確認用の問題文',
+      source: QuestionPromptSource.manual,
+    );
+
+    String build(String lang) =>
+        Layer2SampleAnswerAiPromptTemplate.prompt(prompt: prompt, lang: lang);
+
+    test('ja: 最後のブロック後の追記・カスタマイズ提案を禁止し、ローマ字での代用も禁止する', () {
+      final text = build('ja');
+      expect(text, contains('最後のブロックのあとには何も書かず'));
+      expect(text, contains('カスタマイズしましょうか'));
+      expect(text, contains('ローマ字で代用しない'));
+    });
+
+    test('en: 最後のブロック後の追記・カスタマイズ提案を禁止し、ローマ字での代用も禁止する', () {
+      final text = build('en');
+      expect(text, contains('Write nothing after the last block'));
+      expect(text, contains('customize'));
+      expect(text, contains('never replace it with romaji'));
+    });
+
+    test('vi: 最後のブロック後の追記・カスタマイズ提案を禁止し、ローマ字での代用も禁止する', () {
+      final text = build('vi');
+      expect(text, contains('Không viết gì sau khối cuối cùng'));
+      expect(text, contains('tùy chỉnh'));
+      expect(text, contains('không thay bằng romaji'));
     });
   });
 

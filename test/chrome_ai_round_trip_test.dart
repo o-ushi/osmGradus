@@ -45,8 +45,7 @@ void main() {
               return {'text': clipboardText};
             }
             if (call.method == 'Clipboard.setData') {
-              clipboardText =
-                  (call.arguments as Map)['text'] as String? ?? '';
+              clipboardText = (call.arguments as Map)['text'] as String? ?? '';
               return null;
             }
             return null;
@@ -99,10 +98,7 @@ void main() {
           '学習者が話す練習に使える「約45秒で話せる模範解答」を1つ作成して'
           'ください。\n\n問題文: テスト\n\nプレーンテキストのみで回答し';
       expect(
-        Layer2SampleAnswerMixin.isPlausibleSampleAnswer(
-          sent,
-          sentPrompt: sent,
-        ),
+        Layer2SampleAnswerMixin.isPlausibleSampleAnswer(sent, sentPrompt: sent),
         isFalse,
       );
     });
@@ -117,13 +113,10 @@ void main() {
     });
 
     test('極端に短い文字列は弾く', () {
-      expect(
-        Layer2SampleAnswerMixin.isPlausibleSampleAnswer('短い'),
-        isFalse,
-      );
+      expect(Layer2SampleAnswerMixin.isPlausibleSampleAnswer('短い'), isFalse);
     });
 
-    test('新フォーマット（[質問]/[日本語]/[Romaji]の3ブロック）は通す', () {
+    test('旧フォーマット（[ベトナム語]の無い3ブロック）も通す', () {
       const answer =
           '[質問]\n'
           '週末はどう過ごしましたか？\n'
@@ -133,13 +126,10 @@ void main() {
           '[Romaji]\n'
           'Shuumatsu wa tomodachi to chikaku no kouen ni itte, hisashiburi '
           'ni yukkuri hanashinagara sanpo shimashita.';
-      expect(
-        Layer2SampleAnswerMixin.isPlausibleSampleAnswer(answer),
-        isTrue,
-      );
+      expect(Layer2SampleAnswerMixin.isPlausibleSampleAnswer(answer), isTrue);
     });
 
-    test('実際の新依頼文を送ったあと、依頼文そのものの再送は弾き、3ブロック回答は通す', () {
+    test('実際の依頼文を送ったあと、依頼文そのものの再送は弾き、旧3ブロック回答は通す', () {
       final prompt = QuestionPrompt.create(
         category: TopicCategory.daily,
         body: '週末はどう過ごしましたか？',
@@ -160,10 +150,7 @@ void main() {
           'shimashita.';
 
       expect(
-        Layer2SampleAnswerMixin.isPlausibleSampleAnswer(
-          sent,
-          sentPrompt: sent,
-        ),
+        Layer2SampleAnswerMixin.isPlausibleSampleAnswer(sent, sentPrompt: sent),
         isFalse,
       );
       expect(
@@ -192,12 +179,14 @@ void main() {
         isFalse,
       );
       expect(
-        Layer2SampleAnswerMixin.isAcceptableManualPaste('https://example.com/a'),
+        Layer2SampleAnswerMixin.isAcceptableManualPaste(
+          'https://example.com/a',
+        ),
         isFalse,
       );
     });
 
-    test('新フォーマット（3ブロック）も手動貼り付けで通す', () {
+    test('旧フォーマット（3ブロック）も手動貼り付けで通す', () {
       const answer =
           '[質問]\n'
           '週末はどう過ごしましたか？\n'
@@ -205,10 +194,104 @@ void main() {
           '週末は友達と近くの公園に行きました。\n'
           '[Romaji]\n'
           'Shuumatsu wa tomodachi to chikaku no kouen ni ikimashita.';
+      expect(Layer2SampleAnswerMixin.isAcceptableManualPaste(answer), isTrue);
+    });
+  });
+
+  group('stripSampleAnswerFollowUp', () {
+    const followUp =
+        'この模範解答のスピード調整や、よりフォーマルなビジネス表現への変更など、'
+        'さらに練習しやすいようにカスタマイズしましょうか？';
+    const fourBlocks =
+        '[質問]\n'
+        '週末はどう過ごしましたか？\n'
+        '[日本語]\n'
+        '週末は友達と近くの公園に行って、久しぶりにゆっくり話しながら'
+        '散歩しました。天気もよかったので気分転換になりました。\n'
+        '[Romaji]\n'
+        'Shuumatsu wa tomodachi to chikaku no kouen ni itte, hisashiburi '
+        'ni yukkuri hanashinagara sanpo shimashita.\n'
+        '[ベトナム語]\n'
+        'Cuối tuần tôi đã đi dạo ở công viên gần nhà cùng bạn bè. '
+        'Thời tiết đẹp nên tôi thấy thư giãn.';
+
+    test('4ブロック全文は妥当性チェック（自動・手動）をそのまま通る', () {
       expect(
-        Layer2SampleAnswerMixin.isAcceptableManualPaste(answer),
+        Layer2SampleAnswerMixin.isPlausibleSampleAnswer(fourBlocks),
         isTrue,
       );
+      expect(
+        Layer2SampleAnswerMixin.isAcceptableManualPaste(fourBlocks),
+        isTrue,
+      );
+      expect(stripSampleAnswerFollowUp(fourBlocks), fourBlocks);
+    });
+
+    test('[ベトナム語]のあとに空行＋提案文が付いても、提案文だけ除く', () {
+      final stripped = stripSampleAnswerFollowUp('$fourBlocks\n\n$followUp');
+      expect(stripped, isNot(contains('カスタマイズ')));
+      expect(stripped, fourBlocks);
+      expect(Layer2SampleAnswerMixin.isPlausibleSampleAnswer(stripped), isTrue);
+    });
+
+    test('空行なしで次の行に提案文が付いても除く', () {
+      final stripped = stripSampleAnswerFollowUp('$fourBlocks\n$followUp');
+      expect(stripped, fourBlocks);
+    });
+
+    test('同じ行の末尾に続いた提案文も除き、ベトナム語本文は残す', () {
+      final stripped = stripSampleAnswerFollowUp('$fourBlocks $followUp');
+      expect(stripped, fourBlocks);
+    });
+
+    test('英語・ベトナム語の提案文も除く', () {
+      expect(
+        stripSampleAnswerFollowUp(
+          '$fourBlocks\n\nWould you like me to adjust the speed or make '
+          'the sample answer more formal?',
+        ),
+        fourBlocks,
+      );
+      expect(
+        stripSampleAnswerFollowUp(
+          '$fourBlocks\n\nBạn có muốn tôi tùy chỉnh câu trả lời mẫu này '
+          'cho dễ luyện tập hơn không?',
+        ),
+        fourBlocks,
+      );
+    });
+
+    test('[日本語]が疑問文で終わる模範解答は、その疑問文を残す', () {
+      const answer =
+          '[質問]\n'
+          '休日の過ごし方は？\n'
+          '[日本語]\n'
+          '休日は家でゆっくり本を読むことが多いです。皆さんはどう過ごしていますか？';
+      expect(stripSampleAnswerFollowUp(answer), answer);
+      const headless = '休日は家でゆっくり本を読むことが多いです。\n\n皆さんはどう過ごしていますか？';
+      expect(stripSampleAnswerFollowUp(headless), headless);
+    });
+
+    test('提案の無い3ブロック・見出しなし本文は変化しない', () {
+      const threeBlocks =
+          '[質問]\n'
+          '週末はどう過ごしましたか？\n'
+          '[日本語]\n'
+          '週末は友達と近くの公園に行きました。\n'
+          '[Romaji]\n'
+          'Shuumatsu wa tomodachi to chikaku no kouen ni ikimashita.';
+      const headless = '電話ではまず結論から簡潔に話すことが大切です。用件を短くまとめましょう。';
+      expect(stripSampleAnswerFollowUp(threeBlocks), threeBlocks);
+      expect(stripSampleAnswerFollowUp(headless), headless);
+    });
+
+    test('見出しなしの旧テキストも末尾の提案段落だけ除く', () {
+      const headless = '電話ではまず結論から簡潔に話すことが大切です。用件を短くまとめましょう。';
+      expect(stripSampleAnswerFollowUp('$headless\n\n$followUp'), headless);
+    });
+
+    test('提案文だけのテキストは空にしない（妥当性チェック側に任せる）', () {
+      expect(stripSampleAnswerFollowUp(followUp), followUp);
     });
   });
 }

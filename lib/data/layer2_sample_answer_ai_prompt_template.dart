@@ -11,8 +11,11 @@ import 'google_ai_search.dart';
 /// 日本語スピーキング練習用のため、依頼文の言語によらず常に日本語で書くよう
 /// 明示する。
 ///
-/// 返答フォーマットは `[質問]` / `[日本語]` / `[Romaji]` の3ブロック構成
-/// （見出しは依頼文の言語によらず常にこの半角ブラケット表記で固定）。
+/// 返答フォーマットは `[質問]` / `[日本語]` / `[Romaji]` / `[ベトナム語]` の
+/// 4ブロック構成（見出しは依頼文の言語によらず常にこの半角ブラケット表記で
+/// 固定）。`[Romaji]` は直上の `[日本語]` のローマ字、`[ベトナム語]` は同じ
+/// `[日本語]` のベトナム語訳。最後のブロックのあとの追記（スピード調整・
+/// フォーマル化・カスタマイズの提案など）は禁止する。
 /// `QuestionPrompt.sampleAnswer` にはこのプレーンテキストがそのまま保存され、
 /// レイヤーⅡ（`TextViewSheet`）・レイヤーⅣ（閲覧専用）で表示される。
 abstract final class Layer2SampleAnswerAiPromptTemplate {
@@ -20,10 +23,7 @@ abstract final class Layer2SampleAnswerAiPromptTemplate {
 
   /// [prompt]（本文・シチュエーションの条件文があればそれも含む）から
   /// 模範解答の依頼文を組み立てる。
-  static String prompt({
-    required QuestionPrompt prompt,
-    required String lang,
-  }) {
+  static String prompt({required QuestionPrompt prompt, required String lang}) {
     final copy = _copy(lang);
     final buffer = StringBuffer()
       ..writeln(copy.header)
@@ -78,7 +78,7 @@ abstract final class Layer2SampleAnswerAiPromptTemplate {
           'regardless of the language of this instruction. '
           'Reply in plain text only (no JSON, no markdown headings), with '
           'no preamble or repetition of this request, using exactly these '
-          'three headings in this order, each followed by its content on '
+          'four headings in this order, each followed by its content on '
           'the next line - keep the headings themselves in Japanese '
           'brackets exactly as shown, regardless of the language of this '
           'instruction: '
@@ -86,7 +86,12 @@ abstract final class Layer2SampleAnswerAiPromptTemplate {
           'as-is), then "[日本語]" (the ~45-second spoken sample answer '
           'described above), then "[Romaji]" (a romanization of that '
           '"[日本語]" answer, Hepburn-leaning and optimized for '
-          'readability - long vowels may use common notation).',
+          'readability - long vowels may use common notation), then '
+          '"[ベトナム語]" (an accurate Vietnamese translation of that '
+          '"[日本語]" answer). Write "[日本語]" in kana/kanji, never '
+          'replace it with romaji. Write nothing after the last block: '
+          'no offers to adjust the speed, make it more formal/business-'
+          'like, or customize it further.',
     ),
     'vi' => (
       header:
@@ -103,7 +108,7 @@ abstract final class Layer2SampleAnswerAiPromptTemplate {
           'phải viết bằng tiếng Nhật, bất kể ngôn ngữ của hướng dẫn này. '
           'Chỉ trả lời bằng văn bản thường (không JSON, không tiêu đề '
           'markdown), không thêm lời mở đầu hay lặp lại yêu cầu này, và '
-          'dùng đúng 3 tiêu đề sau theo đúng thứ tự này, mỗi tiêu đề có '
+          'dùng đúng 4 tiêu đề sau theo đúng thứ tự này, mỗi tiêu đề có '
           'nội dung ngay ở dòng tiếp theo - giữ nguyên các tiêu đề bằng '
           'dấu ngoặc vuông tiếng Nhật như bên dưới, bất kể ngôn ngữ của '
           'hướng dẫn này: '
@@ -111,7 +116,12 @@ abstract final class Layer2SampleAnswerAiPromptTemplate {
           'sau đó "[日本語]" (câu trả lời mẫu nói được trong ~45 giây như '
           'mô tả ở trên), rồi "[Romaji]" (phiên âm La-tinh của câu trả '
           'lời "[日本語]" đó, ưu tiên kiểu Hepburn và dễ đọc - âm dài có '
-          'thể dùng cách viết thông dụng).',
+          'thể dùng cách viết thông dụng), cuối cùng "[ベトナム語]" (bản '
+          'dịch tiếng Việt chính xác của câu trả lời "[日本語]" đó). '
+          '"[日本語]" phải viết bằng kana/kanji, không thay bằng romaji. '
+          'Không viết gì sau khối cuối cùng: không đề nghị điều chỉnh '
+          'tốc độ, đổi sang cách nói trang trọng/kinh doanh hay tùy '
+          'chỉnh thêm.',
     ),
     _ => (
       header:
@@ -126,13 +136,18 @@ abstract final class Layer2SampleAnswerAiPromptTemplate {
           '目安として150〜250文字程度で構いませんが、厳密な文字数は気にしな'
           'くてよいです。模範解答の本文は必ず日本語で書いてください。'
           'プレーンテキストのみで回答し（JSONやMarkdown見出しは不要）、'
-          '前置きやこの依頼文の繰り返しは書かず、次の3つの見出しをこの順で'
+          '前置きやこの依頼文の繰り返しは書かず、次の4つの見出しをこの順で'
           '使い、各見出しの直後の行から本文を続けてください（見出しは半角'
           'ブラケットのまま、変更・翻訳しないでください）：'
           '「[質問]」（上記の問題文。状況条件があればそれも含めてそのまま）、'
           '続けて「[日本語]」（上記の約45秒で話せる模範解答）、'
           '続けて「[Romaji]」（その「[日本語]」の模範解答のローマ字書き起'
-          'こし。ヘボン式寄り・読みやすさ優先。長音は一般的な表記でよい）。',
+          'こし。ヘボン式寄り・読みやすさ優先。長音は一般的な表記でよい）、'
+          '続けて「[ベトナム語]」（その「[日本語]」の正確なベトナム語訳）。'
+          '「[日本語]」はかな・漢字で書き、ローマ字で代用しないでください。'
+          '最後のブロックのあとには何も書かず、スピード調整・フォーマルな'
+          '表現への変更・「カスタマイズしましょうか」などの提案もしないで'
+          'ください。',
     ),
   };
 }
