@@ -16,12 +16,6 @@ abstract interface class ICloudBridge {
 
   /// 他の端末からの変更の通知を受け始める。
   Future<void> startObserving(void Function() onExternalChange);
-
-  /// この端末のKVSが、iCloudからの初回ダウンロードを終えたか。
-  ///
-  /// 終わる前の空の読みは「クラウドに何も無い」とは限らない。新規インストールが
-  /// 既定の設定を送って、既存のiCloudを上書きしないために使う。
-  Future<bool> hasFinishedInitialSync();
 }
 
 /// MethodChannel `com.osamushikubo.osm_gradus/icloud` でiOSのKVSを使う。
@@ -57,8 +51,4 @@ class MethodChannelICloudBridge implements ICloudBridge {
     });
     await _channel.invokeMethod<void>('startObserving');
   }
-
-  @override
-  Future<bool> hasFinishedInitialSync() async =>
-      await _channel.invokeMethod<bool>('hasFinishedInitialSync') ?? false;
 }

@@ -602,6 +602,21 @@ class _CloudSyncSection extends StatelessWidget {
 
   final CloudSyncService sync;
 
+  /// 「今すぐ同期」。終わったら結果をスナックバーで知らせる
+  /// （送るものが無くても反応が分かるように）。
+  Future<void> _syncNow(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await sync.manualSync();
+    final lang = appSettings.language;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text((ok ? 'iCloud同期_完了' : 'iCloud同期_失敗_短').tr(lang)),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -656,7 +671,7 @@ class _CloudSyncSection extends StatelessWidget {
                         : 'iCloud同期_今すぐ同期'.tr(lang),
                     value: '',
                     enabled: !sync.isWorking,
-                    onTap: sync.manualSync,
+                    onTap: () => _syncNow(context),
                   ),
                 ],
               ],

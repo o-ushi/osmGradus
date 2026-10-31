@@ -7,6 +7,8 @@ abstract final class GradusL10n {
   };
 
   static const _ja = <String, String>{
+    'iCloud同期_完了': 'iCloudと同期しました。もう一方のiPhoneに届くまで、少しかかることがあります',
+    'iCloud同期_失敗_短': 'iCloudと同期できませんでした',
     'iCloud同期': 'iCloud同期',
     'iCloudで同期する': 'iCloudで同期する',
     'iCloud同期_説明':
@@ -912,6 +914,9 @@ abstract final class GradusL10n {
   };
 
   static const _en = <String, String>{
+    'iCloud同期_完了':
+        'Synced with iCloud. It may take a little while to reach your other iPhone',
+    'iCloud同期_失敗_短': 'Could not sync with iCloud',
     'iCloud同期': 'iCloud sync',
     'iCloudで同期する': 'Sync with iCloud',
     'iCloud同期_説明':
@@ -1955,6 +1960,9 @@ abstract final class GradusL10n {
   };
 
   static const _vi = <String, String>{
+    'iCloud同期_完了':
+        'Đã đồng bộ với iCloud. Có thể mất một lúc để dữ liệu đến iPhone còn lại',
+    'iCloud同期_失敗_短': 'Không thể đồng bộ với iCloud',
     'iCloud同期': 'Đồng bộ iCloud',
     'iCloudで同期する': 'Đồng bộ bằng iCloud',
     'iCloud同期_説明':

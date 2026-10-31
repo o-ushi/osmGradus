@@ -126,10 +126,6 @@ final class ICloudSyncChannel: NSObject {
   private let kvStore = NSUbiquitousKeyValueStore.default
   private var observer: NSObjectProtocol?
 
-  /// iCloud からの初回ダウンロードが終わったか。終わる前はローカルの KVS が空でも、
-  /// クラウドに既存のデータがあることがある（新規インストールがそれを上書きしないため）。
-  private var initialSyncFinished = false
-
   init(messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(name: Self.channelName, binaryMessenger: messenger)
     super.init()
@@ -156,28 +152,17 @@ final class ICloudSyncChannel: NSObject {
         ) { [weak self] notification in
           guard let self else { return }
           let reason = (notification.userInfo?[NSUbiquitousKeyValueStoreChangeReasonKey] as? NSNumber)?.intValue
-          if reason == NSUbiquitousKeyValueStoreInitialSyncChange {
-            self.initialSyncFinished = true
-          } else if reason == NSUbiquitousKeyValueStoreAccountChange {
-            // 別の iCloud アカウントに替わった。前の空読みで送らない。
-            self.initialSyncFinished = false
-          }
           let keys = notification.userInfo?[NSUbiquitousKeyValueStoreChangedKeysKey] as? [String] ?? []
-          let initial = reason == NSUbiquitousKeyValueStoreInitialSyncChange
-          // 初回同期は、クラウドが空でも通知する（空だと分かってから送るため）。
-          guard initial || keys.contains(Self.dataKey) else { return }
+          // 初回ダウンロード前の書き込みは iOS が捨て、InitialSyncChange で知らせてくる。
+          // そのときとアカウントの切り替えは、キーに関係なく Dart に取り込み直させる。
+          let resync = reason == NSUbiquitousKeyValueStoreInitialSyncChange
+            || reason == NSUbiquitousKeyValueStoreAccountChange
+          guard resync || keys.contains(Self.dataKey) else { return }
           self.channel.invokeMethod("externalChange", arguments: nil)
         }
       }
       kvStore.synchronize()
-      // すでに値があるなら、初回ダウンロードは過去に終わっている。
-      if kvStore.object(forKey: Self.dataKey) != nil {
-        initialSyncFinished = true
-      }
       result(nil)
-
-    case "hasFinishedInitialSync":
-      result(initialSyncFinished)
 
     case "read":
       kvStore.synchronize()
@@ -200,6 +185,8 @@ final class ICloudSyncChannel: NSObject {
       }
       kvStore.set(data, forKey: Self.dataKey)
       kvStore.set(timestamp, forKey: Self.timestampKey)
+      // synchronize() は「すぐ iCloud へ送る」ではなく、送る準備ができたかの合図。
+      // 実際の送信は iOS が数秒〜数十秒のうちにまとめて行う。
       kvStore.synchronize()
       result(nil)
 

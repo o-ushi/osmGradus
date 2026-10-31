@@ -74,9 +74,13 @@ class FileCloudSyncBaseStore implements CloudSyncBaseStore {
 ///   変えたキーはその値を採り、削除も相手に伝わる。両方が変えたキーは、
 ///   `id`付きのJSON配列・文字列の配列なら項目単位で同じ3方向マージをし、
 ///   それ以外はiCloud（後から書かれた方）を採る
-/// - この端末が一度も同期していないときは基準を空とみなし、端末とiCloudの
-///   両方の項目を残す（新規インストールの既定値でiCloudを上書きしない）
-/// - KVSの初回ダウンロードが終わるまで、空の読みを「クラウドが空」とみなして送らない
+/// - この端末がiCloudの中身を一度も確かめていない間（[confirmedKey]がfalse）は
+///   基準を空とみなし、端末とiCloudの両方の項目を残す（新規インストールの
+///   既定値でiCloudの記録を消さない）
+/// - iCloudが空なら、確かめる前でも端末の中身を送る。KVSの初回ダウンロード前の
+///   書き込みはiOSが捨て、初回同期の通知を送ってくるので、そのとき上の
+///   「両方を残す」マージで取り込み直す（送らずに通知を待つと、iCloudが本当に
+///   空のときは通知が来ず、どの端末も最初の1回を送らない）
 /// - 記録の保存ごとの通知は無いので、前面に戻ったとき・背面へ回るとき・
 ///   前面にいる間の一定間隔・「今すぐ同期」で、基準から変わっていれば送る
 class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
@@ -93,6 +97,10 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
   /// 最後に取り込んだ／書いたKVSの時刻。端末の時計のずれに左右されないよう、
   /// 「新しいか」ではなく「前に見た時刻と違うか」で比べる。
   static const seenRemoteTimestampKey = 'cloudSync.seenRemoteTimestamp';
+
+  /// iCloudの中身を確かめたか（他の端末のデータを取り込んだ、または自分の
+  /// 書き込みがiCloudに残っているのを読み戻した）。falseの間の基準は空。
+  static const confirmedKey = 'cloudSync.confirmed';
 
   /// KVSの1値の上限（osmNichinichiと同じく1,000,000バイト未満だけ送る）。
   static const maxBytes = 1000000;
@@ -147,11 +155,11 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
   bool? _icloudAvailable;
   bool? get icloudAvailable => _icloudAvailable;
 
-  bool _running = false;
+  /// 実行中の同期（null＝していない）。
+  Future<void>? _current;
 
-  bool get isWorking =>
-      _status == CloudSyncStatus.uploading ||
-      _status == CloudSyncStatus.downloading;
+  /// 同期中か（設定の「今すぐ同期」を押せなくし、「同期中…」と出す）。
+  bool get isWorking => _current != null;
 
   Timer? _periodic;
 
@@ -163,6 +171,9 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
   /// オンにしたらすぐ1回同期する。オフでは送らない・受けない。
   Future<void> setEnabled(bool value) async {
     await _prefs.setBool(enabledKey, value);
+    // オフの間の変更は基準と比べられないので、オンにしたら確かめ直す
+    // （次の取り込みは両方の項目を残すマージ）。
+    if (value) await _prefs.setBool(confirmedKey, false);
     if (!value) _setStatus(CloudSyncStatus.idle);
     notifyListeners();
     if (value) await manualSync();
@@ -173,8 +184,8 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
     return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
   }
 
-  /// この端末がiCloudとの同期を一度も終えていないか（新規インストール・初期化後）。
-  bool get _neverSynced => !_prefs.containsKey(lastSyncKey);
+  /// iCloudの中身をまだ確かめていないか（新規インストール・初期化後・同期をオンにした直後）。
+  bool get _unconfirmed => !(_prefs.getBool(confirmedKey) ?? false);
 
   /// 起動時に1回呼ぶ（main、iOSのみ）。他の端末からの変更と、前面に戻ったとき・
   /// 背面へ回るときの同期を始める。
@@ -216,17 +227,27 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
     super.dispose();
   }
 
-  /// 設定の「今すぐ同期」。
-  Future<void> manualSync() => sync();
+  /// 設定の「今すぐ同期」。自動の同期の途中なら、それが終わってからもう一度行う。
+  /// 終わった後にエラーが無ければtrue（画面に結果を出すため）。
+  Future<bool> manualSync() async {
+    await _current;
+    await sync();
+    return isEnabled &&
+        _error == null &&
+        _status != CloudSyncStatus.unavailable;
+  }
 
   /// iCloudに変更があれば取り込み、この端末に変更があれば送る。
   Future<void> sync() async {
-    if (!isEnabled || _running) return;
-    _running = true;
+    if (!isEnabled || _current != null) return;
+    final run = _exchange();
+    _current = run;
+    notifyListeners();
     try {
-      await _exchange();
+      await run;
     } finally {
-      _running = false;
+      _current = null;
+      notifyListeners();
     }
   }
 
@@ -241,29 +262,36 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
       _setStatus(CloudSyncStatus.error, error: CloudSyncError.failed);
       return;
     }
-    final neverSynced = _neverSynced;
+    final unconfirmed = _unconfirmed;
     final remoteData = remote.data;
     final remoteHasData = remoteData != null && remoteData.isNotEmpty;
     final seen = _prefs.getDouble(seenRemoteTimestampKey);
 
-    if (remoteHasData && (neverSynced || remote.timestamp != seen)) {
-      await _download(remoteData, remote.timestamp, local, neverSynced);
-      return;
-    }
-    // 初回ダウンロードの前の空は「クラウドが空」ではない。既定値を送らない。
-    if (neverSynced && !remoteHasData && !await _initialSyncFinished()) {
+    if (remoteHasData &&
+        unconfirmed &&
+        remote.timestamp == seen &&
+        await _isOwnWrite(remoteData)) {
+      // 自分の書き込みがiCloudに残っていた（iCloudは空だった）。以後は基準を使う。
+      await _prefs.setBool(confirmedKey, true);
+    } else if (remoteHasData && (unconfirmed || remote.timestamp != seen)) {
+      await _download(remoteData, remote.timestamp, local, unconfirmed);
       return;
     }
     final base = await _loadBase();
-    if (neverSynced || _canonical(local) != _canonical(base)) {
+    if (unconfirmed || _canonical(local) != _canonical(base)) {
       await _upload(local);
+      return;
     }
+    // 送るものも受け取るものも無かった。iCloudは確かめたので最終同期は今。
+    await _prefs.setInt(lastSyncKey, clock.now().millisecondsSinceEpoch);
+    _setStatus(CloudSyncStatus.idle);
   }
 
-  Future<bool> _initialSyncFinished() async {
+  /// [data]がこの端末が最後に書いた内容（基準）と同じか。
+  Future<bool> _isOwnWrite(String data) async {
     try {
-      return await _bridge.hasFinishedInitialSync();
-    } on Exception {
+      return _canonical(decodePayload(data)) == _canonical(await _loadBase());
+    } on Object {
       return false;
     }
   }
@@ -340,7 +368,7 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
     String data,
     double remoteTimestamp,
     CloudSnapshot local,
-    bool neverSynced,
+    bool unconfirmed,
   ) async {
     _setStatus(CloudSyncStatus.downloading);
     final CloudSnapshot remote;
@@ -351,11 +379,13 @@ class CloudSyncService extends ChangeNotifier with WidgetsBindingObserver {
       _setStatus(CloudSyncStatus.error, error: CloudSyncError.failed);
       return;
     }
-    // 一度も同期していない端末の基準は空（両方の項目を残す）。
-    final base = neverSynced ? <String, List<Object?>>{} : await _loadBase();
+    // iCloudを確かめる前の基準は空（両方の項目を残す）。
+    final base = unconfirmed ? <String, List<Object?>>{} : await _loadBase();
     final merged = mergeSnapshots(base: base, local: local, remote: remote);
     try {
       await _applyToPrefs(merged, local);
+      // iCloudの中身を取り込んだので、以後は基準を使ったマージにする。
+      await _prefs.setBool(confirmedKey, true);
       if (_canonical(merged) != _canonical(remote)) {
         // この端末の変更が混ざった。相手にも渡す。
         if (!await _write(merged)) return;

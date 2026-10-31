@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:osm_gradus/services/cloud_sync/cloud_sync_service.dart';
 import 'package:osm_gradus/services/cloud_sync/icloud_bridge.dart';
@@ -5,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class _FakeBridge implements ICloudBridge {
   bool available = true;
-  bool initialSyncFinished = true;
   String? data;
   double timestamp = 0;
   int writes = 0;
@@ -26,9 +27,6 @@ class _FakeBridge implements ICloudBridge {
 
   @override
   Future<void> startObserving(void Function() onExternalChange) async {}
-
-  @override
-  Future<bool> hasFinishedInitialSync() async => initialSyncFinished;
 }
 
 class _MemoryBaseStore implements CloudSyncBaseStore {
@@ -66,6 +64,11 @@ class _Device {
     values = {for (final k in prefs.getKeys()) k: prefs.get(k)!};
   }
 }
+
+/// JSON配列の値をidの集合にする（並びは端末ごとに変わりうるので比べない）。
+Set<Object?> _ids(Object? json) => {
+  for (final e in jsonDecode(json! as String) as List) (e as Map)['id'],
+};
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -298,13 +301,71 @@ void main() {
     expect(sync.status, CloudSyncStatus.unavailable);
   });
 
-  test('初回ダウンロード前の空のiCloudには送らない', () async {
-    final bridge = _FakeBridge()..initialSyncFinished = false;
+  test('iCloudが空なら、初回でも端末の中身を送る（どの端末も送らず止まらない）', () async {
+    final bridge = _FakeBridge();
     final device = _Device(bridge)
       ..values = {CloudSyncService.enabledKey: true, 'x': 'local'};
     final sync = await device.open();
     await sync.sync();
-    expect(bridge.writes, 0);
+    expect(bridge.writes, 1);
+    expect(CloudSyncService.decodePayload(bridge.data!)['x'], ['s', 'local']);
+  });
+
+  test('初回ダウンロード前の書き込みがiOSに捨てられても、届いたiCloudの記録は消さない', () async {
+    final bridge = _FakeBridge();
+    // B が先に iCloud に記録を置いていた
+    final b = _Device(bridge)
+      ..values = {CloudSyncService.enabledKey: true, 'onlyB': 'b'};
+    var sync = await b.open();
+    await sync.sync();
+    await b.close();
+    final cloudData = bridge.data;
+    final cloudTs = bridge.timestamp;
+
+    // A はまだ iCloud が届いておらず空に見える → 自分の中身を送る
+    bridge
+      ..data = null
+      ..timestamp = 0;
+    final a = _Device(bridge)
+      ..values = {CloudSyncService.enabledKey: true, 'onlyA': 'a'};
+    sync = await a.open();
+    await sync.sync();
+    // iOS がその書き込みを捨て、初回ダウンロードで B の記録が届いた
+    bridge
+      ..data = cloudData
+      ..timestamp = cloudTs;
+    await sync.sync();
+    await a.close();
+    expect(a.values['onlyA'], 'a');
+    expect(a.values['onlyB'], 'b');
+    expect(
+      CloudSyncService.decodePayload(bridge.data!).keys,
+      containsAll(['onlyA', 'onlyB']),
+    );
+  });
+
+  test('「今すぐ同期」は送るものが無くても成功を返し、最終同期を更新する', () async {
+    final bridge = _FakeBridge();
+    final device = _Device(bridge)
+      ..values = {CloudSyncService.enabledKey: true, 'x': 'local'};
+    final sync = await device.open();
+    expect(await sync.manualSync(), isTrue); // 送る
+    expect(await sync.manualSync(), isTrue); // 読み戻して確かめる
+    final writes = bridge.writes;
+    final before = sync.lastSyncDate;
+    await Future<void>.delayed(const Duration(milliseconds: 5));
+    expect(await sync.manualSync(), isTrue); // 何も変わっていない
+    expect(bridge.writes, writes);
+    expect(sync.lastSyncDate!.isAfter(before!), isTrue);
+    expect(sync.isWorking, isFalse);
+  });
+
+  test('iCloud未サインインなら「今すぐ同期」はfalse', () async {
+    final bridge = _FakeBridge()..available = false;
+    final device = _Device(bridge)
+      ..values = {CloudSyncService.enabledKey: true};
+    final sync = await device.open();
+    expect(await sync.manualSync(), isFalse);
   });
 
   test('上限を超えるデータは送らずエラーにする', () async {
@@ -349,10 +410,7 @@ void main() {
     await sync.sync();
     await b.close();
     expect(b.values['osmGradus.language'], 'vi');
-    expect(
-      b.values['vocabulary.entries'],
-      '[{"id":"2","w":"犬"},{"id":"1","w":"猫"}]',
-    );
+    expect(_ids(b.values['vocabulary.entries']), {'1', '2'});
     expect(b.values['topics.imported.general'], ['お題A']);
     expect(bridge.writes, 2);
 
@@ -361,10 +419,7 @@ void main() {
     await sync.sync();
     await a.close();
     expect(a.values['osmGradus.language'], 'ja');
-    expect(
-      a.values['vocabulary.entries'],
-      '[{"id":"2","w":"犬"},{"id":"1","w":"猫"}]',
-    );
+    expect(_ids(a.values['vocabulary.entries']), {'1', '2'});
     expect(a.applied, 1);
 
     // A で「猫」を消してお題を消す → B でも消える（古いBから復活しない）
@@ -377,7 +432,7 @@ void main() {
     sync = await b.open();
     await sync.sync();
     await b.close();
-    expect(b.values['vocabulary.entries'], '[{"id":"2","w":"犬"}]');
+    expect(_ids(b.values['vocabulary.entries']), {'2'});
     expect(b.values.containsKey('topics.imported.general'), isFalse);
 
     // 変わっていなければ送らない

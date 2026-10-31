@@ -218,6 +218,7 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				B4E1A0C29C5A4C7C9B25C4F1 /* Remove iOS-unused Vosk asset */,
 				70A8E3C38AA69FFD5583C0FF /* [CP] Embed Pods Frameworks */,
+				C4E8A91B2D6F4A70B1E35C08 /* Legacy iPad Window */,
 			);
 			buildRules = (
 			);
@@ -292,6 +293,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		C4E8A91B2D6F4A70B1E35C08 /* Legacy iPad Window */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Legacy iPad Window";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/bin/sh \"${SRCROOT}/scripts/stamp_legacy_ipad_window.sh\"\n";
+		};
 		0B9171BD797570DEEF157313 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
