@@ -7,19 +7,29 @@ import '../../theme/app_colors.dart';
 
 /// 長文読解フローの「1秒チェック」画面。文脈・ロジック理解を問う2択クイズ
 /// （発話・発音は触らない）。回答後は正解/不正解と1行解説を同画面内に表示し、
-/// 「トップへ戻る」タップで[onComplete]を呼ぶ（自動遷移はしない。解説を
-/// 読み終えるまでの時間は学習者ごとに違うため）。
+/// 完了ボタンのタップで[onComplete]を呼ぶ（自動遷移はしない。解説を
+/// 読み終えるまでの時間は学習者ごとに違うため）。[continuesToVocabTest]が
+/// trueのときは、このボタンが実際には「トップ（3択）」ではなく語彙テストへ
+/// 進むため、ボタン文言を「トップへ戻る」から差し替える（Step 10レビュー：
+/// 語彙テストが続く場合にボタン文言だけが旧動線のままだった不整合の修正）。
 class LongArticleComprehensionCheckScreen extends StatefulWidget {
   const LongArticleComprehensionCheckScreen({
     super.key,
     required this.check,
     required this.onComplete,
+    this.continuesToVocabTest = false,
   });
 
   final LongArticleComprehensionCheck check;
 
-  /// 「トップへ戻る」タップで呼ぶ。
-  final VoidCallback onComplete;
+  /// 完了ボタンのタップで呼ぶ。引数は選んだ選択肢（`"A"` / `"B"`）。
+  /// [continuesToVocabTest]により3択復帰／語彙テスト開始のどちらかに
+  /// つながる（分岐は呼び出し元が持つ）。
+  final ValueChanged<String> onComplete;
+
+  /// trueなら、このチェックの後に語彙テストが続く（語彙テスト用単語がある）。
+  /// ボタン文言を「トップへ戻る」ではなく「語彙テストへ進む」にする。
+  final bool continuesToVocabTest;
 
   @override
   State<LongArticleComprehensionCheckScreen> createState() =>
@@ -95,11 +105,7 @@ class _LongArticleComprehensionCheckScreenState
                     ),
                     if (_answered) ...[
                       const SizedBox(height: 20),
-                      _ResultCard(
-                        isCorrect: _isCorrect,
-                        correctOption: check.correctOption,
-                        explanation: check.explanation,
-                      ),
+                      _ResultCard(isCorrect: _isCorrect, check: check),
                     ],
                   ],
                 ),
@@ -109,7 +115,9 @@ class _LongArticleComprehensionCheckScreenState
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton(
-                    onPressed: widget.onComplete,
+                    onPressed: _selectedOption == null
+                        ? null
+                        : () => widget.onComplete(_selectedOption!),
                     style: FilledButton.styleFrom(
                       backgroundColor: palette.accentColor,
                       foregroundColor: palette.onAccent,
@@ -119,7 +127,10 @@ class _LongArticleComprehensionCheckScreenState
                       ),
                     ),
                     child: Text(
-                      '長文読解_1秒チェック_トップへ戻る'.tr(lang),
+                      (widget.continuesToVocabTest
+                              ? '長文読解_1秒チェック_語彙テストへ'
+                              : '長文読解_1秒チェック_トップへ戻る')
+                          .tr(lang),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -229,15 +240,10 @@ class _OptionCard extends StatelessWidget {
 }
 
 class _ResultCard extends StatelessWidget {
-  const _ResultCard({
-    required this.isCorrect,
-    required this.correctOption,
-    required this.explanation,
-  });
+  const _ResultCard({required this.isCorrect, required this.check});
 
   final bool isCorrect;
-  final String correctOption;
-  final String explanation;
+  final LongArticleComprehensionCheck check;
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +282,7 @@ class _ResultCard extends StatelessWidget {
           if (!isCorrect) ...[
             const SizedBox(height: 6),
             Text(
-              '長文読解_1秒チェック_正解表示'.trFmt(lang, [correctOption]),
+              '長文読解_1秒チェック_正解表示'.trFmt(lang, [check.correctOption]),
               style: TextStyle(
                 fontSize: 13,
                 color: palette.textOnCardSecondary,
@@ -285,7 +291,7 @@ class _ResultCard extends StatelessWidget {
           ],
           const SizedBox(height: 8),
           Text(
-            explanation,
+            check.explanationFor(lang),
             style: TextStyle(fontSize: 13, color: palette.textOnCardSecondary),
           ),
         ],

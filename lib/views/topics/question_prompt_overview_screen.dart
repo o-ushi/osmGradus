@@ -14,6 +14,7 @@ import '../../widgets/confirm_history_delete_dialog.dart';
 import '../../widgets/history_delete_background.dart';
 import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/layer_numeral_badge.dart';
+import '../../widgets/question_prompt_list_hints.dart';
 import '../../widgets/question_prompt_overview_row.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
 import '../layers/layer1_question_prompt_detail_screen.dart';
@@ -22,6 +23,7 @@ import '../layers/layer3_question_prompt_detail_screen.dart';
 import '../layers/layer4_question_prompt_detail_screen.dart';
 import '../layers/layer5_question_prompt_detail_screen.dart';
 import '../layers/question_prompt_summary_screen.dart';
+import 'question_prompt_edit_screen.dart';
 import 'question_prompt_filter_sheet.dart';
 import 'topic_add_flow.dart';
 
@@ -107,6 +109,7 @@ class _QuestionPromptOverviewScreenState
         LayerHelpLine(text: '問題文一覧_使い方_フィルタ'.tr(lang), icon: Icons.filter_list),
         LayerHelpLine(text: '問題文横断一覧_使い方_総評'.tr(lang)),
         LayerHelpLine(text: '問題文横断一覧_使い方_レイヤー'.tr(lang)),
+        LayerHelpLine(text: '問題文一覧_使い方_編集'.tr(lang)),
         LayerHelpLine(text: '問題文一覧_使い方_削除'.tr(lang)),
       ],
     );
@@ -133,6 +136,11 @@ class _QuestionPromptOverviewScreenState
 
   Future<void> _openSummary(QuestionPrompt prompt) async {
     await QuestionPromptSummaryScreen.push(context, promptId: prompt.id);
+    await _reload();
+  }
+
+  Future<void> _editPrompt(QuestionPrompt prompt) async {
+    await QuestionPromptEditScreen.push(context, prompt: prompt);
     await _reload();
   }
 
@@ -266,23 +274,28 @@ class _QuestionPromptOverviewScreenState
                         ),
                       ),
                     ),
-                    IconButton(
-                      onPressed: _openFilterSheet,
-                      icon: Icon(
-                        Icons.filter_list,
-                        color: _filter.isEmpty
-                            ? palette.textOnScenePrimary
-                            : palette.accentColor,
+                    GestureDetector(
+                      onDoubleTap: () =>
+                          QuestionPromptListHints.showFilter(context),
+                      child: IconButton(
+                        onPressed: _openFilterSheet,
+                        icon: Icon(
+                          Icons.filter_list,
+                          color: _filter.isEmpty
+                              ? palette.textOnScenePrimary
+                              : palette.accentColor,
+                        ),
+                        tooltip: 'フィルタ'.tr(lang),
                       ),
-                      tooltip: 'フィルタ'.tr(lang),
                     ),
                     Tooltip(
                       message: '問題文を追加'.tr(lang),
                       triggerMode: TooltipTriggerMode.manual,
-                      child: InkWell(
+                      child: GestureDetector(
                         onTap: _addPrompt,
                         onLongPress: _showUsageHelp,
-                        customBorder: const CircleBorder(),
+                        onDoubleTap: () =>
+                            QuestionPromptListHints.showAdd(context),
                         child: Padding(
                           padding: const EdgeInsets.all(8),
                           child: Icon(
@@ -354,6 +367,7 @@ class _QuestionPromptOverviewScreenState
                                 onSummaryTap: () => _openSummary(prompt),
                                 onLayerTap: (layerIndex) =>
                                     _openLayerDetail(layerIndex, prompt),
+                                onBodyLongPress: () => _editPrompt(prompt),
                               ),
                             );
                           },

@@ -85,4 +85,66 @@ void main() {
       expect(restored.evaluationVersion, 'v1');
     });
   });
+
+  group('VocabularyEvaluation.aligningComprehensionQuiz', () {
+    test('単語だけの9件なら先頭にクイズを付け足して10件になり★は正解率から出す', () {
+      final aligned = _evaluation(
+        overallScore: 4,
+        questionEvaluations: [
+          for (var i = 0; i < 9; i++)
+            VocabularyQuestionEvaluation(correct: i != 8),
+        ],
+      ).aligningComprehensionQuiz(isCorrect: true, vocabQuestionCount: 9);
+
+      expect(aligned.questionEvaluations, hasLength(10));
+      expect(aligned.questionEvaluations.first.correct, isTrue);
+      expect(aligned.correctCount, 9);
+      expect(aligned.overallScore, 5);
+    });
+
+    test('クイズ不正解なら正解率に応じて★が下がる', () {
+      final aligned = _evaluation(
+        overallScore: 5,
+        questionEvaluations: [
+          for (var i = 0; i < 9; i++)
+            VocabularyQuestionEvaluation(correct: i != 8),
+        ],
+      ).aligningComprehensionQuiz(isCorrect: false, vocabQuestionCount: 9);
+
+      expect(aligned.correctCount, 8);
+      expect(aligned.overallScore, 4);
+    });
+
+    test('既に10件なら先頭の正誤を機械採点で上書きする', () {
+      final aligned = _evaluation(
+        overallScore: 5,
+        questionEvaluations: [
+          const VocabularyQuestionEvaluation(correct: false, feedback: 'ai'),
+          for (var i = 0; i < 9; i++)
+            const VocabularyQuestionEvaluation(correct: true),
+        ],
+      ).aligningComprehensionQuiz(isCorrect: true, vocabQuestionCount: 9);
+
+      expect(aligned.questionEvaluations, hasLength(10));
+      expect(aligned.questionEvaluations.first.correct, isTrue);
+      expect(aligned.questionEvaluations.first.feedback, 'ai');
+      expect(aligned.correctCount, 10);
+      expect(aligned.overallScore, 5);
+    });
+  });
+
+  group('VocabularyEvaluation.starsFromCorrectRatio', () {
+    test('8/10は★4、0件は★1', () {
+      expect(
+        VocabularyEvaluation.starsFromCorrectRatio([
+          for (var i = 0; i < 8; i++)
+            const VocabularyQuestionEvaluation(correct: true),
+          const VocabularyQuestionEvaluation(correct: false),
+          const VocabularyQuestionEvaluation(correct: false),
+        ]),
+        4,
+      );
+      expect(VocabularyEvaluation.starsFromCorrectRatio(const []), 1);
+    });
+  });
 }

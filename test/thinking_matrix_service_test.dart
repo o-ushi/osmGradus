@@ -2,17 +2,27 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:osm_gradus/data/thinking_matrix_presets.dart';
+import 'package:osm_gradus/localization/app_strings.dart';
+import 'package:osm_gradus/main.dart';
 import 'package:osm_gradus/models/thinking_matrix_cell.dart';
 import 'package:osm_gradus/models/thinking_matrix_cell_status.dart';
 import 'package:osm_gradus/models/thinking_matrix_set.dart';
 import 'package:osm_gradus/models/thinking_theme.dart';
 import 'package:osm_gradus/models/topic_category.dart';
+import 'package:osm_gradus/notifiers/app_settings.dart';
+import 'package:osm_gradus/services/app_preferences.dart';
 import 'package:osm_gradus/services/thinking_matrix_service.dart';
 import 'package:osm_gradus/widgets/thinking_matrix_cell_sheet.dart' show themeDisplayName;
 
 const _themeNames = ['メロンパン', 'カフェのバイト', '猫', '旅行', '資格試験'];
 
 void main() {
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    appPreferences = await AppPreferences.load();
+    appSettings = AppSettings(appPreferences);
+  });
+
   setUp(() {
     SharedPreferences.setMockInitialValues({});
   });
@@ -107,6 +117,178 @@ void main() {
       expect(set.themes.map((t) => t.name), ['相談', '依頼', '断り', '謝罪', '提案']);
       expect(set.cells.length, 15);
       expect(set.totalCells, 15);
+    });
+  });
+
+  group('ensureSystemPresets（Step 1: 拡充度母数65マスの自動シード）', () {
+    test('クリーンなprefsで呼ぶと、日常・ビジネス・シチュエーションが安定IDで'
+        '作成され、合計65マス（25+25+15）になる', () async {
+      final service = ThinkingMatrixService();
+      await service.ensureSystemPresets();
+
+      final all = await service.loadAll();
+      final system = {
+        for (final id in ThinkingMatrixService.systemSetIds.values)
+          id: all.firstWhere((s) => s.id == id),
+      };
+      expect(system, hasLength(3));
+      expect(
+        system[ThinkingMatrixService.systemSetIds[TopicCategory.daily]]!
+            .category,
+        TopicCategory.daily,
+      );
+      expect(
+        system[ThinkingMatrixService.systemSetIds[TopicCategory.business]]!
+            .category,
+        TopicCategory.business,
+      );
+      expect(
+        system[ThinkingMatrixService.systemSetIds[TopicCategory.situational]]!
+            .category,
+        TopicCategory.situational,
+      );
+      final totalCells = system.values
+          .map((s) => s.totalCells)
+          .reduce((a, b) => a + b);
+      expect(totalCells, 65);
+      expect(
+        system.values.every(
+          (s) => s.cells.every(
+            (c) => c.status == ThinkingMatrixCellStatus.empty,
+          ),
+        ),
+        isTrue,
+      );
+    });
+
+    test('タイトルはカテゴリ名そのもので、既存の自動採番「セットN」と衝突しない', () async {
+      final service = ThinkingMatrixService();
+      await service.ensureSystemPresets();
+
+      final all = await service.loadAll();
+      final dailySet = all.firstWhere(
+        (s) => s.id == ThinkingMatrixService.systemSetIds[TopicCategory.daily],
+      );
+      expect(dailySet.title, '日常'.tr(appSettings.language));
+      expect(dailySet.title, isNot(startsWith('セット')));
+    });
+
+    test('2回目に呼んでも増殖しない（冪等）', () async {
+      final service = ThinkingMatrixService();
+      await service.ensureSystemPresets();
+      await service.ensureSystemPresets();
+
+      final all = await service.loadAll();
+      final systemCount = all
+          .where((s) => ThinkingMatrixService.systemSetIds.values.contains(s.id))
+          .length;
+      expect(systemCount, 3);
+    });
+
+    test('既存のユーザー作成セットは消えない', () async {
+      final service = ThinkingMatrixService();
+      final userSet = await service.createSet(
+        title: 'ユーザーのセット',
+        themeNames: _themeNames,
+      );
+      await service.ensureSystemPresets();
+
+      final all = await service.loadAll();
+      expect(all.any((s) => s.id == userSet.id), isTrue);
+      expect(all, hasLength(4));
+    });
+
+    test('既にシステムセットが進捗を持っていても中身を書き換えない', () async {
+      final service = ThinkingMatrixService();
+      await service.ensureSystemPresets();
+      final dailyId = ThinkingMatrixService.systemSetIds[TopicCategory.daily]!;
+      final daily = (await service.loadAll()).firstWhere(
+        (s) => s.id == dailyId,
+      );
+      final themeId = daily.themes.first.id;
+      final columnId = daily.columns.first.id;
+      await service.upsertCellLayer2(
+        setId: dailyId,
+        themeId: themeId,
+        columnId: columnId,
+        keyword: '進めた記録',
+      );
+
+      await service.ensureSystemPresets();
+
+      final updated = (await service.loadAll()).firstWhere(
+        (s) => s.id == dailyId,
+      );
+      expect(updated.cellFor(themeId, columnId).keyword, '進めた記録');
+    });
+
+    test('システムセットが削除された後に呼ぶと、空の新規セットとして再生成される'
+        '（削除前の進捗は戻らない）', () async {
+      final service = ThinkingMatrixService();
+      await service.ensureSystemPresets();
+      final dailyId = ThinkingMatrixService.systemSetIds[TopicCategory.daily]!;
+      final daily = (await service.loadAll()).firstWhere(
+        (s) => s.id == dailyId,
+      );
+      await service.upsertCellLayer2(
+        setId: dailyId,
+        themeId: daily.themes.first.id,
+        columnId: daily.columns.first.id,
+        keyword: '消える記録',
+      );
+      await service.delete(dailyId);
+
+      await service.ensureSystemPresets();
+
+      final regenerated = (await service.loadAll()).firstWhere(
+        (s) => s.id == dailyId,
+      );
+      expect(
+        regenerated.cells.every((c) => c.status == ThinkingMatrixCellStatus.empty),
+        isTrue,
+      );
+    });
+
+    test('システムIDのセットがプリセットと食い違う壊れた状態（列数不一致）でも、'
+        'ensureSystemPresetsは中身を修復しない（IDがあれば何もしない方針）', () async {
+      final service = ThinkingMatrixService();
+      final dailyId = ThinkingMatrixService.systemSetIds[TopicCategory.daily]!;
+      // シチュエーション用の3列プリセットを、あえて日常IDで保存する
+      // （列数25→15への食い違いを人工的に作る）。
+      final corrupted = ThinkingMatrixSet.create(
+        id: dailyId,
+        title: '壊れた日常',
+        category: TopicCategory.daily,
+        themes: ThinkingMatrixPresets.themesFor(
+          TopicCategory.situational,
+        ).map(ThinkingTheme.create).toList(),
+        columns: ThinkingMatrixPresets.columnsFor(TopicCategory.situational),
+      );
+      await service.save(corrupted);
+
+      await service.ensureSystemPresets();
+
+      final all = await service.loadAll();
+      final daily = all.firstWhere((s) => s.id == dailyId);
+      // 修復されず、壊れたタイトル・列数（15マス）のまま残る。
+      expect(daily.title, '壊れた日常');
+      expect(daily.totalCells, 15);
+    });
+
+    test('オリジナル／追加の同カテゴリセットは対象外（systemSetIdsに含まれない）', () async {
+      final service = ThinkingMatrixService();
+      final extraDaily = await service.createFromPreset(
+        TopicCategory.daily,
+        title: '追加の日常セット',
+      );
+      await service.ensureSystemPresets();
+
+      final all = await service.loadAll();
+      expect(all.any((s) => s.id == extraDaily.id), isTrue);
+      expect(
+        ThinkingMatrixService.systemSetIds.values.contains(extraDaily.id),
+        isFalse,
+      );
     });
   });
 

@@ -47,6 +47,8 @@ class VocabularyCheckHistoryScreen extends StatelessWidget {
             HistoryFormatBadge(label: '未解析'.tr(lang)),
           if (saved.questionPromptId != null)
             HistoryFormatBadge(label: 'レイヤーⅠ_語彙_問題文の見直し'.tr(lang)),
+          if (saved.longArticleId != null)
+            HistoryFormatBadge(label: '長文読解_語彙_履歴バッジ'.tr(lang)),
         ],
         children: _buildCardBody(palette, lang, saved),
       ),
@@ -78,8 +80,8 @@ class VocabularyCheckHistoryScreen extends StatelessWidget {
       const SizedBox(height: 4),
       Text(
         'レイヤーⅠ_語彙_正解数'.trFmt(lang, [
-          '${evaluation.correctCount}',
-          '${saved.questions.length}',
+          '${saved.combinedCorrectCount}',
+          '${saved.combinedQuestionCount}',
         ]),
         style: TextStyle(fontSize: 13, color: palette.textOnCardSecondary),
       ),

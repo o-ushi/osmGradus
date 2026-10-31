@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 
@@ -28,23 +29,28 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.current;
-    return Material(
-      color: palette.cardFill,
-      child: SafeArea(
-        bottom: false,
-        child: SizedBox(
-          height: preferredSize.height,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: List.generate(numerals.length, (index) {
-              return _LayerIconButton(
-                label: numerals[index],
-                isActive: index == currentIndex,
-                color: palette.layerColors[index],
-                onTap: () => onSelect(index),
-                onLongPress: onLongPress,
-              );
-            }),
+    // ステータスバーの裏まで scene 色（RGB 61, 89, 147）で塗り、時刻・バッテリーは
+    // 白にして背景に溶けないようにする。
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Material(
+        color: palette.scene,
+        child: SafeArea(
+          bottom: false,
+          child: SizedBox(
+            height: preferredSize.height,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(numerals.length, (index) {
+                return _LayerIconButton(
+                  label: numerals[index],
+                  isActive: index == currentIndex,
+                  color: palette.layerColors[index],
+                  onTap: () => onSelect(index),
+                  onLongPress: onLongPress,
+                );
+              }),
+            ),
           ),
         ),
       ),

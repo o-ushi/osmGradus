@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -97,6 +96,13 @@ void main() {
     // JSST・的中度・PREPそれぞれ独立したブロック見出しはもう出ない。
     expect(find.text('語彙'.tr(lang)), findsOneWidget);
     expect(find.text('発音'.tr(lang)), findsOneWidget);
+    expect(find.text('25マス'.tr(lang)), findsOneWidget);
+    expect(find.text('日常'.tr(lang)), findsOneWidget);
+    expect(find.text('ビジネス'.tr(lang)), findsOneWidget);
+    expect(find.text('シチュエーション'.tr(lang)), findsOneWidget);
+    expect(find.text('総合判定'.tr(lang)), findsOneWidget);
+    expect(find.text('テスト総合'.tr(lang)), findsOneWidget);
+    expect(find.text('拡充度総合'.tr(lang)), findsOneWidget);
 
     // 直近2件のJSST帯・的中度・PREPが表として表示される（2件とも同じ値のため2つずつ）。
     // JSST列は見出しに既に「JSST」とあるため、値は接頭辞を外した帯だけ（折り返し防止）。
@@ -148,29 +154,72 @@ void main() {
     expect(hitHeaderHeight, lessThan(jsstHeaderHeight * 1.5));
   });
 
-  testWidgets('ベトナム語では「総合判定：Đánh giá tổng hợp」のラベルが長くても、'
-      '総合判定の行が折り返さず1行に収まる（FittedBoxで自動縮小）', (tester) async {
+  testWidgets('ベトナム語では総合判定・テスト総合・拡充度総合のラベルが折り返さず1行に収まる', (
+    tester,
+  ) async {
     final originalLang = appSettings.language;
     appSettings.language = 'vi';
     addTearDown(() => appSettings.language = originalLang);
-
-    await ScoringResultStorage().save(
-      _scoringWithAiEval('r1', DateTime(2026, 8, 7, 18, 59)),
-    );
 
     await tester.pumpWidget(const MaterialApp(home: TranscriptScreen()));
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-
-    final richTextFinder = find.descendant(
-      of: find.byType(FittedBox),
-      matching: find.byType(RichText),
+    expect(tester.getSize(find.text('Đánh giá tổng hợp')).height, lessThan(24));
+    expect(
+      tester.getSize(find.text('Tổng hợp bài kiểm tra')).height,
+      lessThan(24),
     );
-    expect(richTextFinder, findsOneWidget);
-    final paragraph = tester.renderObject<RenderParagraph>(richTextFinder);
-    // gradeValueStyleのfontSizeは22（既定の行高で約26〜27）。2行に折り返して
-    // いれば倍近い高さになるはずなので、1行分に収まっていることを確認する。
-    expect(paragraph.size.height, lessThan(40));
+    expect(tester.getSize(find.text('Tổng hợp mở rộng')).height, lessThan(24));
+    expect(tester.getSize(find.text('Tình huống')).height, lessThan(20));
+  });
+
+  testWidgets('英語では総合判定・テスト総合・拡充度総合と25マス見出しが折り返さない', (
+    tester,
+  ) async {
+    final originalLang = appSettings.language;
+    appSettings.language = 'en';
+    addTearDown(() => appSettings.language = originalLang);
+
+    await tester.pumpWidget(const MaterialApp(home: TranscriptScreen()));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(
+      tester.getSize(find.text('Overall Assessment')).height,
+      lessThan(24),
+    );
+    expect(tester.getSize(find.text('Test overall')).height, lessThan(24));
+    expect(tester.getSize(find.text('Expansion overall')).height, lessThan(24));
+    expect(tester.getSize(find.text('Situations')).height, lessThan(20));
+  });
+
+  testWidgets('判定3行のA〜Eが同じ横位置に揃い、拡充度総合は括弧付き%で、'
+      '25マスは発行時点のカテゴリ%を1行で出す', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: TranscriptScreen()));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    final overallDx = tester
+        .getTopLeft(find.byKey(const Key('transcript-grade-letter-overall')))
+        .dx;
+    expect(
+      tester
+          .getTopLeft(find.byKey(const Key('transcript-grade-letter-test')))
+          .dx,
+      overallDx,
+    );
+    expect(
+      tester
+          .getTopLeft(
+            find.byKey(const Key('transcript-grade-letter-expansion')),
+          )
+          .dx,
+      overallDx,
+    );
+    expect(find.text('（ー）'), findsOneWidget);
+    expect(find.text('（0.0%）'), findsOneWidget);
+    expect(find.text('0.0%'), findsNWidgets(3));
+    expect(find.textContaining('25マス拡充度'), findsNothing);
   });
 }

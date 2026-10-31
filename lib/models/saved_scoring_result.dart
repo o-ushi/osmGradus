@@ -20,6 +20,9 @@ class SavedScoringResult {
     this.hitStars,
     this.prepAdvice,
     this.hitAdvice,
+    this.modelAnswer,
+    this.modelAnswerRomaji,
+    this.modelAnswerVi,
     this.aiEvaluationUnparsedResponse,
     this.questionPromptId,
     this.questionPromptBody,
@@ -52,6 +55,15 @@ class SavedScoringResult {
   /// 的中度への一言アドバイス。AIが返さなかった場合はnull。
   final String? hitAdvice;
 
+  /// 発話内容を自然な日本語に直した模範回答。未送信・旧データではnull。
+  final String? modelAnswer;
+
+  /// [modelAnswer]のローマ字。未送信・旧データではnull。
+  final String? modelAnswerRomaji;
+
+  /// [modelAnswer]のベトナム語訳。未送信・旧データではnull。
+  final String? modelAnswerVi;
+
   /// PREP・的中度の評価解析に失敗した場合の、Chrome AIの回答原文。
   final String? aiEvaluationUnparsedResponse;
 
@@ -67,6 +79,9 @@ class SavedScoringResult {
     int? hitStars,
     String? prepAdvice,
     String? hitAdvice,
+    String? modelAnswer,
+    String? modelAnswerRomaji,
+    String? modelAnswerVi,
     String? aiEvaluationUnparsedResponse,
   }) => SavedScoringResult(
     id: id,
@@ -76,6 +91,9 @@ class SavedScoringResult {
     hitStars: hitStars,
     prepAdvice: prepAdvice,
     hitAdvice: hitAdvice,
+    modelAnswer: modelAnswer,
+    modelAnswerRomaji: modelAnswerRomaji,
+    modelAnswerVi: modelAnswerVi,
     aiEvaluationUnparsedResponse: aiEvaluationUnparsedResponse,
     questionPromptId: questionPromptId,
     questionPromptBody: questionPromptBody,
@@ -133,6 +151,9 @@ class SavedScoringResult {
     if (hitStars != null) 'hitStars': hitStars,
     if (prepAdvice != null) 'prepAdvice': prepAdvice,
     if (hitAdvice != null) 'hitAdvice': hitAdvice,
+    if (modelAnswer != null) 'modelAnswer': modelAnswer,
+    if (modelAnswerRomaji != null) 'modelAnswerRomaji': modelAnswerRomaji,
+    if (modelAnswerVi != null) 'modelAnswerVi': modelAnswerVi,
     if (aiEvaluationUnparsedResponse != null)
       'aiEvaluationUnparsedResponse': aiEvaluationUnparsedResponse,
     if (questionPromptId != null) 'questionPromptId': questionPromptId,
@@ -222,6 +243,9 @@ class SavedScoringResult {
       hitStars: (json['hitStars'] as num?)?.toInt(),
       prepAdvice: json['prepAdvice'] as String?,
       hitAdvice: json['hitAdvice'] as String?,
+      modelAnswer: json['modelAnswer'] as String?,
+      modelAnswerRomaji: json['modelAnswerRomaji'] as String?,
+      modelAnswerVi: json['modelAnswerVi'] as String?,
       aiEvaluationUnparsedResponse:
           json['aiEvaluationUnparsedResponse'] as String?,
       questionPromptId: json['questionPromptId'] as String?,

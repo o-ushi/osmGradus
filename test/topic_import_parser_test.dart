@@ -53,9 +53,8 @@ void main() {
         tagsForBody: QuestionPromptAutoTagService().suggestTags,
       );
 
-      final all = await QuestionPromptService().loadByCategory(
-        TopicCategory.general,
-      );
+      final service = QuestionPromptService();
+      final all = await _promptsInCategory(service, TopicCategory.general);
       final added = all.singleWhere(
         (p) => p.body == 'あなたの趣味について教えてください。',
       );

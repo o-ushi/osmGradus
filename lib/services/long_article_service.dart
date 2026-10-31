@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../models/long_article.dart';
 import '../models/long_article_comprehension_check.dart';
+import '../models/long_article_vocab_word.dart';
 import 'json_list_store.dart';
 
 /// 長文読解（レイヤーⅠ「長文読解」）で作成した長文の一覧をローカル保持する。
@@ -36,6 +37,7 @@ class LongArticleService {
     String? generationJlptLevel,
     int? generationLength,
     LongArticleComprehensionCheck? comprehensionCheck,
+    List<LongArticleVocabWord> vocabTestWords = const [],
   }) async {
     final articles = await loadArticles();
     final now = DateTime.now();
@@ -50,6 +52,7 @@ class LongArticleService {
       generationJlptLevel: generationJlptLevel,
       generationLength: generationLength,
       comprehensionCheck: comprehensionCheck,
+      vocabTestWords: vocabTestWords,
     );
     final updated = _normalize([article, ...articles]);
     await _store.saveAll(updated);
@@ -68,6 +71,30 @@ class LongArticleService {
       for (final article in articles)
         if (article.id == id)
           article.copyWith(title: title.trim(), body: body, updatedAt: now)
+        else
+          article,
+    ];
+    await _store.saveAll(updated);
+    return updated;
+  }
+
+  /// 語彙テスト（レイヤーⅠ長文読解）の採点結果を書き戻す
+  /// （[Layer1VocabScreenState._gradeLongArticle]から呼ぶ）。
+  Future<List<LongArticle>> recordVocabTestResult(
+    String id, {
+    required int correctCount,
+    required int questionCount,
+    required String lastVocabularyCheckId,
+  }) async {
+    final articles = await loadArticles();
+    final updated = [
+      for (final article in articles)
+        if (article.id == id)
+          article.copyWith(
+            vocabTestCorrectCount: correctCount,
+            vocabTestQuestionCount: questionCount,
+            lastVocabularyCheckId: lastVocabularyCheckId,
+          )
         else
           article,
     ];

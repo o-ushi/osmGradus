@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'question_prompt_list_test_helpers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -139,8 +141,7 @@ void main() {
   testWidgets('行タップで詳細が開き、既存レイヤーと同じ予約席レイアウトを持つ', (tester) async {
     await _openQuestionPromptList(tester);
 
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     // 上段: DiceActionRow（45/60/15+60はダミー、＋は表示）。
     expect(find.byType(DiceActionRow), findsOneWidget);
@@ -161,8 +162,7 @@ void main() {
     _mockClipboard(tester);
 
     await _openQuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     final iconBefore = tester.widget<Icon>(find.byIcon(Icons.quiz_outlined));
     expect(iconBefore.color, isNot(Colors.orange));
@@ -371,8 +371,7 @@ void main() {
 
   testWidgets('本文の単語をタップすると単語帳へ登録され、「訳を付ける」が使えるようになる', (tester) async {
     await _openQuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     expect(_enrichButton(tester).visible, isFalse);
 
@@ -406,22 +405,14 @@ void main() {
     expect(find.text(_t('問題文がありません')), findsOneWidget);
   });
 
-  testWidgets('フィルタでカテゴリ「その他」＋タブ「趣味」を選ぶと、趣味タグ付きのgeneral問題だけに絞れる'
-      '（question-prompt-tabs.md Step 3）', (tester) async {
+  testWidgets('フィルタでカテゴリ「趣味」を選ぶと、趣味タグ付きのgeneral問題だけに絞れる', (
+    tester,
+  ) async {
     await _openQuestionPromptList(tester);
 
     await tester.tap(find.byIcon(Icons.filter_list));
     await tester.pumpAndSettle();
 
-    // 「その他」を選ぶとタブ軸が現れる（日常／ビジネスはもう出ない）。
-    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
-    await tester.pumpAndSettle();
-    expect(find.text(_t('タブ')), findsOneWidget);
-    expect(find.text(_t('日常')), findsNothing);
-    expect(find.text(_t('ビジネス')), findsNothing);
-
-    // 背後の一覧行にも「趣味」タグチップが出ているため、シート内の
-    // チップに絞ってタップする。
     await tester.tap(
       find.descendant(
         of: find.byType(QuestionPromptFilterSheet),
@@ -449,8 +440,7 @@ void main() {
     final firstBody = all.first.body;
 
     await _openQuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.tap(find.byType(LayerNumeralBadge));
     await tester.pump(_tapConfirmWait);
@@ -471,8 +461,7 @@ void main() {
     final firstRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).first,
     );
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
     await tester.tap(find.byType(LayerNumeralBadge));
     await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
@@ -489,8 +478,7 @@ void main() {
     final secondRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).at(1),
     );
-    await tester.tap(find.byType(QuestionPromptListRow).at(1));
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).at(1));
 
     // 再度「II」。Ⅱ側は既にselectFromListモードのまま（initStateは再実行され
     // ない）だが、それでも一覧ではなく新しい問題文の詳細へ直接飛ぶこと。

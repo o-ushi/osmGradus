@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ import 'package:osm_gradus/services/question_prompt_tab_registry.dart';
 import 'package:osm_gradus/services/topic_speech_reader.dart';
 import 'package:osm_gradus/services/tts_settings_service.dart';
 import 'package:osm_gradus/views/topics/question_prompt_edit_screen.dart';
+import 'package:osm_gradus/widgets/dice_action_row.dart';
 import 'package:osm_gradus/widgets/question_prompt_list_row.dart';
 
 const _lang = 'vi';
@@ -53,11 +55,30 @@ void main() {
   ) async {
     await _openQuestionPromptList(tester);
 
-    await tester.longPress(find.byType(QuestionPromptListRow).first);
+    final firstBody = find.descendant(
+      of: find.byType(QuestionPromptListRow).first,
+      matching: find.byType(Text),
+    ).first;
+    await tester.longPress(firstBody);
     await tester.pumpAndSettle();
 
     expect(find.byType(QuestionPromptEditScreen), findsOneWidget);
     expect(find.text(_t('問題文を編集')), findsOneWidget);
+  });
+
+  testWidgets('本文をタップすると詳細画面が開く（編集ではない）', (tester) async {
+    await _openQuestionPromptList(tester);
+
+    final firstBody = find.descendant(
+      of: find.byType(QuestionPromptListRow).first,
+      matching: find.byType(Text),
+    ).first;
+    await tester.tap(firstBody);
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(QuestionPromptEditScreen), findsNothing);
+    expect(find.byType(DiceActionRow), findsOneWidget);
   });
 
   testWidgets('generalの問題文はタブ変更が保存される', (tester) async {
@@ -72,9 +93,9 @@ void main() {
     expect(find.byType(QuestionPromptEditScreen), findsOneWidget);
 
     // まだ選ばれていない「会社」タブを追加選択して保存する。
-    await tester.tap(find.widgetWithText(FilterChip, _t('会社')));
+    await tester.tap(find.text(_t('会社')));
     await tester.pump();
-    await tester.tap(find.text(_t('保存')));
+    await tester.tap(find.byTooltip(_t('保存')));
     await tester.pumpAndSettle();
 
     final updatedAll = await QuestionPromptService().loadAll();
@@ -96,9 +117,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(FilterChip, _t('会社')));
+    await tester.tap(find.text(_t('会社')));
     await tester.pump();
-    await tester.tap(find.text(_t('保存')));
+    await tester.tap(find.byTooltip(_t('保存')));
     await tester.pumpAndSettle();
 
     // 相当する新しいセッションを模して、もう一度loadAllを呼んでも
@@ -130,7 +151,7 @@ void main() {
     expect(textFields, findsNWidgets(2));
     await tester.enterText(textFields.at(0), '編集後の状況文');
     await tester.enterText(textFields.at(1), '編集後の条件文');
-    await tester.tap(find.text(_t('保存')));
+    await tester.tap(find.byTooltip(_t('保存')));
     await tester.pumpAndSettle();
 
     final updatedAll = await QuestionPromptService().loadAll();
@@ -156,15 +177,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.widgetWithText(ActionChip, _t('新しいタブ')));
+    await tester.tap(find.byTooltip(_t('新しいタブ')));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).last, 'スポーツ');
     await tester.tap(find.text(_t('追加')));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(FilterChip, 'スポーツ'), findsOneWidget);
+    expect(find.text('スポーツ'), findsOneWidget);
 
-    await tester.tap(find.text(_t('保存')));
+    await tester.tap(find.byTooltip(_t('保存')));
     await tester.pumpAndSettle();
 
     final updatedAll = await QuestionPromptService().loadAll();

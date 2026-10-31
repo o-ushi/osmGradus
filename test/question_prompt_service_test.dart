@@ -13,6 +13,14 @@ import 'package:osm_gradus/models/topic_category.dart';
 import 'package:osm_gradus/services/question_prompt_service.dart';
 import 'package:osm_gradus/services/topic_service.dart';
 
+Future<List<QuestionPrompt>> _promptsInCategory(
+  QuestionPromptService service,
+  TopicCategory category,
+) async {
+  final all = await service.loadAll();
+  return service.filter(all, category: category);
+}
+
 ScoringResult _buildScoringResult() => ScoringResult(
   transcriptChunks: const [],
   fullTranscript: 'テストの回答です。',
@@ -430,9 +438,8 @@ void main() {
         'AIが生成した問題文',
       ], source: QuestionPromptSource.ai);
 
-      final general = await QuestionPromptService().loadByCategory(
-        TopicCategory.general,
-      );
+      final service = QuestionPromptService();
+      final general = await _promptsInCategory(service, TopicCategory.general);
       final added = general.singleWhere((p) => p.body == 'AIが生成した問題文');
       expect(added.source, QuestionPromptSource.ai);
     });
@@ -442,9 +449,8 @@ void main() {
         '手入力した問題文',
       ], source: QuestionPromptSource.manual);
 
-      final general = await QuestionPromptService().loadByCategory(
-        TopicCategory.general,
-      );
+      final service = QuestionPromptService();
+      final general = await _promptsInCategory(service, TopicCategory.general);
       final added = general.singleWhere((p) => p.body == '手入力した問題文');
       expect(added.source, QuestionPromptSource.manual);
     });
@@ -452,7 +458,9 @@ void main() {
     test('sourceを渡さない場合はimportedが既定値になる（JSON/バックアップ経由との互換）', () async {
       await TopicService().importTopics(TopicCategory.situational, ['素の取り込み']);
 
-      final situational = await QuestionPromptService().loadByCategory(
+      final service = QuestionPromptService();
+      final situational = await _promptsInCategory(
+        service,
         TopicCategory.situational,
       );
       final added = situational.singleWhere((p) => p.body == '素の取り込み');
@@ -463,27 +471,25 @@ void main() {
     });
 
     test('同じ本文を2回取り込んでも1件のまま（重複除外）', () async {
-      final service = TopicService();
-      await service.importTopics(TopicCategory.daily, ['重複お題']);
-      final second = await service.importTopics(TopicCategory.daily, ['重複お題']);
+      final topicService = TopicService();
+      await topicService.importTopics(TopicCategory.daily, ['重複お題']);
+      final second = await topicService.importTopics(TopicCategory.daily, ['重複お題']);
 
       expect(second, 0);
-      final general = await QuestionPromptService().loadByCategory(
-        TopicCategory.general,
-      );
+      final promptService = QuestionPromptService();
+      final general = await _promptsInCategory(promptService, TopicCategory.general);
       expect(general.where((p) => p.body == '重複お題'), hasLength(1));
     });
 
     test('clearImportedで取り込み分だけ消え、組み込みは残る', () async {
-      final service = TopicService();
-      await service.importTopics(TopicCategory.daily, ['消される問題文']);
-      await service.clearImported(TopicCategory.daily);
+      final topicService = TopicService();
+      await topicService.importTopics(TopicCategory.daily, ['消される問題文']);
+      await topicService.clearImported(TopicCategory.daily);
 
       // Step 4からTopicService.importTopics(daily/business, ...)はgeneralへ
       // 正規化されるため、取り込み・削除の確認もgeneralで行う。
-      final general = await QuestionPromptService().loadByCategory(
-        TopicCategory.general,
-      );
+      final promptService = QuestionPromptService();
+      final general = await _promptsInCategory(promptService, TopicCategory.general);
       expect(general.any((p) => p.body == '消される問題文'), false);
       // 組み込みの日常/ビジネス20件（Step 2からgeneralに統合）は残る。
       expect(
@@ -501,9 +507,8 @@ void main() {
       // 旧`topics.imported.daily`の生データはloadAllの移行スキャン
       // （_importableCategories）でgeneralに正規化して取り込まれる（Step 6で
       // TopicService.importTopics経由の正規化と揃えた）。
-      final general = await QuestionPromptService().loadByCategory(
-        TopicCategory.general,
-      );
+      final service = QuestionPromptService();
+      final general = await _promptsInCategory(service, TopicCategory.general);
 
       expect(
         general
@@ -583,12 +588,12 @@ void main() {
     test('deleteで指定IDだけが消える', () async {
       final service = QuestionPromptService();
       await TopicService().importTopics(TopicCategory.daily, ['削除対象']);
-      final before = await service.loadByCategory(TopicCategory.general);
+      final before = await _promptsInCategory(service, TopicCategory.general);
       final target = before.firstWhere((p) => p.body == '削除対象');
 
       await service.delete(target.id);
 
-      final after = await service.loadByCategory(TopicCategory.general);
+      final after = await _promptsInCategory(service, TopicCategory.general);
       expect(after.any((p) => p.id == target.id), false);
 
       // 組み込みの日常/ビジネス20件はStep 2からgeneralに統合されている。
@@ -601,7 +606,8 @@ void main() {
     test('deleteした取り込み本文はtopics.importedからも消え、loadAllで復活しない', () async {
       final service = QuestionPromptService();
       await TopicService().importTopics(TopicCategory.daily, ['復活させない']);
-      final target = (await service.loadByCategory(
+      final target = (await _promptsInCategory(
+        service,
         TopicCategory.general,
       )).firstWhere((p) => p.body == '復活させない');
 
@@ -825,6 +831,42 @@ void main() {
       expect(updated.hitScore, isNull);
       expect(updated.prepScore, isNull);
       expect(updated.hasPronunciationScore, isFalse);
+    });
+  });
+
+  group('tag maintenance', () {
+    test('renameTagOnAllPrompts は該当タグを置き換える', () async {
+      final service = QuestionPromptService();
+      final prompt = QuestionPrompt.create(
+        category: TopicCategory.general,
+        body: 'タグ置換テスト',
+        source: QuestionPromptSource.manual,
+        tags: const ['趣味', 'スポーツ'],
+      );
+      await service.importPrompts([prompt]);
+
+      final changed = await service.renameTagOnAllPrompts('スポーツ', '音楽');
+      expect(changed, 1);
+
+      final updated = await service.loadById(prompt.id);
+      expect(updated!.tags, ['趣味', '音楽']);
+    });
+
+    test('removeTagFromAllPrompts はタグを外す', () async {
+      final service = QuestionPromptService();
+      final prompt = QuestionPrompt.create(
+        category: TopicCategory.general,
+        body: 'タグ削除テスト',
+        source: QuestionPromptSource.manual,
+        tags: const ['趣味', 'スポーツ'],
+      );
+      await service.importPrompts([prompt]);
+
+      final changed = await service.removeTagFromAllPrompts('スポーツ');
+      expect(changed, 1);
+
+      final updated = await service.loadById(prompt.id);
+      expect(updated!.tags, ['趣味']);
     });
   });
 }

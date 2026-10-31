@@ -240,6 +240,8 @@ void main() {
     // LayerHelpLineは行頭の連番バッジ・{{icon}}を別Textとして切り出して描画
     // するため、バッジより後ろの本文部分だけを確認する。
     expect(find.textContaining('để chọn danh mục và tạo bộ mới'), findsOneWidget);
+    // Step 8: 標準3シートが最初からあることの補足行（連番バッジ無しの字下げ行）。
+    expect(find.text(_t('25マス_一覧_使い方_標準シート')), findsOneWidget);
     expect(find.text('Nhấn vào một dòng để mở bảng'), findsOneWidget);
     expect(find.text('Vuốt sang trái để xóa'), findsOneWidget);
   });
@@ -269,6 +271,52 @@ void main() {
     expect(find.text(created.title), findsNothing);
     expect(find.text(_t('25マス_一覧が空です')), findsOneWidget);
     expect(await ThinkingMatrixService().loadAll(), isEmpty);
+  });
+
+  testWidgets('システムセット（日常等）の一覧タイルは、キーワード達成率ではなく'
+      '拡充度%（ダッシュボードの拡充度と同じ計算式）を表示する（Step 5）', (tester) async {
+    final service = ThinkingMatrixService();
+    await service.ensureSystemPresets();
+    final daily = (await service.loadAll()).firstWhere(
+      (s) => s.id == ThinkingMatrixService.systemSetIds[TopicCategory.daily],
+    );
+    await service.upsertCellLayer2(
+      setId: daily.id,
+      themeId: daily.themes.first.id,
+      columnId: daily.columns.first.id,
+      keyword: 'テスト',
+    );
+
+    // システムセットが既にあるため、入口タップで（カテゴリ選択を経由せず）
+    // 直接一覧が開く。
+    await _openLayer2ThinkingMatrix(tester);
+
+    // (1/3)/25*100 ≈ 1.3%（Step 2・Step 4のダッシュボードと同じ計算式）。
+    expect(
+      find.text('25マス_拡充度_一覧'.trFmt(_lang, ['1.3%'])),
+      findsOneWidget,
+    );
+    // 従来のキーワード達成率表示（達成率 n% (filled/total)）はシステム
+    // セットには出ない。
+    expect(
+      find.text('25マス_達成率'.trFmt(_lang, ['4', '1', '25'])),
+      findsNothing,
+    );
+  });
+
+  testWidgets('オリジナル・追加セットの一覧タイルは、従来どおりキーワード達成率のまま', (
+    tester,
+  ) async {
+    await _createBoard(tester);
+    await tester.tap(find.byIcon(Icons.arrow_back_rounded));
+    await tester.pumpAndSettle();
+
+    // オリジナルは0/25埋まり（0%）のまま。拡充度表示ではなく従来の
+    // 達成率表示が出る。
+    expect(
+      find.text('25マス_達成率'.trFmt(_lang, ['0', '0', '25'])),
+      findsOneWidget,
+    );
   });
 
   testWidgets('セルをタップしてキーワードを保存するとマスに表示され、再オープンで既存値が入る', (tester) async {

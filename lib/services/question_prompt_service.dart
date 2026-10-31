@@ -123,12 +123,6 @@ class QuestionPromptService {
     return null;
   }
 
-  /// 指定したカテゴリの問題文だけを返す（組み込み＋各入手元、すべて含む）。
-  Future<List<QuestionPrompt>> loadByCategory(TopicCategory category) async {
-    final all = await loadAll();
-    return all.where((p) => p.category == category).toList();
-  }
-
   /// 理解・要約・PREP・スコア・アドバイス等の更新を保存する。[prompt]は
   /// 呼び出し側が[QuestionPrompt.copyWith]で組み立てるため、body/category/tags
   /// の変更もここを通せば保存できる（[id]は変えない想定。長押し編集画面用の
@@ -199,6 +193,57 @@ class QuestionPromptService {
       await prefs.setStringList(key, next);
       return;
     }
+  }
+
+  /// [tag]を付けている[TopicCategory.general]の問題文件数。
+  Future<int> countPromptsWithTag(String tag) async {
+    final all = await loadAll();
+    return all
+        .where(
+          (p) => p.category == TopicCategory.general && p.tags.contains(tag),
+        )
+        .length;
+  }
+
+  /// 全問題文の[oldTag]を[newTag]へ置き換える（重複は除去）。
+  /// 変更した問題文の件数を返す。
+  Future<int> renameTagOnAllPrompts(String oldTag, String newTag) async {
+    final all = await loadAll();
+    var changed = 0;
+    final updated = <QuestionPrompt>[];
+    for (final prompt in all) {
+      if (prompt.category != TopicCategory.general ||
+          !prompt.tags.contains(oldTag)) {
+        updated.add(prompt);
+        continue;
+      }
+      changed++;
+      final nextTags = <String>{
+        for (final tag in prompt.tags) tag == oldTag ? newTag : tag,
+      }.toList();
+      updated.add(prompt.copyWith(tags: nextTags, contentEdited: true));
+    }
+    if (changed > 0) await _store.saveAll(updated);
+    return changed;
+  }
+
+  /// 全問題文から[tag]を外す。変更した問題文の件数を返す。
+  Future<int> removeTagFromAllPrompts(String tag) async {
+    final all = await loadAll();
+    var changed = 0;
+    final updated = <QuestionPrompt>[];
+    for (final prompt in all) {
+      if (prompt.category != TopicCategory.general ||
+          !prompt.tags.contains(tag)) {
+        updated.add(prompt);
+        continue;
+      }
+      changed++;
+      final nextTags = prompt.tags.where((t) => t != tag).toList();
+      updated.add(prompt.copyWith(tags: nextTags, contentEdited: true));
+    }
+    if (changed > 0) await _store.saveAll(updated);
+    return changed;
   }
 
   /// [delete]・[updateContent]が生リスト（`topics.imported.*`）の本文を

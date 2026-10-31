@@ -38,6 +38,16 @@ void main() {
       expect(prompt, contains('expectedTranslation (Vietnamese): thúc đẩy'));
     });
 
+    test('1秒チェックはChrome AIプロンプトに載せない', () {
+      final prompt = VocabularyAiPromptTemplate.evaluationPrompt(
+        questions: _questions(),
+        lang: 'ja',
+      );
+      expect(prompt, contains('1. word: 促進'));
+      expect(prompt, isNot(contains('readingComprehensionCheck')));
+      expect(prompt, isNot(contains('gradedCorrect')));
+    });
+
     test('JSONスキーマはquestionEvaluations/overallScore/summaryを要求する', () {
       for (final lang in ['ja', 'en', 'vi']) {
         final prompt = VocabularyAiPromptTemplate.evaluationPrompt(

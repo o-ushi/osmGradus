@@ -14,7 +14,6 @@ import '../../models/question_prompt.dart';
 import '../../models/question_prompt_pronunciation_sentence.dart';
 import '../../models/recording_mode.dart';
 import '../../models/saved_pronunciation_check.dart';
-import '../../models/topic_category.dart';
 import '../../navigation/app_routes.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/pronunciation_ai_response_parser.dart';
@@ -25,7 +24,6 @@ import '../../services/question_prompt_service.dart';
 import '../../services/recording_stt_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
-import '../../widgets/category_select_field.dart';
 import '../../widgets/dice_action_row.dart';
 import '../../widgets/genki_transport_row.dart';
 import '../../widgets/google_ai_send_consent_dialog.dart';
@@ -52,7 +50,7 @@ import 'pronunciation_history_screen.dart';
 /// 参考評価を受け取る（送信自体は録音音声ではなく、期待文と端末STT結果の
 /// テキストのみ）。
 ///
-/// レイアウトはレイヤーⅡ〜Ⅳ（[DiceActionRow]・[CategorySelectField]・
+/// レイアウトはレイヤーⅡ〜Ⅳ（[DiceActionRow]・[QuestionPromptNavRow]・
 /// [PrepLabelRow]・[GenkiTransportRow]）と同じ部品・同じ並び順で揃え、
 /// このレイヤーで使わないボタンは`visible: false`でゴースト化する
 /// （枠だけ確保し、レイヤーを切り替えたときにボタン位置がズレないため）。
@@ -990,9 +988,9 @@ class Layer5ScreenState extends State<Layer5Screen>
                         onPrevious: widget.onGoPrevious ?? () {},
                         onNext: widget.onGoNext ?? () {},
                       )
-                    : CategorySelectField(
-                        selected: TopicCategory.daily,
-                        onChanged: (_) {},
+                    : const SizedBox(
+                        key: Key('layer5_category_spacer'),
+                        height: 32,
                       ),
               ),
               const SizedBox(height: 4),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../theme/app_colors.dart';
+import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/long_article_action_row.dart';
 import '../../widgets/tappable_japanese_text.dart';
 import '../../widgets/vocabulary_sheet.dart';
@@ -66,6 +68,22 @@ class LongArticleReaderScreenState extends State<LongArticleReaderScreen> {
     await _textKey.currentState?.reloadRegisteredWords();
   }
 
+  /// 「単語帳」長押し：フロー本体に「＋」が無いため、使い方シートの入口を
+  /// ここに割り当てる（[Layer1QuestionPromptDetailScreen]の「＋」長押しと
+  /// 同じ役割）。①次へ（チェック→語彙）②訳を付ける③単語帳、の順で示す。
+  void _showUsageHelp() {
+    final lang = appSettings.language;
+    LayerHelpSheet.show(
+      context,
+      title: '長文読解_使い方_タイトル'.tr(lang),
+      lines: [
+        LayerHelpLine(text: '長文読解_使い方_次へ'.tr(lang)),
+        LayerHelpLine(text: '長文読解_使い方_訳付'.tr(lang)),
+        LayerHelpLine(text: '長文読解_使い方_単語帳'.tr(lang)),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = appSettings.language;
@@ -105,6 +123,7 @@ class LongArticleReaderScreenState extends State<LongArticleReaderScreen> {
                     ? _openEnrichAutoSubmit
                     : null,
                 onVocabulary: _openVocabulary,
+                onVocabularyLongPress: _showUsageHelp,
                 onNext: widget.onFinish,
                 languageCode: lang,
                 enableActionHints: true,

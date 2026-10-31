@@ -1,10 +1,13 @@
+import '../models/dashboard_summary.dart';
 import '../models/pronunciation_exercise.dart';
 import '../models/saved_pronunciation_check.dart';
 import '../models/saved_scoring_result.dart';
 import '../models/saved_vocabulary_check.dart';
+import '../models/thinking_matrix_expansion_summary.dart';
 import '../services/dashboard_summary_service.dart';
 import '../services/jsst_scoring_service.dart';
 import 'google_ai_search.dart';
+import 'learner_friendly_japanese.dart';
 
 /// ダッシュボード用：直近のレイヤーⅠ・Ⅳ・Ⅴ履歴から総合アドバイスを依頼する
 /// Chrome AIプロンプト。
@@ -24,11 +27,15 @@ abstract final class DashboardAiPromptTemplate {
   static const recentLimit = DashboardSummaryService.recentLimit;
 
   /// 直近[recentLimit]件ずつの履歴を埋め込んだアドバイス依頼文。
+  /// [expansion]・[overallGrade]を渡すと、25マス拡充度（Step 2）と新・総合
+  /// （Step 3）を短い1行で追記する（省略時はこのブロック自体を出さない）。
   static String advicePrompt({
     required List<SavedScoringResult> scoringResults,
     required List<SavedPronunciationCheck> pronunciationChecks,
     required List<SavedVocabularyCheck> vocabularyChecks,
     required String lang,
+    ThinkingMatrixExpansionSummary? expansion,
+    DashboardOverallGrade? overallGrade,
   }) {
     final copy = _copy(lang);
     final buffer = StringBuffer()
@@ -71,10 +78,34 @@ abstract final class DashboardAiPromptTemplate {
       }
     }
 
+    if (expansion != null) {
+      buffer
+        ..writeln()
+        ..writeln(copy.expansionHeading)
+        ..writeln(_expansionLine(expansion, overallGrade));
+    }
+
     buffer
       ..writeln()
       ..writeln(copy.instruction);
     return buffer.toString();
+  }
+
+  /// 25マス拡充度（カテゴリ％・拡充度総合）と新・総合を1行にまとめる
+  /// （長文化しすぎないよう、内訳の単語ごとの説明は付けない）。
+  static String _expansionLine(
+    ThinkingMatrixExpansionSummary expansion,
+    DashboardOverallGrade? overallGrade,
+  ) {
+    final overallText = overallGrade == null
+        ? ''
+        : ' / overallGrade: ${overallGrade.letter}';
+    return 'daily: ${expansion.dailyDisplay} / '
+        'business: ${expansion.businessDisplay} / '
+        'situational: ${expansion.situationalDisplay} / '
+        'total: ${expansion.totalDisplay} / '
+        'expansionGrade: ${expansion.expansionGrade.letter}'
+        '$overallText';
   }
 
   static Uri adviceSearchUrl({
@@ -82,12 +113,16 @@ abstract final class DashboardAiPromptTemplate {
     required List<SavedPronunciationCheck> pronunciationChecks,
     required List<SavedVocabularyCheck> vocabularyChecks,
     required String lang,
+    ThinkingMatrixExpansionSummary? expansion,
+    DashboardOverallGrade? overallGrade,
   }) {
     final prompt = advicePrompt(
       scoringResults: scoringResults,
       pronunciationChecks: pronunciationChecks,
       vocabularyChecks: vocabularyChecks,
       lang: lang,
+      expansion: expansion,
+      overallGrade: overallGrade,
     );
     final query = switch (lang) {
       'en' => prompt.startsWith('In English') ? prompt : 'In English, $prompt',
@@ -189,6 +224,7 @@ abstract final class DashboardAiPromptTemplate {
     String jsstHeading,
     String pronunciationHeading,
     String vocabularyHeading,
+    String expansionHeading,
     String none,
     String instruction,
   })
@@ -205,13 +241,15 @@ abstract final class DashboardAiPromptTemplate {
       jsstHeading: '## Recent Layer IV (JSST-style) results',
       pronunciationHeading: '## Recent Layer V (pronunciation) results',
       vocabularyHeading: '## Recent Layer I (vocabulary check) results',
+      expansionHeading: '## 25-cell thinking-matrix expansion',
       none: '(none)',
       instruction:
           'Write overall advice that balances all 5 areas: JSST-style '
           'fluency, how directly answers address the question (hitStars), '
           'how well answers follow a Point-Reason-Example structure '
-          '(prepStars), pronunciation, and vocabulary recall. Mention '
-          'concrete next steps.',
+          '(prepStars), pronunciation, and vocabulary recall. If expansion '
+          'data is included, also briefly mention which category to '
+          'fill in next. Mention concrete next steps.',
     ),
     'vi' => (
       header:
@@ -225,12 +263,14 @@ abstract final class DashboardAiPromptTemplate {
       jsstHeading: '## Kết quả Lớp IV (kiểu JSST) gần đây',
       pronunciationHeading: '## Kết quả Lớp V (phát âm) gần đây',
       vocabularyHeading: '## Kết quả Lớp I (từ vựng) gần đây',
+      expansionHeading: '## Mở rộng ma trận 25 ô',
       none: '(không có)',
       instruction:
           'Viết lời khuyên tổng thể cân bằng cả 5 mặt: độ trôi chảy kiểu '
           'JSST, mức độ trả lời đúng trọng tâm câu hỏi (hitStars), mức độ '
           'tuân theo cấu trúc Kết luận-Lý do-Ví dụ (prepStars), phát âm và '
-          'khả năng nhớ từ vựng. Nêu bước tiếp theo cụ thể.',
+          'khả năng nhớ từ vựng. Nếu có dữ liệu mở rộng, hãy nêu ngắn gọn '
+          'nên điền tiếp danh mục nào. Nêu bước tiếp theo cụ thể.',
     ),
     _ => (
       header:
@@ -243,11 +283,13 @@ abstract final class DashboardAiPromptTemplate {
       jsstHeading: '## 直近のレイヤーⅣ（JSST風）結果',
       pronunciationHeading: '## 直近のレイヤーⅤ（発音）結果',
       vocabularyHeading: '## 直近のレイヤーⅠ（語彙チェック）結果',
+      expansionHeading: '## 25マス思考の拡充度',
       none: '（なし）',
       instruction:
           'JSST風の流暢さ・的中度（hitStars）・PREP構成（prepStars）・発音・'
           '語彙力の5点をバランスよく踏まえた総合アドバイスと、具体的な次の'
-          '一歩を書いてください。',
+          '一歩を書いてください。拡充度のデータがあれば、次に埋めるとよい'
+          'カテゴリも一言添えてください。$learnerFriendlyJapaneseAdvice',
     ),
   };
 }

@@ -1,6 +1,6 @@
 part of 'layer1_vocab_screen.dart';
 
-/// [CategorySelectField]相当。単語テストの出題レベル（N1/N2/N3/ランダム）を
+/// 出題レベル選択行。単語テストの出題レベル（N1/N2/N3/ランダム）を
 /// タップで選ぶトリガー行。
 class _Layer1LevelField extends StatelessWidget {
   const _Layer1LevelField({required this.selection, required this.onTap});
@@ -51,7 +51,7 @@ class _Layer1LevelField extends StatelessWidget {
   }
 }
 
-/// [CategorySelectSheet]相当。出題レベルの選択シート。
+/// 出題レベル選択シート。単語テストの出題レベルを選ぶ。
 /// 「レベル選択」配下のN1/N2/N3/その他はチェックボックスで複数選択でき、
 /// 選ぶたびに[onChanged]で即座に反映される（[EpisodeSortSheet]と同じ、
 /// シートを開いたまま調整を続けられる方式）。「ランダム」は全レベル対象の

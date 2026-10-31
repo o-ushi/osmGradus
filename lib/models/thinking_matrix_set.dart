@@ -53,7 +53,11 @@ class ThinkingMatrixSet {
   /// は15）。
   int get totalCells => themes.length * columns.length;
 
+  /// [id]を指定しなければランダムな新規IDを振る。指定した場合はそのIDを
+  /// そのまま使う（[ThinkingMatrixService.ensureSystemPresets]の安定ID
+  /// システムセット作成用）。
   factory ThinkingMatrixSet.create({
+    String? id,
     required String title,
     TopicCategory? category,
     required List<ThinkingTheme> themes,
@@ -63,7 +67,7 @@ class ThinkingMatrixSet {
     assert(columns.isNotEmpty, 'ThinkingMatrixSet.create()のcolumnsは空にできない');
     final now = DateTime.now();
     return ThinkingMatrixSet(
-      id: 'tm_${now.microsecondsSinceEpoch}_${_idRandom.nextInt(1 << 32)}',
+      id: id ?? 'tm_${now.microsecondsSinceEpoch}_${_idRandom.nextInt(1 << 32)}',
       title: title,
       category: category,
       columns: columns,

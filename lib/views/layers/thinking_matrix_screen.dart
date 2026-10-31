@@ -12,6 +12,7 @@ import '../../models/thinking_matrix_layer.dart';
 import '../../models/thinking_matrix_set.dart';
 import '../../models/thinking_theme.dart';
 import '../../models/topic_category.dart';
+import '../../services/thinking_matrix_expansion_service.dart';
 import '../../services/thinking_matrix_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/confirm_history_delete_dialog.dart';
@@ -19,7 +20,7 @@ import '../../widgets/history_delete_background.dart';
 import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/text_edit_sheet.dart';
 import '../../widgets/thinking_matrix_cell_sheet.dart';
-import '../topics/category_select_sheet.dart';
+import '../../widgets/category_select_row.dart';
 
 enum _ThinkingMatrixPhase { list, edit, board }
 
@@ -187,7 +188,7 @@ class _ThinkingMatrixCategoryChoice {
 }
 
 /// 25マス新規作成のカテゴリ選択（日常/ビジネス/シチュエーション/オリジナル）。
-/// 問題文用の[CategorySelectSheet]と行の見た目（[CategorySelectRow]）を
+/// 問題文用の[QuestionPromptDrawSelectSheet]と行の見た目（[CategorySelectRow]）を
 /// 共有するが、`random`を出さず4行目に「オリジナル」を足すため戻り値の型が
 /// 異なる別シートにしている。
 class _ThinkingMatrixCategorySelectSheet extends StatelessWidget {
@@ -293,6 +294,10 @@ class _ThinkingMatrixListView extends StatelessWidget {
           text: '25マス_一覧_使い方_追加'.tr(lang),
           icon: Icons.add_rounded,
         ),
+        LayerHelpLine(
+          text: '25マス_一覧_使い方_標準シート'.tr(lang),
+          indent: true,
+        ),
         LayerHelpLine(text: '25マス_一覧_使い方_詳細'.tr(lang)),
         LayerHelpLine(text: '25マス_一覧_使い方_削除'.tr(lang)),
       ],
@@ -393,6 +398,24 @@ class _ThinkingMatrixSetTile extends StatelessWidget {
   final Future<bool> Function() onConfirmDelete;
   final VoidCallback onDelete;
 
+  /// 日常／ビジネス／シチュエーションの安定ID3セットのみ（Step 1の
+  /// [ThinkingMatrixService.systemSetIds]）。追加で作った同カテゴリセットは
+  /// 対象外（従来どおりキーワード達成率のまま）。
+  bool get _isSystemSet =>
+      ThinkingMatrixService.systemSetIds.values.contains(set.id);
+
+  /// このセット単体の拡充度%（Step 2の[ThinkingMatrixExpansionService.cellWeight]
+  /// と同じ段階ウェイトの合計÷母数）。システムセットが規定どおりの列・
+  /// テーマ数なら、ダッシュボードの該当カテゴリ%と一致する。
+  double get _expansionPercent {
+    if (set.totalCells == 0) return 0.0;
+    final weightSum = set.cells.fold<double>(
+      0.0,
+      (sum, cell) => sum + ThinkingMatrixExpansionService.cellWeight(set, cell),
+    );
+    return weightSum / set.totalCells * 100;
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.current;
@@ -446,11 +469,15 @@ class _ThinkingMatrixSetTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '25マス_達成率'.trFmt(lang, [
-                        '$percent',
-                        '${set.filledCount}',
-                        '${set.totalCells}',
-                      ]),
+                      _isSystemSet
+                          ? '25マス_拡充度_一覧'.trFmt(lang, [
+                              '${_expansionPercent.toStringAsFixed(1)}%',
+                            ])
+                          : '25マス_達成率'.trFmt(lang, [
+                              '$percent',
+                              '${set.filledCount}',
+                              '${set.totalCells}',
+                            ]),
                       style: TextStyle(
                         fontSize: 12,
                         color: palette.textOnCardSecondary,

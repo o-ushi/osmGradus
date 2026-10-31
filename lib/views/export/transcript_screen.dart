@@ -13,15 +13,14 @@ import '../../services/dashboard_summary_service.dart';
 import '../../services/jsst_scoring_service.dart';
 import '../../services/pronunciation_check_storage.dart';
 import '../../services/scoring_result_storage.dart';
+import '../../services/thinking_matrix_service.dart';
 import '../../services/vocabulary_check_storage.dart';
 import '../../theme/app_colors.dart';
-import '../../utils/history_timestamp.dart';
 import '../../widgets/osm_subpage_scaffold.dart';
 
 /// 起動画面の「…」→「成績証明証」から開く、1画面に収まる形の
-/// 簡易証明書。発行日時・総合判定・JSST/発音/語彙の直近3件の結果を
-/// [DashboardSummaryService]と同じ計算方法でまとめる（値は
-/// [DashboardScreen]と常に一致する）。
+/// 簡易証明書。発行日時・総合判定・会話/語彙/発音の直近3件と、
+/// 発行時点の25マス拡充度を[DashboardSummaryService]と同じ計算でまとめる。
 class TranscriptScreen extends StatefulWidget {
   const TranscriptScreen({super.key});
 
@@ -58,9 +57,12 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   }
 
   Future<void> _load() async {
+    final thinkingMatrixService = ThinkingMatrixService();
+    await thinkingMatrixService.ensureSystemPresets();
     final scoring = await ScoringResultStorage().loadAll();
     final pronunciation = await PronunciationCheckStorage().loadAll();
     final vocabulary = await VocabularyCheckStorage().loadAll();
+    final thinkingMatrixSets = await thinkingMatrixService.loadAll();
     if (!mounted) return;
     setState(() {
       _scoringResults = scoring.take(_rowsPerCategory).toList();
@@ -70,6 +72,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
         scoringResults: scoring,
         pronunciationChecks: pronunciation,
         vocabularyChecks: vocabulary,
+        thinkingMatrixSets: thinkingMatrixSets,
       );
       _loading = false;
     });
@@ -93,7 +96,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
     final rows = [
       for (final saved in _scoringResults)
         _ConversationRow(
-          date: formatHistoryTimestamp(saved.createdAt, languageCode: lang),
+          date: _certificateTimestamp(saved.createdAt, lang),
           jsst: JsstReferenceSamples.levelLabel(
             JsstScoringService.combinedReferenceLevel(saved.result),
           ).replaceFirst('JSST ', ''),
@@ -109,14 +112,19 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
       for (var i = 0; i < _rowsPerCategory; i++)
         i < rows.length
             ? rows[i]
-            : const _ConversationRow(date: 'ー', jsst: 'ー', hit: 'ー', prep: 'ー'),
+            : const _ConversationRow(
+                date: 'ー',
+                jsst: 'ー',
+                hit: 'ー',
+                prep: 'ー',
+              ),
     ];
   }
 
   List<_CategoryRow> _pronunciationRows(String lang) => _padRows([
     for (final check in _pronunciationChecks)
       _CategoryRow(
-        date: formatHistoryTimestamp(check.createdAt, languageCode: lang),
+        date: _certificateTimestamp(check.createdAt, lang),
         result: _pronunciationStars(check) ?? 'ー',
       ),
   ]);
@@ -124,7 +132,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   List<_CategoryRow> _vocabularyRows(String lang) => _padRows([
     for (final check in _vocabularyChecks)
       _CategoryRow(
-        date: formatHistoryTimestamp(check.createdAt, languageCode: lang),
+        date: _certificateTimestamp(check.createdAt, lang),
         result: check.evaluation?.starDisplay ?? 'ー',
       ),
   ]);
@@ -153,43 +161,56 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
           : SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _HeaderRow(
-                      issuedAt: _issuedAt,
-                      summary: _summary,
-                      lang: lang,
-                    ),
-                    const SizedBox(height: 12),
-                    // JSST・的中度・PREPは同じレイヤーⅣ結果から同時に得られる
-                    // ため、3列の表1つにまとめて表示する（語彙・発音は従来どおり
-                    // 1列ずつ）。5ブロックを均等に縦積みすると1画面に収まらず
-                    // 見切れていたため、会話表は行数分の高さだけ使い、
-                    // 残りを語彙・発音に譲る。
-                    _ConversationBlock(
-                      color: kLayerColors[3],
-                      title: '会話'.tr(lang),
-                      rows: _conversationRows(lang),
-                    ),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: _ResultsPanel(
-                        sections: [
-                          (
-                            color: kLayerColors[0],
-                            title: '語彙'.tr(lang),
-                            rows: _vocabularyRows(lang),
-                          ),
-                          (
-                            color: kLayerColors[4],
-                            title: '発音'.tr(lang),
-                            rows: _pronunciationRows(lang),
-                          ),
-                        ],
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _HeaderRow(issuedAt: _issuedAt, lang: lang),
+                            const SizedBox(height: 12),
+                            _TranscriptGradeTable(
+                              summary: _summary,
+                              lang: lang,
+                            ),
+                            const SizedBox(height: 14),
+                            _ConversationBlock(
+                              color: kLayerColors[3],
+                              title: '会話'.tr(lang),
+                              rows: _conversationRows(lang),
+                            ),
+                            const SizedBox(height: 10),
+                            _CategoryBlock(
+                              section: (
+                                color: kLayerColors[0],
+                                title: '語彙'.tr(lang),
+                                rows: _vocabularyRows(lang),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _CategoryBlock(
+                              section: (
+                                color: kLayerColors[4],
+                                title: '発音'.tr(lang),
+                                rows: _pronunciationRows(lang),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            _ExpansionBlock(
+                              issuedAt: _issuedAt,
+                              summary: _summary,
+                              lang: lang,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -197,41 +218,79 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
   }
 }
 
-/// アプリアイコン（左）＋発行日・発行時間・総合判定（右、縦並び）の見出し行。
-/// 3行のうち総合判定だけを太字・大きめにして、メリハリをつける。
-class _HeaderRow extends StatelessWidget {
-  const _HeaderRow({
-    required this.issuedAt,
-    required this.summary,
-    required this.lang,
+String _two(int n) => n.toString().padLeft(2, '0');
+
+/// 証明証の日付（ゼロ埋め。ja/en は月/日、vi は日/月）。
+String _certificateDate(DateTime dt, String lang) {
+  final y = dt.year;
+  final m = _two(dt.month);
+  final d = _two(dt.day);
+  return switch (lang) {
+    'en' => '$m/$d/$y',
+    'vi' => '$d/$m/$y',
+    _ => '$y/$m/$d',
+  };
+}
+
+/// 証明証の履歴行日時（ゼロ埋め。年なし）。
+String _certificateTimestamp(DateTime dt, String lang) {
+  final m = _two(dt.month);
+  final d = _two(dt.day);
+  final time = '${_two(dt.hour)}:${_two(dt.minute)}';
+  final date = switch (lang) {
+    'vi' => '$d/$m',
+    _ => '$m/$d',
+  };
+  return '$date $time';
+}
+
+/// 1行に収める（英語・ベトナム語の長い見出しが折り返さないように縮小）。
+class _NoWrapText extends StatelessWidget {
+  const _NoWrapText(
+    this.text, {
+    required this.style,
+    this.align = TextAlign.left,
   });
 
-  final DateTime issuedAt;
-  final DashboardSummary summary;
-  final String lang;
+  final String text;
+  final TextStyle style;
+  final TextAlign align;
 
-  static String _two(int n) => n.toString().padLeft(2, '0');
+  @override
+  Widget build(BuildContext context) {
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: switch (align) {
+        TextAlign.right => Alignment.centerRight,
+        TextAlign.center => Alignment.center,
+        _ => Alignment.centerLeft,
+      },
+      child: Text(
+        text,
+        maxLines: 1,
+        softWrap: false,
+        textAlign: align,
+        style: style,
+      ),
+    );
+  }
+}
+
+/// アプリアイコン（左）＋発行日・発行時間（右）。判定3行は[_TranscriptGradeTable]。
+class _HeaderRow extends StatelessWidget {
+  const _HeaderRow({required this.issuedAt, required this.lang});
+
+  final DateTime issuedAt;
+  final String lang;
 
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.current;
-    final dateText = formatLocalizedDate(issuedAt, lang);
-    final timeText = '${_two(issuedAt.hour)}:${_two(issuedAt.minute)}';
     final metaStyle = TextStyle(
       fontSize: 13,
       color: palette.textOnSubpageSecondary,
     );
     final metaLabelStyle = metaStyle.copyWith(fontWeight: FontWeight.w600);
-    final gradeLabelStyle = TextStyle(
-      fontSize: 13,
-      fontWeight: FontWeight.w600,
-      color: palette.textOnSubpageSecondary,
-    );
-    final gradeValueStyle = TextStyle(
-      fontSize: 22,
-      fontWeight: FontWeight.bold,
-      color: palette.accentColor,
-    );
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -250,51 +309,119 @@ class _HeaderRow extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(text: '${'発行日'.tr(lang)}：', style: metaLabelStyle),
-                    TextSpan(text: dateText, style: metaStyle),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 1),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: '${'発行時間'.tr(lang)}：',
-                      style: metaLabelStyle,
-                    ),
-                    TextSpan(text: timeText, style: metaStyle),
-                  ],
-                ),
+              _NoWrapText(
+                '${'発行日'.tr(lang)}：${_certificateDate(issuedAt, lang)}',
+                style: metaLabelStyle,
               ),
               const SizedBox(height: 2),
-              // ベトナム語「Đánh giá tổng hợp」等、言語によってラベルが長く
-              // 折り返すと2行目に「(3.8)」だけ浮いて見た目が崩れるため、
-              // FittedBoxで1行に収まる大きさへ自動縮小する
-              // （[_ResultTitle]と同じ手法）。
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${'総合判定'.tr(lang)}：',
-                        style: gradeLabelStyle,
-                      ),
-                      TextSpan(
-                        text: summary.overallGradeDisplay,
-                        style: gradeValueStyle,
-                      ),
-                    ],
-                  ),
-                ),
+              _NoWrapText(
+                '${'発行時間'.tr(lang)}：${_two(issuedAt.hour)}:${_two(issuedAt.minute)}',
+                style: metaLabelStyle,
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 総合判定／テスト総合／拡充度総合。A〜Eの文字を同じ横位置に揃える。
+class _TranscriptGradeTable extends StatelessWidget {
+  const _TranscriptGradeTable({required this.summary, required this.lang});
+
+  final DashboardSummary summary;
+  final String lang;
+
+  static const overallLetterKey = Key('transcript-grade-letter-overall');
+  static const testLetterKey = Key('transcript-grade-letter-test');
+  static const expansionLetterKey = Key('transcript-grade-letter-expansion');
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppColors.current;
+    final labelStyle = TextStyle(
+      fontSize: 13,
+      color: palette.textOnSubpageSecondary,
+    );
+    final letterStyle = TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: palette.textOnSubpagePrimary,
+      height: 1.1,
+    );
+    final overallLetterStyle = letterStyle.copyWith(
+      fontWeight: FontWeight.w800,
+      color: palette.accentColor,
+    );
+    final detailStyle = TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: palette.textOnSubpagePrimary,
+      height: 1.1,
+    );
+
+    return Table(
+      columnWidths: const {
+        0: FlexColumnWidth(),
+        1: IntrinsicColumnWidth(),
+        2: IntrinsicColumnWidth(),
+      },
+      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+      children: [
+        _row(
+          label: '総合判定'.tr(lang),
+          letter: summary.overallGrade.letter,
+          letterKey: overallLetterKey,
+          letterStyle: overallLetterStyle,
+          detail: '',
+          labelStyle: labelStyle,
+          detailStyle: detailStyle,
+        ),
+        _row(
+          label: 'テスト総合'.tr(lang),
+          letter: summary.testGrade.letter,
+          letterKey: testLetterKey,
+          letterStyle: letterStyle,
+          detail: summary.testGradeDetail,
+          labelStyle: labelStyle,
+          detailStyle: detailStyle,
+        ),
+        _row(
+          label: '拡充度総合'.tr(lang),
+          letter: summary.expansionGrade.letter,
+          letterKey: expansionLetterKey,
+          letterStyle: letterStyle,
+          detail: summary.expansionGradeDetail,
+          labelStyle: labelStyle,
+          detailStyle: detailStyle,
+        ),
+      ],
+    );
+  }
+
+  static TableRow _row({
+    required String label,
+    required String letter,
+    required Key letterKey,
+    required TextStyle letterStyle,
+    required String detail,
+    required TextStyle labelStyle,
+    required TextStyle detailStyle,
+  }) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: _NoWrapText(label, style: labelStyle),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 3, 6, 3),
+          child: Text(letter, key: letterKey, style: letterStyle),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Text(detail, style: detailStyle),
         ),
       ],
     );
@@ -314,23 +441,23 @@ typedef _CategorySectionData = ({
   List<_CategoryRow> rows,
 });
 
-/// 語彙 / 発音を枠線なしで1画面にまとめた結果パネル
-/// （JSST・的中度・PREPは[_ConversationBlock]が別途まとめて表示する）。
-class _ResultsPanel extends StatelessWidget {
-  const _ResultsPanel({required this.sections});
+class _SectionMarker extends StatelessWidget {
+  const _SectionMarker({required this.color, this.square = false});
 
-  final List<_CategorySectionData> sections;
+  final Color color;
+  final bool square;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var i = 0; i < sections.length; i++) ...[
-          if (i > 0) const SizedBox(height: 8),
-          Expanded(child: _CategoryBlock(section: sections[i])),
-        ],
-      ],
+    return Container(
+      width: 8,
+      height: 8,
+      decoration: square
+          ? BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(1.5),
+            )
+          : BoxDecoration(color: color, shape: BoxShape.circle),
     );
   }
 }
@@ -348,50 +475,42 @@ class _CategoryBlock extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: section.color,
-                shape: BoxShape.circle,
-              ),
-            ),
+            _SectionMarker(color: section.color),
             const SizedBox(width: 6),
-            Text(
-              section.title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: palette.textOnSubpagePrimary,
+            Expanded(
+              child: _NoWrapText(
+                section.title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: palette.textOnSubpagePrimary,
+                ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 2),
         for (final row in section.rows)
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Row(
-                children: [
-                  Text(
-                    row.date,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: palette.textOnSubpageSecondary,
-                    ),
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Row(
+              children: [
+                Text(
+                  row.date,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: palette.textOnSubpageSecondary,
                   ),
-                  const Spacer(),
-                  Text(
-                    row.result,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: palette.textOnSubpagePrimary,
-                    ),
+                ),
+                const Spacer(),
+                Text(
+                  row.result,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: palette.textOnSubpagePrimary,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
       ],
@@ -413,8 +532,7 @@ class _ConversationRow {
   final String prep;
 }
 
-/// JSST・的中度・PREPをまとめた3列の表（[_CategoryBlock]と違い、他の
-/// ブロックと縦に均等分割せず、行数（見出し+最大3件）ぶんの高さだけ使う）。
+/// JSST・的中度・PREPをまとめた3列の表。会話マーカーはレイヤーⅣのピンク。
 class _ConversationBlock extends StatelessWidget {
   const _ConversationBlock({
     required this.color,
@@ -429,10 +547,74 @@ class _ConversationBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = appSettings.language;
+    return _ThreeValueTable(
+      color: color,
+      title: title,
+      headers: ['JSST'.tr(lang), '的中度'.tr(lang), 'PREP'.tr(lang)],
+      rows: [
+        for (final row in rows)
+          (date: row.date, values: [row.jsst, row.hit, row.prep]),
+      ],
+    );
+  }
+}
+
+/// 発行時点の25マス拡充度（日常／ビジネス／シチュエーション）。マーカーは四角。
+class _ExpansionBlock extends StatelessWidget {
+  const _ExpansionBlock({
+    required this.issuedAt,
+    required this.summary,
+    required this.lang,
+  });
+
+  final DateTime issuedAt;
+  final DashboardSummary summary;
+  final String lang;
+
+  @override
+  Widget build(BuildContext context) {
+    final expansion = summary.expansion;
+    return _ThreeValueTable(
+      color: kLayerColors[1],
+      title: '25マス'.tr(lang),
+      squareMarker: true,
+      headers: [
+        '日常'.tr(lang),
+        'ビジネス'.tr(lang),
+        'シチュエーション'.tr(lang),
+      ],
+      rows: [
+        (
+          date: _certificateTimestamp(issuedAt, lang),
+          values: [
+            expansion?.dailyDisplay ?? '0.0%',
+            expansion?.businessDisplay ?? '0.0%',
+            expansion?.situationalDisplay ?? '0.0%',
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _ThreeValueTable extends StatelessWidget {
+  const _ThreeValueTable({
+    required this.color,
+    required this.title,
+    required this.headers,
+    required this.rows,
+    this.squareMarker = false,
+  });
+
+  final Color color;
+  final String title;
+  final List<String> headers;
+  final List<({String date, List<String> values})> rows;
+  final bool squareMarker;
+
+  @override
+  Widget build(BuildContext context) {
     final palette = AppColors.current;
-    // 的中度・PREPの英語・ベトナム語訳（"Relevance"・"Độ trúng đích"等）は
-    // JSSTより長く、見出し行の等幅3列だと折り返してしまうため、値行より
-    // 小さいフォントサイズにする（列自体もJSST/PREPより広め、[columnWidths]参照）。
     final headerStyle = TextStyle(
       fontSize: 10,
       fontWeight: FontWeight.w600,
@@ -454,53 +636,47 @@ class _ConversationBlock extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
+            _SectionMarker(color: color, square: squareMarker),
             const SizedBox(width: 6),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: palette.textOnSubpagePrimary,
+            Expanded(
+              child: _NoWrapText(
+                title,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: palette.textOnSubpagePrimary,
+                ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 4),
         Table(
-          // 的中度（列2）は英語・ベトナム語訳がJSST/PREPより長いため、
-          // 日付・JSST・PREPの幅を詰めてその分広めに割り当てる。
           columnWidths: const {
             0: FlexColumnWidth(1.15),
-            1: FlexColumnWidth(0.65),
-            2: FlexColumnWidth(1.3),
-            3: FlexColumnWidth(0.65),
+            1: FlexColumnWidth(0.85),
+            2: FlexColumnWidth(1.05),
+            3: FlexColumnWidth(1.15),
           },
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
           children: [
             TableRow(
               children: [
                 const SizedBox.shrink(),
-                Text(
-                  'JSST'.tr(lang),
-                  textAlign: TextAlign.right,
+                _NoWrapText(
+                  headers[0],
                   style: headerStyle,
+                  align: TextAlign.center,
                 ),
-                Text(
-                  '的中度'.tr(lang),
-                  // 的中度列だけJSST/PREPより幅が広いため、右詰めだと数値が
-                  // PREP側に寄って見える。見出し・数値とも中央寄せにして、
-                  // JSSTとPREPのちょうど中間に来るようにする。
-                  textAlign: TextAlign.center,
+                _NoWrapText(
+                  headers[1],
                   style: headerStyle,
+                  align: TextAlign.center,
                 ),
-                Text(
-                  'PREP'.tr(lang),
-                  textAlign: TextAlign.right,
+                _NoWrapText(
+                  headers[2],
                   style: headerStyle,
+                  align: TextAlign.center,
                 ),
               ],
             ),
@@ -514,15 +690,7 @@ class _ConversationBlock extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      row.jsst,
-                      textAlign: TextAlign.right,
-                      style: valueStyle,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      row.hit,
+                      row.values[0],
                       textAlign: TextAlign.center,
                       style: valueStyle,
                     ),
@@ -530,8 +698,16 @@ class _ConversationBlock extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      row.prep,
-                      textAlign: TextAlign.right,
+                      row.values[1],
+                      textAlign: TextAlign.center,
+                      style: valueStyle,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      row.values[2],
+                      textAlign: TextAlign.center,
                       style: valueStyle,
                     ),
                   ),

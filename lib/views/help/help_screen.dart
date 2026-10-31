@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../data/layer_help_tips.dart';
 import '../../localization/app_strings.dart';
@@ -11,6 +12,25 @@ import '../../widgets/osm_subpage_scaffold.dart';
 /// osmGradus ヘルプ。最新機能をレイヤー色付きカードと箇条書きで整理する。
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
+
+  /// Google スライド操作マニュアル（言語別・閲覧用 preview）。
+  /// 共有は「リンクを知っている全員」。編集 URL ではなく preview を開く。
+  /// 英語・ベトナム語は同じファイルを上書き更新する前提（ID は固定）。
+  static const userManualPresentationIdJa =
+      '1_Xs9VaUB0ZDCFCrXxmAo6RBL2J1fdJUusNsjLIW4m_w';
+  static const userManualPresentationIdEn =
+      '1arF2q9iGxKhmA9gfeyNiHpr2oXtOKqSXm6dbDubmImM';
+  static const userManualPresentationIdVi =
+      '1sIUXEkSvGabriacxxfKvko1l6JEXxdNQbucgydHI4uM';
+
+  static String userManualUrlFor(String language) {
+    final id = switch (language) {
+      'en' => userManualPresentationIdEn,
+      'ja' => userManualPresentationIdJa,
+      _ => userManualPresentationIdVi,
+    };
+    return 'https://docs.google.com/presentation/d/$id/preview';
+  }
 
   static Future<void> push(BuildContext context) {
     return Navigator.of(
@@ -35,6 +55,8 @@ class _HelpScreenState extends State<HelpScreen> {
         'help.gradus.dashboard.tip2',
         'help.gradus.dashboard.tip3',
         'help.gradus.dashboard.tip4',
+        'help.gradus.dashboard.tip5',
+        'help.gradus.dashboard.tip6',
       ],
     ),
     _HelpSectionSpec(
@@ -56,6 +78,7 @@ class _HelpScreenState extends State<HelpScreen> {
         'help.gradus.transcript.tip1',
         'help.gradus.transcript.tip2',
         'help.gradus.transcript.tip3',
+        'help.gradus.transcript.tip4',
       ],
     ),
     _HelpSectionSpec(
@@ -67,6 +90,7 @@ class _HelpScreenState extends State<HelpScreen> {
         'help.gradus.backup.tip2',
         'help.gradus.backup.tip3',
         'help.gradus.backup.tip4',
+        'help.gradus.backup.tip5',
       ],
     ),
     _HelpSectionSpec(
@@ -78,6 +102,8 @@ class _HelpScreenState extends State<HelpScreen> {
         'help.gradus.settings.tip2',
         'help.gradus.settings.tip3',
         'help.gradus.settings.tip4',
+        'help.gradus.settings.tip5',
+        'help.gradus.settings.tip6',
       ],
     ),
     _HelpSectionSpec(
@@ -136,6 +162,15 @@ class _HelpScreenState extends State<HelpScreen> {
             versionLabel: _versionLabel,
           ),
           const SizedBox(height: 20),
+          _HelpManualLink(
+            lang: lang,
+            accentColor: palette.scene,
+            onTap: () => launchUrl(
+              Uri.parse(HelpScreen.userManualUrlFor(lang)),
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+          const SizedBox(height: 20),
           _HelpLeadCard(
             title: 'help.gradus.overview.title'.tr(lang),
             summary: 'help.gradus.overview.summary'.tr(lang),
@@ -144,6 +179,19 @@ class _HelpScreenState extends State<HelpScreen> {
               'help.gradus.overview.tip2'.tr(lang),
               'help.gradus.overview.tip3'.tr(lang),
               'help.gradus.overview.tip4'.tr(lang),
+            ],
+            accentColor: palette.scene,
+          ),
+          const SizedBox(height: 20),
+          _HelpLeadCard(
+            title: 'help.gradus.questionPrompts.title'.tr(lang),
+            summary: 'help.gradus.questionPrompts.summary'.tr(lang),
+            tips: [
+              'help.gradus.questionPrompts.tip1'.tr(lang),
+              'help.gradus.questionPrompts.tip2'.tr(lang),
+              'help.gradus.questionPrompts.tip3'.tr(lang),
+              'help.gradus.questionPrompts.tip4'.tr(lang),
+              'help.gradus.questionPrompts.tip5'.tr(lang),
             ],
             accentColor: palette.scene,
           ),
@@ -277,6 +325,82 @@ class _HelpHero extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _HelpManualLink extends StatelessWidget {
+  const _HelpManualLink({
+    required this.lang,
+    required this.accentColor,
+    required this.onTap,
+  });
+
+  final String lang;
+  final Color accentColor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppColors.current;
+    final onAccent = palette.onFill(accentColor);
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const Key('help_user_manual'),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: _HelpSectionCardShell(
+          accentColor: accentColor,
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.menu_book_outlined,
+                  color: onAccent,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'help.gradus.manual.title'.tr(lang),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: palette.textOnCardPrimary,
+                      ),
+                    ),
+                    Text(
+                      'help.gradus.manual.summary'.tr(lang),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: accentColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.open_in_new_rounded,
+                size: 18,
+                color: palette.textOnCardSecondary,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

@@ -51,6 +51,7 @@ void main() {
     appSettings.buttonHintPersistUntilNextAction = false;
     appSettings.buttonHintDisplaySeconds =
         AppPreferences.defaultButtonHintDisplaySeconds;
+    appSettings.showStartupScreen = true;
     appSettings.showUsageScreen = true;
   });
 
@@ -61,10 +62,7 @@ void main() {
     expect(find.text(_t('ボタンヒント_次のアクションまで表示')), findsOneWidget);
     final switchWidget = tester.widget<Switch>(
       find.descendant(
-        of: find.widgetWithText(
-          SettingsSwitchRow,
-          _t('ボタンヒント_次のアクションまで表示'),
-        ),
+        of: find.widgetWithText(SettingsSwitchRow, _t('ボタンヒント_次のアクションまで表示')),
         matching: find.byType(Switch),
       ),
     );
@@ -134,6 +132,52 @@ void main() {
       ),
     );
     expect(switchWidget.value, isTrue);
+
+    await tester.tap(find.text(_t('使い方画面')));
+    await tester.pumpAndSettle();
+
+    expect(appSettings.showUsageScreen, isFalse);
+  });
+
+  test('スタートアップをOFFにすると使い方も自動でOFFになる（連動Step1）', () {
+    appSettings.showStartupScreen = true;
+    appSettings.showUsageScreen = true;
+
+    appSettings.showStartupScreen = false;
+
+    expect(appSettings.showUsageScreen, isFalse);
+  });
+
+  test('スタートアップを再びONにしても使い方は自動で戻らない（連動Step1）', () {
+    appSettings.showStartupScreen = true;
+    appSettings.showUsageScreen = true;
+    appSettings.showStartupScreen = false;
+    expect(appSettings.showUsageScreen, isFalse);
+
+    appSettings.showStartupScreen = true;
+
+    expect(appSettings.showUsageScreen, isFalse);
+  });
+
+  test('スタートアップONのまま使い方だけOFFにしてもスタートアップはONのまま（連動Step1）', () {
+    appSettings.showStartupScreen = true;
+    appSettings.showUsageScreen = true;
+
+    appSettings.showUsageScreen = false;
+
+    expect(appSettings.showStartupScreen, isTrue);
+  });
+
+  testWidgets('スタートアップOFFのとき使い方スイッチはenabled:falseでタップしても変わらない（連動Step1）', (
+    tester,
+  ) async {
+    appSettings.showStartupScreen = false;
+    await _openSettings(tester);
+
+    final row = tester.widget<SettingsSwitchRow>(
+      find.widgetWithText(SettingsSwitchRow, _t('使い方画面')),
+    );
+    expect(row.enabled, isFalse);
 
     await tester.tap(find.text(_t('使い方画面')));
     await tester.pumpAndSettle();

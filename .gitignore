@@ -47,3 +47,7 @@ app.*.map.json
 # Release signing (never commit secrets)
 android/key.properties
 android/app/*.jks
+
+# Generated user-manual binaries (rebuilt from Google Slides export)
+docs/*.pptx
+docs/*.pdf

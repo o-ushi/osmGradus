@@ -1,20 +1,17 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
+import '../../models/question_prompt_draw_selection.dart';
 import '../../models/question_prompt_filter.dart';
 import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
 import '../../services/question_prompt_tab_registry.dart';
 import '../../theme/app_colors.dart';
 
-/// 問題文一覧のフィルタシート（入手元／カテゴリ／タブ／実施状況の4軸、
-/// `question-prompt-tabs.md` Step 3）。タブ軸は[TopicCategory.general]選択時
-/// のみ表示する（シチュエーションは[QuestionPrompt.tags]を持たないため）。
-/// [CategorySelectSheet]と違い、複数軸をまとめて1枚のシートで選ぶため、
-/// タップ即pop（単一選択のみ）ではなく「完了」で確定する。
+/// 問題文一覧のフィルタシート（入手元／カテゴリ／実施状況の3軸）。
+/// カテゴリ軸は[QuestionPromptDrawSelectSheet]と同じ選択肢（組み込みタブ・
+/// ランダム・シチュエーション）をチップで並べる。
 class QuestionPromptFilterSheet extends StatefulWidget {
   const QuestionPromptFilterSheet({
     super.key,
@@ -57,18 +54,25 @@ class QuestionPromptFilterSheet extends StatefulWidget {
 
 class _QuestionPromptFilterSheetState extends State<QuestionPromptFilterSheet> {
   late QuestionPromptFilter _draft = widget.initial;
-  List<String> _tabKeys = const [];
 
-  @override
-  void initState() {
-    super.initState();
-    unawaited(_loadTabKeys());
+  bool _matchesDrawSelection(QuestionPromptDrawSelection selection) {
+    if (_draft.category != selection.category) return false;
+    return switch (selection.kind) {
+      QuestionPromptDrawKind.tagged => _draft.tag == selection.tag,
+      QuestionPromptDrawKind.generalRandom =>
+        _draft.category == TopicCategory.general && _draft.tag == null,
+      QuestionPromptDrawKind.situational => true,
+    };
   }
 
-  Future<void> _loadTabKeys() async {
-    final tabKeys = await QuestionPromptTabRegistry().allTabKeys();
-    if (!mounted) return;
-    setState(() => _tabKeys = tabKeys);
+  void _selectDrawSelection(QuestionPromptDrawSelection selection) {
+    setState(
+      () => _draft = _draft.copyWith(
+        category: selection.category,
+        tag: selection.filterTag,
+        clearTag: selection.filterTag == null,
+      ),
+    );
   }
 
   @override
@@ -146,47 +150,37 @@ class _QuestionPromptFilterSheetState extends State<QuestionPromptFilterSheet> {
                               ),
                             ),
                           ),
-                          for (final category in const [
-                            TopicCategory.general,
-                            TopicCategory.situational,
-                          ])
+                          for (final tab
+                              in QuestionPromptTabRegistry.builtInTabKeys)
                             _FilterChip(
-                              label: category.labelKey().tr(lang),
-                              selected: _draft.category == category,
-                              onTap: () => setState(() {
-                                _draft = _draft.copyWith(
-                                  category: category,
-                                  // タブはgeneral選択時のみ意味を持つため、
-                                  // シチュエーションへ切り替えたら外す。
-                                  clearTag: category != TopicCategory.general,
-                                );
-                              }),
+                              label: tab.tr(lang),
+                              selected: _matchesDrawSelection(
+                                QuestionPromptDrawSelection.tag(tab),
+                              ),
+                              onTap: () => _selectDrawSelection(
+                                QuestionPromptDrawSelection.tag(tab),
+                              ),
                             ),
+                          _FilterChip(
+                            label: 'ランダム'.tr(lang),
+                            selected: _matchesDrawSelection(
+                              const QuestionPromptDrawSelection.generalRandom(),
+                            ),
+                            onTap: () => _selectDrawSelection(
+                              const QuestionPromptDrawSelection.generalRandom(),
+                            ),
+                          ),
+                          _FilterChip(
+                            label: 'シチュエーション'.tr(lang),
+                            selected: _matchesDrawSelection(
+                              const QuestionPromptDrawSelection.situational(),
+                            ),
+                            onTap: () => _selectDrawSelection(
+                              const QuestionPromptDrawSelection.situational(),
+                            ),
+                          ),
                         ],
                       ),
-                      if (_draft.category == TopicCategory.general) ...[
-                        const SizedBox(height: 16),
-                        _FilterSection(
-                          title: 'タブ'.tr(lang),
-                          children: [
-                            _FilterChip(
-                              label: 'すべて'.tr(lang),
-                              selected: _draft.tag == null,
-                              onTap: () => setState(
-                                () => _draft = _draft.copyWith(clearTag: true),
-                              ),
-                            ),
-                            for (final tag in _tabKeys)
-                              _FilterChip(
-                                label: tag.tr(lang),
-                                selected: _draft.tag == tag,
-                                onTap: () => setState(
-                                  () => _draft = _draft.copyWith(tag: tag),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
                       const SizedBox(height: 16),
                       _FilterSection(
                         title: widget.doneAxisLabel,

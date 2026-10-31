@@ -109,6 +109,9 @@ void main() {
     // 未送信の案内だけが表示される。
     expect(find.text('PREP評価・的中度'.tr(lang)), findsOneWidget);
     expect(find.text('PREP評価・的中度は未送信です。'.tr(lang)), findsOneWidget);
+    expect(find.text('発話内容'.tr(lang)), findsOneWidget);
+    expect(find.text('模範回答'.tr(lang)), findsOneWidget);
+    expect(find.text('模範回答は未送信です。'.tr(lang)), findsOneWidget);
   });
 
   testWidgets('PREP・的中度のAI評価が付いた結果は、一覧に★・詳細にスコアとアドバイスが表示される', (tester) async {
@@ -122,6 +125,9 @@ void main() {
       hitStars: 2,
       prepAdvice: '結論から話せていて良い構成です。',
       hitAdvice: '質問の意図をもう少し汲み取りましょう。',
+      modelAnswer: 'こんにちは。今日は、天気について話します。',
+      modelAnswerRomaji: 'Konnichiwa. Kyou wa, tenki ni tsuite hanashimasu.',
+      modelAnswerVi: 'Xin chào. Hôm nay tôi sẽ nói về thời tiết.',
     );
     await ScoringResultStorage().save(withEvaluation);
 
@@ -138,6 +144,50 @@ void main() {
 
     expect(find.text('結論から話せていて良い構成です。'), findsOneWidget);
     expect(find.text('質問の意図をもう少し汲み取りましょう。'), findsOneWidget);
+    expect(find.text('こんにちは。今日は、天気について話します。'), findsOneWidget);
+    expect(find.text('ローマ字'.tr(lang)), findsOneWidget);
+    expect(
+      find.text('Konnichiwa. Kyou wa, tenki ni tsuite hanashimasu.'),
+      findsOneWidget,
+    );
+    expect(find.text('ベトナム語'.tr(lang)), findsOneWidget);
+    expect(
+      find.text('Xin chào. Hôm nay tôi sẽ nói về thời tiết.'),
+      findsOneWidget,
+    );
+    final japaneseY = tester.getTopLeft(find.text('こんにちは。今日は、天気について話します。')).dy;
+    final romajiY = tester
+        .getTopLeft(
+          find.text('Konnichiwa. Kyou wa, tenki ni tsuite hanashimasu.'),
+        )
+        .dy;
+    final viY = tester
+        .getTopLeft(find.text('Xin chào. Hôm nay tôi sẽ nói về thời tiết.'))
+        .dy;
+    expect(romajiY, greaterThan(japaneseY));
+    expect(viY, greaterThan(romajiY));
+    expect(find.text('模範回答'.tr(lang)), findsOneWidget);
     expect(find.text('PREP評価・的中度は未送信です。'.tr(lang)), findsNothing);
+    expect(find.text('模範回答は未送信です。'.tr(lang)), findsNothing);
+  });
+
+  testWidgets('AI評価済みでも模範回答が無い古い結果は、その旨を発話内容の下に出す', (tester) async {
+    tester.view.physicalSize = const Size(1080, 8000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await ScoringResultStorage().save(
+      _buildResult('r3').withAiEvaluation(prepStars: 3, hitStars: 3),
+    );
+
+    await tester.pumpWidget(const MaterialApp(home: ScoringHistoryScreen()));
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.byType(Dismissible));
+    await tester.pumpAndSettle();
+
+    final lang = appSettings.language;
+    expect(find.text('この結果には模範回答がありません。'.tr(lang)), findsOneWidget);
   });
 }

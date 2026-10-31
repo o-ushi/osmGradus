@@ -8,11 +8,21 @@ class _VocabResultDialog extends StatelessWidget {
     required this.evaluation,
     required this.session,
     required this.lang,
+    this.comprehensionQuiz,
   });
 
   final VocabularyEvaluation evaluation;
   final VocabTestSession? session;
   final String lang;
+  final SavedComprehensionQuizResult? comprehensionQuiz;
+
+  int get _quizOffset => comprehensionQuiz != null ? 1 : 0;
+
+  VocabularyQuestionEvaluation? _vocabEvalAt(int wordIndex) {
+    final evalIndex = wordIndex + _quizOffset;
+    if (evalIndex >= evaluation.questionEvaluations.length) return null;
+    return evaluation.questionEvaluations[evalIndex];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +45,28 @@ class _VocabResultDialog extends StatelessWidget {
               Text(
                 'レイヤーⅠ_語彙_正解数'.trFmt(lang, [
                   '${evaluation.correctCount}',
-                  '${questions.length}',
+                  '${questions.length + (comprehensionQuiz != null ? 1 : 0)}',
                 ]),
                 style: TextStyle(
                   fontSize: 13,
                   color: palette.textOnCardSecondary,
                 ),
               ),
+              if (comprehensionQuiz != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '長文読解_語彙_内訳'.trFmt(lang, [
+                    '${evaluation.correctCount - (comprehensionQuiz!.isCorrect ? 1 : 0)}',
+                    '${questions.length}',
+                    comprehensionQuiz!.isCorrect ? '1' : '0',
+                    '1',
+                  ]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: palette.textOnCardSecondary,
+                  ),
+                ),
+              ],
               if (evaluation.summary != null) ...[
                 const SizedBox(height: 8),
                 Text(
@@ -53,6 +78,35 @@ class _VocabResultDialog extends StatelessWidget {
                 ),
               ],
               const SizedBox(height: 12),
+              if (comprehensionQuiz != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        comprehensionQuiz!.isCorrect
+                            ? Icons.check_circle_rounded
+                            : Icons.cancel_rounded,
+                        size: 18,
+                        color: comprehensionQuiz!.isCorrect
+                            ? Colors.green
+                            : palette.textOnCardSecondary,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${'長文読解_1秒チェック_見出し'.tr(lang)}: ${comprehensionQuiz!.question}',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: palette.textOnCardPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               for (var i = 0; i < questions.length; i++)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
@@ -60,14 +114,11 @@ class _VocabResultDialog extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(
-                        i < evaluation.questionEvaluations.length &&
-                                evaluation.questionEvaluations[i].correct
+                        _vocabEvalAt(i)?.correct == true
                             ? Icons.check_circle_rounded
                             : Icons.cancel_rounded,
                         size: 18,
-                        color:
-                            i < evaluation.questionEvaluations.length &&
-                                evaluation.questionEvaluations[i].correct
+                        color: _vocabEvalAt(i)?.correct == true
                             ? Colors.green
                             : palette.textOnCardSecondary,
                       ),
@@ -84,11 +135,9 @@ class _VocabResultDialog extends StatelessWidget {
                                 color: palette.textOnCardPrimary,
                               ),
                             ),
-                            if (i < evaluation.questionEvaluations.length &&
-                                evaluation.questionEvaluations[i].feedback !=
-                                    null)
+                            if (_vocabEvalAt(i)?.feedback != null)
                               Text(
-                                evaluation.questionEvaluations[i].feedback!,
+                                _vocabEvalAt(i)!.feedback!,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: palette.textOnCardSecondary,

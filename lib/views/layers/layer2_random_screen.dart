@@ -7,14 +7,13 @@ import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../models/drawn_topic.dart';
 import '../../models/question_prompt.dart';
-import '../../models/topic_category.dart';
+import '../../models/question_prompt_draw_selection.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
 import '../../services/layer2_sample_answer_chrome_ai.dart';
 import '../../services/question_prompt_service.dart';
-import '../../services/question_prompt_tab_registry.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
-import '../../widgets/category_select_field.dart';
+import '../../widgets/question_prompt_draw_select_field.dart';
 import '../../widgets/dice_action_row.dart';
 import '../../widgets/dice_topic_card.dart';
 import '../../widgets/genki_transport_row.dart';
@@ -30,11 +29,8 @@ import '../topics/topic_add_flow.dart';
 /// 軽量な画面（[PracticeLayerScreenState]は使わない）。
 ///
 /// [QuestionPrompt.category]は[TopicCategory.random]を取らないため、カテゴリは
-/// その他（[TopicCategory.general]）/シチュエーションの2つに絞る
-/// （`question-prompt-tabs.md` Step 3、旧日常/ビジネスの3分類UIは廃止）。
-/// 「その他」選択時は直下にタブ（[QuestionPromptTabRegistry]）の横スクロール
-/// チップを出し、選択タブに含まれるgeneral問題だけを抽選対象にする
-/// （未選択＝すべてのgeneralから抽選）。
+/// 組み込みタブ・ランダム・シチュエーションのフラットな1枚シートで選ぶ
+/// （[QuestionPromptDrawSelectField]）。
 class Layer2RandomScreen extends StatefulWidget {
   const Layer2RandomScreen({super.key});
 
@@ -48,28 +44,17 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen>
         AiImportKeepAliveMixin<Layer2RandomScreen>,
         ChromeAiSubmitMixin<Layer2RandomScreen>,
         Layer2SampleAnswerMixin<Layer2RandomScreen> {
-  static const _availableCategories = [
-    TopicCategory.general,
-    TopicCategory.situational,
-  ];
-
   final _service = QuestionPromptService();
-  final _tabRegistry = QuestionPromptTabRegistry();
   final _idRandom = Random();
 
-  TopicCategory _selectedCategory = TopicCategory.general;
-  List<String> _tabKeys = const [];
-
-  /// 選択中のタブ（null＝「すべて」）。[_selectedCategory]が
-  /// [TopicCategory.general]のときだけ抽選に反映する。
-  String? _selectedTag;
+  QuestionPromptDrawSelection _drawSelection =
+      const QuestionPromptDrawSelection.generalRandom();
   QuestionPrompt? _drawnPrompt;
   bool _drawing = false;
 
   @override
   void initState() {
     super.initState();
-    unawaited(_loadTabKeys());
     // [MainShell]に一度生成されたら破棄されずキャッシュされ続けるため、
     // 設定画面で言語を変えて戻ってきただけでは再構築されず表示が古い言語の
     // ままになる。appSettingsの変更を直接購読し、その場で再描画する。
@@ -113,12 +98,6 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen>
 
   void _onSettingsChanged() => setState(() {});
 
-  Future<void> _loadTabKeys() async {
-    final tabKeys = await _tabRegistry.allTabKeys();
-    if (!mounted) return;
-    setState(() => _tabKeys = tabKeys);
-  }
-
   Future<void> _drawPrompt() async {
     // 前の問題文の解答例の貼り付け待ち中に再抽選すると、表示が新しい問題文に
     // 差し替わったあとも貼り付け待ち状態だけ前の問題文のまま残ってしまい、
@@ -129,8 +108,8 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen>
     final all = await _service.loadAll();
     final prompts = _service.filter(
       all,
-      category: _selectedCategory,
-      tag: _selectedCategory == TopicCategory.general ? _selectedTag : null,
+      category: _drawSelection.category,
+      tag: _drawSelection.filterTag,
     );
     if (!mounted) return;
     if (prompts.isEmpty) {
@@ -155,8 +134,10 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen>
     setState(() => _drawnPrompt = null);
   }
 
-  Future<void> _showAddChoice() =>
-      showTopicAddChoiceFlow(context, initialCategory: _selectedCategory);
+  Future<void> _showAddChoice() => showTopicAddChoiceFlow(
+    context,
+    initialCategory: _drawSelection.category,
+  );
 
   /// 「＋」長押し：カテゴリ選択・サイコロ・イメージの3ステップを表示する。
   void _showUsageHelp() {
@@ -206,34 +187,17 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen>
                 addHintLongPressText: '操作方法',
               ),
               const SizedBox(height: 4),
-              CategorySelectField(
-                selected: _selectedCategory,
-                availableCategories: _availableCategories,
-                onChanged: (category) {
-                  // カテゴリ変更でも表示中の問題文が消えるため、_resetPromptと
-                  // 同じ理由で解答例の貼り付け待ち状態を解除する。
+              QuestionPromptDrawSelectField(
+                selected: _drawSelection,
+                showSituational: true,
+                onChanged: (selection) {
                   if (chromeAiAwaitingPaste) clearChromeAiPendingState();
                   setState(() {
-                    _selectedCategory = category;
-                    _selectedTag = null;
+                    _drawSelection = selection;
                     _drawnPrompt = null;
                   });
                 },
               ),
-              if (_selectedCategory == TopicCategory.general) ...[
-                const SizedBox(height: 8),
-                _TagChipsScroller(
-                  tabKeys: _tabKeys,
-                  selected: _selectedTag,
-                  onChanged: (tag) {
-                    if (chromeAiAwaitingPaste) clearChromeAiPendingState();
-                    setState(() {
-                      _selectedTag = tag;
-                      _drawnPrompt = null;
-                    });
-                  },
-                ),
-              ],
               const SizedBox(height: 4),
               // シチュエーションの問題文は文章が長くなることがあるため、問題文
               // エリアはスクロール可能な領域に閉じ込める。ボタン列は下に固定
@@ -335,88 +299,6 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen>
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// タブ選択の横スクロールチップ行（「すべて」＋[tabKeys]、単一選択）。
-/// [Layer2RandomScreen]の「その他」選択時のみ表示する。
-class _TagChipsScroller extends StatelessWidget {
-  const _TagChipsScroller({
-    required this.tabKeys,
-    required this.selected,
-    required this.onChanged,
-  });
-
-  final List<String> tabKeys;
-
-  /// null＝「すべて」。
-  final String? selected;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final lang = appSettings.language;
-    return SizedBox(
-      height: 34,
-      // ListView.builderと違い全チップを常時ビルドする（件数が少なく、
-      // widget testがスクロール位置に関わらずfind.textで見つけられるため）。
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _TagChip(
-              label: 'すべて'.tr(lang),
-              selected: selected == null,
-              onTap: () => onChanged(null),
-            ),
-            for (final tabKey in tabKeys)
-              Padding(
-                padding: const EdgeInsets.only(left: 8),
-                child: _TagChip(
-                  label: tabKey.tr(lang),
-                  selected: selected == tabKey,
-                  onTap: () => onChanged(tabKey),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TagChip extends StatelessWidget {
-  const _TagChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppColors.current;
-    final fill = selected ? palette.accentColor : Colors.transparent;
-    final foreground = selected ? palette.onAccent : palette.textOnScenePrimary;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: fill,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: selected ? palette.accentColor : palette.cardBorder,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: Text(label, style: TextStyle(fontSize: 13, color: foreground)),
       ),
     );
   }

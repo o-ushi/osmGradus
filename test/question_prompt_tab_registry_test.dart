@@ -64,5 +64,36 @@ void main() {
       final tabs = await registry.allTabKeys();
       expect(tabs.contains(tooLong), false);
     });
+
+    test('独自タブの名前を変更できる', () async {
+      final registry = QuestionPromptTabRegistry();
+      await registry.addCustomTab('スポーツ');
+
+      expect(await registry.renameCustomTab('スポーツ', '音楽'), true);
+      expect(await registry.customTabKeys(), ['音楽']);
+      expect(await registry.allTabKeys(), contains('音楽'));
+      expect(await registry.allTabKeys(), isNot(contains('スポーツ')));
+    });
+
+    test('組み込みと同名へのリネームは拒否する', () async {
+      final registry = QuestionPromptTabRegistry();
+      await registry.addCustomTab('スポーツ');
+
+      expect(await registry.renameCustomTab('スポーツ', '趣味'), false);
+      expect(await registry.customTabKeys(), ['スポーツ']);
+    });
+
+    test('独自タブを削除できる', () async {
+      final registry = QuestionPromptTabRegistry();
+      await registry.addCustomTab('スポーツ');
+
+      expect(await registry.deleteCustomTab('スポーツ'), true);
+      expect(await registry.customTabKeys(), isEmpty);
+    });
+
+    test('組み込みタブは削除できない', () async {
+      final registry = QuestionPromptTabRegistry();
+      expect(await registry.deleteCustomTab('趣味'), false);
+    });
   });
 }

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
 import '../theme/app_colors.dart';
 import '../widgets/language_flag_button.dart';
+import '../widgets/startup_bottom_bar.dart';
 
 /// インストール直後（および設定で有効なとき）に出す案内画面。
-/// アプリアイコン・アプリ名・ブランド説明・「次回から表示しない」チェックの順。
+/// アプリアイコン・アプリ名・ブランド説明をスクロールで並べ、
+/// 「次回から表示しない」と「はじめる」は画面下に固定する。
 class StartupScreen extends StatefulWidget {
   const StartupScreen({super.key, required this.onContinue});
 
@@ -39,21 +42,27 @@ class _StartupScreenState extends State<StartupScreen> {
     final lang = appSettings.language;
     final palette = AppColors.current;
 
-    return Scaffold(
-      backgroundColor: palette.scene,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // 濃いscene色の上ではステータスバーの文字（時刻・バッテリー）を白にする。
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: palette.scene,
+        body: SafeArea(
           child: Column(
             children: [
+              // 国旗は言語の切り替えで描き直すため const にしない。
               Align(
                 alignment: Alignment.topRight,
-                child: LanguageFlagButton(),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 32),
+                  child: LanguageFlagButton(),
+                ),
               ),
               Expanded(
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           minHeight: constraints.maxHeight,
@@ -110,94 +119,21 @@ class _StartupScreenState extends State<StartupScreen> {
                                 color: palette.textOnSceneSecondary,
                               ),
                             ),
-                            const SizedBox(height: 36),
-                            InkWell(
-                              onTap: () => setState(
-                                () => _dontShowAgain = !_dontShowAgain,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 10,
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: Checkbox(
-                                        value: _dontShowAgain,
-                                        onChanged: (value) {
-                                          setState(
-                                            () => _dontShowAgain =
-                                                value ?? false,
-                                          );
-                                        },
-                                        side: BorderSide(
-                                          color: palette.textOnScenePrimary,
-                                          width: 1.5,
-                                        ),
-                                        fillColor:
-                                            WidgetStateProperty.resolveWith((
-                                              states,
-                                            ) {
-                                              if (states.contains(
-                                                WidgetState.selected,
-                                              )) {
-                                                return palette.accentColor;
-                                              }
-                                              return Colors.transparent;
-                                            }),
-                                        checkColor: palette.onAccent,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Flexible(
-                                      child: Text(
-                                        '次回から表示しない'.tr(lang),
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          color: palette.textOnScenePrimary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 28),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton(
-                                onPressed: () =>
-                                    widget.onContinue(_dontShowAgain),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: palette.accentColor,
-                                  foregroundColor: palette.onAccent,
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 16,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                ),
-                                child: Text(
-                                  'はじめる'.tr(lang),
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
                           ],
                         ),
                       ),
                     );
                   },
                 ),
+              ),
+              // 説明を読み終えなくても始められるよう、下部に固定する
+              // （osmNichinichiと同じ）。
+              StartupBottomBar(
+                dontShowAgain: _dontShowAgain,
+                onDontShowAgainChanged: (v) =>
+                    setState(() => _dontShowAgain = v),
+                label: 'はじめる'.tr(lang),
+                onPressed: () => widget.onContinue(_dontShowAgain),
               ),
             ],
           ),

@@ -29,7 +29,10 @@ const _validPrepHitJson = '''
   "prepStars": 4,
   "hitStars": 3,
   "prepAdvice": "結論を先に述べられていて良い構成です。",
-  "hitAdvice": "質問の意図にはおおむね答えられています。"
+  "hitAdvice": "質問の意図にはおおむね答えられています。",
+  "modelAnswer": "わたしは、このように考えます。",
+  "modelAnswerRomaji": "Watashi wa, kono you ni kangaemasu.",
+  "modelAnswerVi": "Tôi nghĩ như thế này."
 }''';
 
 void _mockClipboard(WidgetTester tester) {
@@ -175,6 +178,12 @@ void main() {
     expect(state.debugLastResult?.hitStars, 3);
     expect(state.debugLastResult?.prepAdvice, isNotNull);
     expect(state.debugLastResult?.hitAdvice, isNotNull);
+    expect(state.debugLastResult?.modelAnswer, 'わたしは、このように考えます。');
+    expect(
+      state.debugLastResult?.modelAnswerRomaji,
+      'Watashi wa, kono you ni kangaemasu.',
+    );
+    expect(state.debugLastResult?.modelAnswerVi, 'Tôi nghĩ như thế này.');
 
     final saved = await ScoringResultStorage().loadAll();
     expect(saved, hasLength(1));

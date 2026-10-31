@@ -16,6 +16,33 @@ void main() {
       expect(prompt, contains('answerTranscript: 週末は映画を見ます。'));
       expect(prompt, contains('prepStars'));
       expect(prompt, contains('hitStars'));
+      expect(prompt, contains('modelAnswer'));
+      expect(prompt, contains('やさしい言葉と短い文'));
+    });
+
+    test('英語のアドバイスは英語のまま、模範回答だけ日本語で頼む', () {
+      final prompt = PrepHitAiPromptTemplate.buildPrompt(
+        questionJa: '休日は何をしますか。',
+        answerTranscript: '週末は映画を見ます。',
+        lang: 'en',
+      );
+
+      expect(prompt, contains('modelAnswer'));
+      expect(prompt, contains('natural, correct Japanese'));
+      expect(prompt, contains('Both advice'));
+      expect(prompt, isNot(contains('やさしい言葉と短い文')));
+    });
+
+    test('ja/en/viいずれも模範回答のローマ字とベトナム語訳を頼む', () {
+      for (final lang in ['ja', 'en', 'vi']) {
+        final prompt = PrepHitAiPromptTemplate.buildPrompt(
+          questionJa: '休日は何をしますか。',
+          answerTranscript: '週末は映画を見ます。',
+          lang: lang,
+        );
+        expect(prompt, contains('"modelAnswerRomaji"'), reason: lang);
+        expect(prompt, contains('"modelAnswerVi"'), reason: lang);
+      }
     });
 
     test('回答の文字起こしが空/nullなら(none)になる', () {

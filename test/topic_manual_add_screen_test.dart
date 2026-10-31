@@ -9,6 +9,7 @@ import 'package:osm_gradus/notifiers/app_settings.dart';
 import 'package:osm_gradus/services/app_preferences.dart';
 import 'package:osm_gradus/services/question_prompt_service.dart';
 import 'package:osm_gradus/views/topics/topic_manual_add_screen.dart';
+import 'package:osm_gradus/widgets/question_prompt_draw_select_field.dart';
 
 const _lang = 'vi';
 String _t(String key) => key.tr(_lang);
@@ -42,13 +43,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('カテゴリ選択はその他／シチュエーションの2択（日常・ビジネスは出ない、question-prompt-tabs.md Step 4）', (
-    tester,
-  ) async {
+  testWidgets('カテゴリ選択はタブ6種＋ランダム＋シチュエーション', (tester) async {
     await openScreen(tester);
 
-    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
+    await tester.tap(find.byType(QuestionPromptDrawSelectField));
     await tester.pumpAndSettle();
+    for (final tag in ['趣味', '健康', '旅行', '家族', '環境', '会社']) {
+      expect(find.text(_t(tag)), findsAtLeastNWidgets(1));
+    }
+    expect(find.text(_t('ランダム')), findsNWidgets(2));
     expect(find.text(_t('シチュエーション')), findsOneWidget);
     expect(find.text(_t('日常')), findsNothing);
     expect(find.text(_t('ビジネス')), findsNothing);
@@ -61,7 +64,7 @@ void main() {
 
     await tester.enterText(find.byType(TextField), '週末はキャンプに行きます');
     await tester.pump();
-    await tester.tap(find.text(_t('追加')));
+    await tester.tap(find.byTooltip(_t('追加')));
     await tester.pump();
 
     final all = await QuestionPromptService().loadAll();

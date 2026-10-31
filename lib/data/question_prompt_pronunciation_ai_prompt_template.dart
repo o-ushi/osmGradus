@@ -1,4 +1,5 @@
 import 'google_ai_search.dart';
+import 'learner_friendly_japanese.dart';
 import 'pronunciation_ai_json_schema.dart';
 
 /// レイヤーⅤ「問題文一覧から選ぶ」用のChrome AIプロンプト（Step 6）。
@@ -129,7 +130,7 @@ abstract final class QuestionPromptPronunciationAiPromptTemplate {
       jsonInstructionNote:
           'scoreは1〜5の整数、confidenceはlow/medium/highのいずれか。'
           '文字起こしに現れるカテゴリだけを含め、feedbackとsummaryは日本語で'
-          '書いてください。',
+          '書いてください。$learnerFriendlyJapaneseAdvice',
     ),
   };
 }

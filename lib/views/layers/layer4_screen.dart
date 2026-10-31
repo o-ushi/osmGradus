@@ -11,7 +11,7 @@ import '../../models/layer4_prompt_reveal_mode.dart';
 import '../../models/practice_timer_models.dart';
 import '../../models/question_prompt.dart';
 import '../../models/saved_scoring_result.dart';
-import '../../models/topic_category.dart';
+import '../../models/question_prompt_draw_selection.dart';
 import '../../navigation/app_routes.dart';
 import '../../services/alarm_sound_service.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
@@ -23,7 +23,7 @@ import '../../services/recording_stt_service.dart';
 import '../../services/scoring_result_storage.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/ai_import_shared.dart';
-import '../../widgets/category_select_field.dart';
+import '../../widgets/question_prompt_draw_select_field.dart';
 import '../../widgets/dice_action_row.dart';
 import '../../widgets/dice_topic_card.dart';
 import '../../widgets/genki_transport_row.dart';
@@ -151,7 +151,7 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
 
   String _resetStateKey() => [
     buttonPhase.name,
-    selectedCategory.name,
+    drawSelection.labelKey,
     timerController.option.name,
     drawnTopic?.text ?? '',
     recordingService.lastRecordingPath ?? '',
@@ -359,13 +359,11 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
   /// （Ⅱランダムと同じ挙動）。
   Future<bool> _prepareActivePromptForNewAttempt() async {
     if (widget.fixedPrompt == null) {
-      final prompts = await _questionPromptService.loadByCategory(
-        selectedCategory,
-      );
+      final prompt = await drawRandomQuestionPrompt();
       if (!mounted) return false;
-      if (prompts.isEmpty) return false;
-      _drawnPrompt = prompts[_idRandom.nextInt(prompts.length)];
-      _sampleAnswer = _drawnPrompt!.sampleAnswer;
+      if (prompt == null) return false;
+      _drawnPrompt = prompt;
+      _sampleAnswer = prompt.sampleAnswer;
     }
     setState(() {
       _lastResult = null;
@@ -571,6 +569,9 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
         hitStars: eval.hitStars,
         prepAdvice: eval.prepAdvice,
         hitAdvice: eval.hitAdvice,
+        modelAnswer: eval.modelAnswer,
+        modelAnswerRomaji: eval.modelAnswerRomaji,
+        modelAnswerVi: eval.modelAnswerVi,
       );
       await _storage.update(updated);
       unawaited(
@@ -647,17 +648,13 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
   /// カテゴリ変更でも表示中の問題文が消えるため（基底クラスが
   /// `drawnTopic = null`にする）、Ⅱランダムと同じ理由で抽選済み問題文
   /// （[_drawnPrompt]）・解答例の貼り付け待ちも一緒に解除する（Step 4）。
-  @override
-  void onCategoryChanged(TopicCategory category) {
+  void _onDrawSelectionChanged(QuestionPromptDrawSelection selection) {
     if (chromeAiAwaitingPaste) clearChromeAiPendingState();
-    super.onCategoryChanged(category);
+    super.onDrawSelectionChanged(selection);
     if (!mounted) return;
     setState(() {
       _drawnPrompt = null;
       _sampleAnswer = '';
-      // タートルの表示待ち（Step 3）も一緒に解除する。基底クラスの
-      // `_resetIfActive`はidle中（＝表示待ち中もidleのまま）は何もしない
-      // ため、ここで明示的にクリアしないと古い問題文を読み上げてしまう。
       _awaitingSpeakAfterPreview = false;
     });
   }
@@ -667,11 +664,9 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
   /// 抽選済みの問題文（[_drawnPrompt]）も同じ条件で一緒に手放す（Step 4）。
   @override
   void onPresetTap(NormalTimerOption option) {
-    final wasSituational = selectedCategory == TopicCategory.situational;
+    final wasSituational =
+        drawSelection.kind == QuestionPromptDrawKind.situational;
     super.onPresetTap(option);
-    // タートルの表示待ち（Step 3）は、シチュエーション以外でもタイマー
-    // プリセット自体が変わるたびに解除する（基底クラスの`_resetIfActive`は
-    // idle中＝表示待ち中も何もしないため、ここで明示的にクリアする）。
     if (mounted) setState(() => _awaitingSpeakAfterPreview = false);
     if (widget.fixedPrompt == null &&
         wasSituational &&
@@ -885,10 +880,10 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
                     )
                   : ListenableBuilder(
                       listenable: timerController,
-                      builder: (context, _) => CategorySelectField(
-                        selected: selectedCategory,
-                        availableCategories: availableCategories,
-                        onChanged: onCategoryChanged,
+                      builder: (context, _) => QuestionPromptDrawSelectField(
+                        selected: drawSelection,
+                        showSituational: showSituationalInDrawSelect,
+                        onChanged: _onDrawSelectionChanged,
                       ),
                     ),
               const SizedBox(height: 4),

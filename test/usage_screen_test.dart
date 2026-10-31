@@ -13,6 +13,7 @@ import 'package:osm_gradus/services/topic_speech_reader.dart';
 import 'package:osm_gradus/services/tts_settings_service.dart';
 import 'package:osm_gradus/views/launch_screen.dart';
 import 'package:osm_gradus/views/settings/tts_settings_screen.dart';
+import 'package:osm_gradus/views/startup_screen.dart';
 import 'package:osm_gradus/views/usage_screen.dart';
 
 void main() {
@@ -33,6 +34,24 @@ void main() {
     appSettings.language = lang;
   });
 
+  Future<void> swipeFromLeftEdge(WidgetTester tester) async {
+    final gesture = await tester.startGesture(const Offset(16, 300));
+    await gesture.moveBy(
+      const Offset(40, 0),
+      timeStamp: const Duration(milliseconds: 10),
+    );
+    await gesture.moveBy(
+      const Offset(80, 0),
+      timeStamp: const Duration(milliseconds: 20),
+    );
+    await gesture.moveBy(
+      const Offset(120, 0),
+      timeStamp: const Duration(milliseconds: 30),
+    );
+    await gesture.up(timeStamp: const Duration(milliseconds: 30));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> pumpUsage(
     WidgetTester tester, {
     required ValueChanged<bool> onContinue,
@@ -47,6 +66,20 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  test('コピー案内の文言に赤丸表現が残っておらず、TAP!の矢印に言及している（連動Step3）', () {
+    for (final code in ['ja', 'en', 'vi']) {
+      final body = '使い方_コピー本文'.tr(code);
+      final imageDescription = '使い方_コピー画像_説明'.tr(code);
+      for (final text in [body, imageDescription]) {
+        expect(text, isNot(contains('赤丸')));
+        expect(text, isNot(contains('red circle')));
+        expect(text, isNot(contains('khoanh đỏ')));
+      }
+      expect(body, contains('TAP!'));
+      expect(imageDescription, contains('TAP!'));
+    }
+  });
 
   testWidgets('使い方画面が仕様の説明・画像・チェック・ボタンをすべて表示する', (tester) async {
     await pumpUsage(tester, onContinue: (_) {});
@@ -150,24 +183,70 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(t('コンセプトサブタイトル')), findsOneWidget);
 
-    final gesture = await tester.startGesture(const Offset(16, 300));
-    await gesture.moveBy(
-      const Offset(40, 0),
-      timeStamp: const Duration(milliseconds: 10),
-    );
-    await gesture.moveBy(
-      const Offset(80, 0),
-      timeStamp: const Duration(milliseconds: 20),
-    );
-    await gesture.moveBy(
-      const Offset(120, 0),
-      timeStamp: const Duration(milliseconds: 30),
-    );
-    await gesture.up(timeStamp: const Duration(milliseconds: 30));
-    await tester.pumpAndSettle();
+    await swipeFromLeftEdge(tester);
 
     expect(tester.takeException(), isNull);
     expect(find.text(t('使い方_タイトル')), findsNothing);
     expect(find.text(t('はじめる')), findsOneWidget);
+  });
+
+  testWidgets('使い方画面を左端右スワイプすると、フラグを保存せずスタートアップへ戻る（連動Step2）', (tester) async {
+    appSettings.showStartupScreen = true;
+    appSettings.showUsageScreen = true;
+    tester.view.physicalSize = const Size(390, 2200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(t('はじめる')));
+    await tester.pumpAndSettle();
+    expect(find.text(t('使い方_タイトル')), findsOneWidget);
+
+    await swipeFromLeftEdge(tester);
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(t('はじめる')), findsOneWidget);
+    expect(find.text(t('ホーム画面へ')), findsNothing);
+    // 「ホーム画面へ」を押していないのでフラグは変わらない。
+    expect(appSettings.showStartupScreen, isTrue);
+    expect(appSettings.showUsageScreen, isTrue);
+
+    // スタートアップから再度「はじめる」→ usageがONならまた使い方へ（往復可）。
+    await tester.tap(find.text(t('はじめる')));
+    await tester.pumpAndSettle();
+    expect(find.text(t('使い方_タイトル')), findsOneWidget);
+  });
+
+  testWidgets('スタートアップ・使い方の確定ボタンは、スクロールせずに画面下へ固定される', (
+    WidgetTester tester,
+  ) async {
+    // iPhone SE 相当の低い画面でも、長い本文の下に隠れない。
+    tester.view.physicalSize = const Size(375, 667);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final (screen, label) in [
+      (StartupScreen(onContinue: (_) {}), 'はじめる'),
+      (UsageScreen(onContinue: (_) {}), 'ホーム画面へ'),
+    ]) {
+      await tester.pumpWidget(MaterialApp(home: screen));
+      await tester.pumpAndSettle();
+      for (final text in [t(label), t('次回から表示しない')]) {
+        final rect = tester.getRect(find.text(text));
+        expect(rect.bottom, lessThanOrEqualTo(667), reason: text);
+        // スクロール領域の外（固定の下部バー）にある。
+        expect(
+          find.ancestor(
+            of: find.text(text),
+            matching: find.byType(SingleChildScrollView),
+          ),
+          findsNothing,
+          reason: text,
+        );
+      }
+    }
   });
 }

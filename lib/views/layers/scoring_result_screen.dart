@@ -82,6 +82,8 @@ class ScoringResultScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
+              _ModelAnswerCard(saved: result),
+              const SizedBox(height: 16),
               _SectionCard(
                 title: '待遇表現'.tr(lang),
                 child: Column(
@@ -260,6 +262,81 @@ class _SectionCard extends StatelessWidget {
             child,
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// 発話内容を自然な日本語に直した模範回答（Chrome AI、PREP・的中度と同時に取得）。
+/// 解答例と同じく、日本語の直下にローマ字、その直下にベトナム語訳を並べる
+/// （旧データ・AIが返さなかった場合は日本語だけ）。
+class _ModelAnswerCard extends StatelessWidget {
+  const _ModelAnswerCard({required this.saved});
+
+  final SavedScoringResult saved;
+
+  @override
+  Widget build(BuildContext context) {
+    final lang = appSettings.language;
+    final answer = saved.modelAnswer;
+    final Widget body;
+    if (answer != null && answer.isNotEmpty) {
+      final romaji = saved.modelAnswerRomaji;
+      final vi = saved.modelAnswerVi;
+      body = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(answer),
+          if (romaji != null && romaji.isNotEmpty)
+            _ModelAnswerSubBlock(label: 'ローマ字'.tr(lang), text: romaji),
+          if (vi != null && vi.isNotEmpty)
+            _ModelAnswerSubBlock(label: 'ベトナム語'.tr(lang), text: vi),
+        ],
+      );
+    } else if (saved.hasAiEvaluation) {
+      body = Text(
+        'この結果には模範回答がありません。'.tr(lang),
+        style: TextStyle(color: Colors.black.withValues(alpha: 0.55)),
+      );
+    } else if (saved.aiEvaluationUnparsedResponse != null) {
+      body = Text(
+        '模範回答を読み取れませんでした。'.tr(lang),
+        style: TextStyle(color: Colors.black.withValues(alpha: 0.55)),
+      );
+    } else {
+      body = Text(
+        '模範回答は未送信です。'.tr(lang),
+        style: TextStyle(color: Colors.black.withValues(alpha: 0.55)),
+      );
+    }
+    return _SectionCard(title: '模範回答'.tr(lang), child: body);
+  }
+}
+
+/// [_ModelAnswerCard]内の、日本語の模範回答に続くローマ字／ベトナム語訳の1ブロック。
+class _ModelAnswerSubBlock extends StatelessWidget {
+  const _ModelAnswerSubBlock({required this.label, required this.text});
+
+  final String label;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.black.withValues(alpha: 0.55),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(text),
+        ],
       ),
     );
   }

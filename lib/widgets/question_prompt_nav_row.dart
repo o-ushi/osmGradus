@@ -4,7 +4,7 @@ import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
 import '../theme/app_colors.dart';
 
-/// 「問題文一覧から選ぶ」の詳細画面で、[CategorySelectField]が入る「分野」枠
+/// 「問題文一覧から選ぶ」の詳細画面で、[QuestionPromptNavRow]が入る「分野」枠
 /// をそのまま差し替えて使う、前後の問題文へ移動する▲▼ボタン行。
 /// 一覧から開いた詳細では分野は一覧のフィルタで絞り込めるため表示せず、
 /// 代わりにここへ前後移動を置く（[canGoPrevious]/[canGoNext]がfalseの

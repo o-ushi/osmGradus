@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,7 +17,10 @@ import 'package:osm_gradus/services/question_prompt_service.dart';
 import 'package:osm_gradus/services/topic_speech_reader.dart';
 import 'package:osm_gradus/services/tts_settings_service.dart';
 import 'package:osm_gradus/views/launch_screen.dart';
+import 'package:osm_gradus/views/topics/question_prompt_edit_screen.dart';
+import 'package:osm_gradus/views/topics/question_prompt_overview_screen.dart';
 import 'package:osm_gradus/widgets/app_header.dart';
+import 'package:osm_gradus/widgets/layer_numeral_badge.dart';
 import 'package:osm_gradus/widgets/question_prompt_overview_row.dart';
 
 const _lang = 'vi';
@@ -65,10 +69,14 @@ void main() {
     // 総評マーク（⭕️）は未実施のため出ないが、Ⅰ〜Ⅴのレイヤーアイコンは
     // 常にタップできる（[QuestionPromptOverviewRow.onLayerTap]）。
     final firstRow = find.byType(QuestionPromptOverviewRow).first;
-    final layer1Icon = find
-        .descendant(of: firstRow, matching: find.byType(InkWell))
-        .first;
+    final layer1Icon = find.descendant(
+      of: firstRow,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is LayerNumeralIcon && widget.layerIndex == 0,
+      ),
+    );
     await tester.tap(layer1Icon);
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
     await tester.pumpAndSettle();
 
     // レイヤーⅠ詳細画面が開いていること（常設ヘッダーが存在する）。
@@ -82,5 +90,44 @@ void main() {
 
     expect(find.byType(LaunchScreen), findsOneWidget);
     expect(find.byType(QuestionPromptOverviewRow), findsNothing);
+  });
+
+  testWidgets('横断一覧の本文を長押しすると編集画面が開く', (tester) async {
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip(_t('問題文一覧')));
+    await tester.pumpAndSettle();
+
+    final firstRow = find.byType(QuestionPromptOverviewRow).first;
+    final bodyText = find.descendant(
+      of: firstRow,
+      matching: find.byType(Text),
+    ).last;
+    await tester.longPress(bodyText);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(QuestionPromptEditScreen), findsOneWidget);
+    expect(find.byType(QuestionPromptOverviewScreen), findsNothing);
+  });
+
+  testWidgets('横断一覧の本文をタップしても何も起きない', (tester) async {
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip(_t('問題文一覧')));
+    await tester.pumpAndSettle();
+
+    final firstRow = find.byType(QuestionPromptOverviewRow).first;
+    final bodyText = find.descendant(
+      of: firstRow,
+      matching: find.byType(Text),
+    ).last;
+    await tester.tap(bodyText);
+    await tester.pump(kDoubleTapTimeout + const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(QuestionPromptEditScreen), findsNothing);
+    expect(find.byType(QuestionPromptOverviewScreen), findsOneWidget);
   });
 }

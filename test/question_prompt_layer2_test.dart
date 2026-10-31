@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'question_prompt_list_test_helpers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -181,8 +183,7 @@ void main() {
 
   testWidgets('行タップで詳細が開き、予約席レイアウト（要約・III）を持つ', (tester) async {
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     expect(find.byType(DiceActionRow), findsOneWidget);
     expect(find.byType(PrepLabelRow), findsOneWidget);
@@ -198,8 +199,7 @@ void main() {
 
   testWidgets('「要約」アイコンをタップして入力すると橙色になり、一覧の進捗に反映される', (tester) async {
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.tap(find.byIcon(Icons.summarize_rounded));
     await tester.pump(_tapConfirmWait);
@@ -218,8 +218,7 @@ void main() {
 
   testWidgets('一覧詳細：＋長押しの使い方シートに①要約②解答例③IIIの順で並ぶ', (tester) async {
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.longPress(find.byIcon(Icons.add_rounded));
     await tester.pumpAndSettle();
@@ -242,8 +241,7 @@ void main() {
 
   testWidgets('「解答例」アイコンが見え、タップで同意ダイアログが出てキャンセルできる', (tester) async {
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     expect(find.byIcon(Icons.menu_book_rounded), findsOneWidget);
     final icon = tester.widget<Icon>(find.byIcon(Icons.menu_book_rounded));
@@ -266,8 +264,7 @@ void main() {
     _mockClipboard(tester);
 
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.tap(find.byIcon(Icons.menu_book_rounded));
     await tester.pump(_tapConfirmWait);
@@ -304,8 +301,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
     expect(
       tester.widget<Icon>(find.byIcon(Icons.menu_book_rounded)).color,
       Colors.orange,
@@ -319,8 +315,7 @@ void main() {
     _mockClipboard(tester);
 
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.tap(find.byIcon(Icons.menu_book_rounded));
     await tester.pump(_tapConfirmWait);
@@ -367,8 +362,7 @@ void main() {
       _mockClipboard(tester);
 
       await _openLayer2QuestionPromptList(tester);
-      await tester.tap(find.byType(QuestionPromptListRow).first);
-      await tester.pumpAndSettle();
+      await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
       await tester.tap(find.byIcon(Icons.menu_book_rounded));
       await tester.pump(_tapConfirmWait);
@@ -419,8 +413,7 @@ void main() {
       _mockClipboard(tester);
 
       await _openLayer2QuestionPromptList(tester);
-      await tester.tap(find.byType(QuestionPromptListRow).first);
-      await tester.pumpAndSettle();
+      await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
       await tester.tap(find.byIcon(Icons.menu_book_rounded));
       await tester.pump(_tapConfirmWait);
@@ -651,8 +644,7 @@ void main() {
     final firstBody = all.first.body;
 
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.tap(find.byType(LayerNumeralBadge));
     await tester.pump(_tapConfirmWait);
@@ -669,8 +661,7 @@ void main() {
 
   testWidgets('要約・IIIをダブルタップすると機能ヒントが出て、単タップの動作は実行されない', (tester) async {
     await _openLayer2QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     Future<void> doubleTap(Finder finder) async {
       await tester.tap(finder);
@@ -696,8 +687,7 @@ void main() {
     final firstRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).first,
     );
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
     await tester.tap(find.byType(LayerNumeralBadge));
     await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
@@ -714,8 +704,7 @@ void main() {
     final secondRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).at(1),
     );
-    await tester.tap(find.byType(QuestionPromptListRow).at(1));
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).at(1));
 
     // 再度「III」。Ⅲ側は既にselectFromListモードのまま（initStateは再実行
     // されない）だが、それでも一覧ではなく新しい問題文の詳細へ直接飛ぶこと。

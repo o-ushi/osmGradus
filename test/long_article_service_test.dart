@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:osm_gradus/models/long_article_comprehension_check.dart';
+import 'package:osm_gradus/models/long_article_vocab_word.dart';
 import 'package:osm_gradus/services/long_article_service.dart';
 
 void main() {
@@ -45,7 +46,9 @@ void main() {
       optionA: '友達',
       optionB: '家族',
       correctOption: 'A',
-      explanation: '本文に「友達と一緒に」とある。',
+      explanationJa: '本文に「友達と一緒に」とある。',
+      explanationEn: 'The text says "with a friend."',
+      explanationVi: 'Văn bản có ghi "cùng với bạn bè".',
     );
     await service.addArticle(
       title: '旅行',
@@ -59,7 +62,9 @@ void main() {
     expect(saved.comprehensionCheck!.optionA, check.optionA);
     expect(saved.comprehensionCheck!.optionB, check.optionB);
     expect(saved.comprehensionCheck!.correctOption, check.correctOption);
-    expect(saved.comprehensionCheck!.explanation, check.explanation);
+    expect(saved.comprehensionCheck!.explanationJa, check.explanationJa);
+    expect(saved.comprehensionCheck!.explanationEn, check.explanationEn);
+    expect(saved.comprehensionCheck!.explanationVi, check.explanationVi);
   });
 
   test('comprehensionCheckを渡さなければnullのまま（旧データ互換）', () async {
@@ -68,6 +73,32 @@ void main() {
 
     final saved = (await service.loadArticles()).single;
     expect(saved.comprehensionCheck, isNull);
+  });
+
+  test('vocabTestWordsを渡すと保存・復元でき、正解数・出題数はまだnullのまま', () async {
+    final service = LongArticleService();
+    const words = [
+      LongArticleVocabWord(word: '観光', meaningEn: 'sightseeing', meaningVi: 'du lịch'),
+    ];
+    await service.addArticle(
+      title: '旅行',
+      body: '本文',
+      vocabTestWords: words,
+    );
+
+    final saved = (await service.loadArticles()).single;
+    expect(saved.vocabTestWords, hasLength(1));
+    expect(saved.vocabTestWords.single.word, '観光');
+    expect(saved.vocabTestCorrectCount, isNull);
+    expect(saved.vocabTestQuestionCount, isNull);
+  });
+
+  test('vocabTestWordsを渡さなければ空配列のまま（旧データ互換）', () async {
+    final service = LongArticleService();
+    await service.addArticle(title: '旅行', body: '本文');
+
+    final saved = (await service.loadArticles()).single;
+    expect(saved.vocabTestWords, isEmpty);
   });
 
   test('updateArticle()でtitle/bodyが更新され、updatedAtが進む', () async {

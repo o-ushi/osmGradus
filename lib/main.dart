@@ -1,14 +1,18 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'audio/podcast_audio_handler.dart';
 import 'notifiers/app_settings.dart';
 import 'services/app_logger.dart';
 import 'services/app_services.dart';
 import 'services/app_preferences.dart';
+import 'services/cloud_sync/cloud_sync_service.dart';
+import 'services/cloud_sync/icloud_bridge.dart';
 import 'services/jsst_calibration_preferences.dart';
 import 'services/podcast_library_service.dart';
 import 'services/topic_speech_reader.dart';
@@ -23,6 +27,9 @@ late final TopicSpeechReader topicSpeechReader;
 late final JsstCalibrationPreferences jsstCalibrationPreferences;
 late final AppPreferences appPreferences;
 late final AppSettings appSettings;
+
+/// iCloud同期（iOSのみ。Androidでは作らず、設定にも出さない）。
+CloudSyncService? cloudSync;
 
 /// レイアウトをiPhone向けの縦画面に統一する。iOS版はiPhone専用ターゲットのため、
 /// iPadではOS標準のiPhone互換表示（縦向き・拡大）になる。
@@ -65,6 +72,22 @@ void main() {
         ),
       );
       AppServices.audioHandler = audioHandler;
+
+      if (Platform.isIOS) {
+        cloudSync = CloudSyncService(
+          prefs: await SharedPreferences.getInstance(),
+          bridge: MethodChannelICloudBridge(),
+          baseStore: FileCloudSyncBaseStore(),
+          // 取り込んだ設定を、値をメモリに持つサービスへ反映する
+          // （バックアップのインポートと同じ読み直し）。
+          onApplied: () async {
+            await ttsSettings.load();
+            await jsstCalibrationPreferences.load();
+            appSettings.refresh();
+          },
+        );
+        unawaited(cloudSync!.attach());
+      }
 
       FlutterError.onError = (details) {
         AppLogger.instance.log(
@@ -128,8 +151,13 @@ class _OsmGradusAppState extends State<OsmGradusApp> {
   // レイに浮かべたいため、Navigator（＝home以下のルート群）を丸ごと包む
   // MaterialApp.builderの位置に置く。
   Widget _wrapWithChrome(BuildContext context, Widget? child) {
-    return ButtonActionHintOverlay(
-      child: _applyMinimumTextScale(context, child),
+    // 既定のステータスバーは白文字（主要画面の背景が濃いscene色のため）。
+    // 明るい背景のAppBarを持つ画面は、AppBar側の指定がこれより優先される。
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: ButtonActionHintOverlay(
+        child: _applyMinimumTextScale(context, child),
+      ),
     );
   }
 

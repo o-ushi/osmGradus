@@ -13,6 +13,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/confirm_history_delete_dialog.dart';
 import '../../widgets/history_delete_background.dart';
 import '../../widgets/layer_help_sheet.dart';
+import '../../widgets/question_prompt_list_hints.dart';
 import '../../widgets/question_prompt_list_row.dart';
 import 'question_prompt_edit_screen.dart';
 import 'question_prompt_filter_sheet.dart';
@@ -122,7 +123,7 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
     );
   }
 
-  /// 本文長押し：編集画面（Step 5）。戻ったら一覧を再読み込みする。
+  /// 行長押し：編集画面（Step 5）。戻ったら一覧を再読み込みする。
   Future<void> _editPrompt(QuestionPrompt prompt) async {
     await QuestionPromptEditScreen.push(context, prompt: prompt);
     await reload();
@@ -187,23 +188,26 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: _openFilterSheet,
-                    icon: Icon(
-                      Icons.filter_list,
-                      color: _filter.isEmpty
-                          ? palette.textOnScenePrimary
-                          : palette.accentColor,
+                  GestureDetector(
+                    onDoubleTap: () => QuestionPromptListHints.showFilter(context),
+                    child: IconButton(
+                      onPressed: _openFilterSheet,
+                      icon: Icon(
+                        Icons.filter_list,
+                        color: _filter.isEmpty
+                            ? palette.textOnScenePrimary
+                            : palette.accentColor,
+                      ),
+                      tooltip: 'フィルタ'.tr(lang),
                     ),
-                    tooltip: 'フィルタ'.tr(lang),
                   ),
                   Tooltip(
                     message: '問題文を追加'.tr(lang),
                     triggerMode: TooltipTriggerMode.manual,
-                    child: InkWell(
+                    child: GestureDetector(
                       onTap: _addPrompt,
                       onLongPress: _showUsageHelp,
-                      customBorder: const CircleBorder(),
+                      onDoubleTap: () => QuestionPromptListHints.showAdd(context),
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Icon(
@@ -268,7 +272,7 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
                               tags: prompt.tags,
                               onTap: () =>
                                   widget.onTap(context, prompt, filtered),
-                              onBodyLongPress: () => _editPrompt(prompt),
+                              onLongPress: () => _editPrompt(prompt),
                               trailing: widget.trailingBuilder?.call(prompt),
                             ),
                           );

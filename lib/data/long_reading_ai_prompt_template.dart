@@ -1,5 +1,6 @@
 import '../models/long_article.dart';
 import 'google_ai_search.dart';
+import 'learner_friendly_japanese.dart';
 import 'pronunciation_ai_json_schema.dart';
 
 /// レイヤーⅤ「長文」音読用のChrome AIプロンプト。
@@ -146,7 +147,7 @@ abstract final class LongReadingAiPromptTemplate {
       jsonInstructionNote:
           'scoreは1〜5の整数、confidenceはlow/medium/highのいずれか。'
           '抜粋に現れるカテゴリだけを含め、feedbackとsummaryは日本語で'
-          '書いてください。',
+          '書いてください。$learnerFriendlyJapaneseAdvice',
     ),
   };
 }

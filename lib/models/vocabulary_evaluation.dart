@@ -61,6 +61,50 @@ class VocabularyEvaluation {
   /// 正解した問題数。
   int get correctCount => questionEvaluations.where((q) => q.correct).length;
 
+  /// 1秒チェックの機械採点を、Chrome AIの単語評価の先頭に付け足す。
+  /// クイズはAIに送らない。[overallScore]はクイズ＋単語の正解率から再計算する。
+  VocabularyEvaluation aligningComprehensionQuiz({
+    required bool isCorrect,
+    required int vocabQuestionCount,
+    String? feedback,
+  }) {
+    final quizEval = VocabularyQuestionEvaluation(
+      correct: isCorrect,
+      feedback: feedback,
+    );
+    final rest = questionEvaluations;
+    final List<VocabularyQuestionEvaluation> aligned;
+    if (rest.length == vocabQuestionCount + 1) {
+      aligned = [
+        VocabularyQuestionEvaluation(
+          correct: isCorrect,
+          feedback: feedback ?? rest.first.feedback,
+        ),
+        ...rest.skip(1),
+      ];
+    } else if (rest.length >= vocabQuestionCount) {
+      aligned = [quizEval, ...rest.take(vocabQuestionCount)];
+    } else {
+      aligned = [quizEval, ...rest];
+    }
+    return VocabularyEvaluation(
+      overallScore: starsFromCorrectRatio(aligned),
+      summary: summary,
+      questionEvaluations: aligned,
+      languageCode: languageCode,
+      rawResponse: rawResponse,
+      evaluationVersion: evaluationVersion,
+    );
+  }
+
+  /// 正解率を1〜5の★に写す（0%→1、100%→5。四捨五入）。
+  static int starsFromCorrectRatio(List<VocabularyQuestionEvaluation> items) {
+    if (items.isEmpty) return 1;
+    final ratio = items.where((q) => q.correct).length / items.length;
+    final stars = (ratio * 5).round();
+    return stars < 1 ? 1 : (stars > 5 ? 5 : stars);
+  }
+
   factory VocabularyEvaluation.fromJson(Map<String, dynamic> json) {
     final rawQuestions = json['questionEvaluations'] as List<dynamic>? ?? [];
     return VocabularyEvaluation(

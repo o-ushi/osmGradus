@@ -14,6 +14,12 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ja</string>
+		<string>en</string>
+		<string>vi</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>osm_gradus</string>
 	<key>CFBundlePackageType</key>
@@ -26,16 +32,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>CFBundleLocalizations</key>
-	<array>
-		<string>ja</string>
-		<string>en</string>
-		<string>vi</string>
-	</array>
-	<key>NSMotionUsageDescription</key>
-	<string>Shake your device to quickly open the vocabulary deck.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Used to record your speech during practice.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Shake your device to quickly open the vocabulary deck.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Apple Speech Recognition converts recorded speech into text for practice and scoring. Audio may be processed on Apple servers.</string>
 	<key>UIApplicationSceneManifest</key>
@@ -50,7 +50,7 @@
 					<key>UISceneClassName</key>
 					<string>UIWindowScene</string>
 					<key>UISceneConfigurationName</key>
-					<string>flutter</string>
+					<string>com.osamushikubo.osmGradus.scene</string>
 					<key>UISceneDelegateClassName</key>
 					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
 					<key>UISceneStoryboardFile</key>
@@ -69,6 +69,8 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleLightContent</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

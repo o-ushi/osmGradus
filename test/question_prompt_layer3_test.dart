@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'question_prompt_list_test_helpers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:osm_gradus/audio/podcast_audio_handler.dart';
@@ -97,8 +99,7 @@ void main() {
 
   testWidgets('行タップで詳細が開き、予約席レイアウト（結論・理由・具体例・IV）を持つ', (tester) async {
     await _openLayer3QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     expect(find.byType(DiceActionRow), findsOneWidget);
     expect(find.byType(PrepLabelRow), findsOneWidget);
@@ -119,8 +120,7 @@ void main() {
 
   testWidgets('結論・理由・具体例をすべて記入すると橙色になり、一覧の進捗に反映される', (tester) async {
     await _openLayer3QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     Future<void> fillField(IconData icon, String text) async {
       await tester.tap(find.byIcon(icon));
@@ -157,8 +157,7 @@ void main() {
     final firstBody = all.first.body;
 
     await _openLayer3QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.tap(find.byType(LayerNumeralBadge));
     await tester.pump(_tapConfirmWait);
@@ -176,8 +175,7 @@ void main() {
     tester,
   ) async {
     await _openLayer3QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     // レイヤーⅡは今回のセッションでまだ一度も訪れていない（_modeが未選択の
     // まま）状態で、詳細画面上端の常設ヘッダー「Ⅱ」をタップする。
@@ -191,8 +189,7 @@ void main() {
 
   testWidgets('結論・理由・具体例・IVをダブルタップすると機能ヒントが出て、単タップの動作は実行されない', (tester) async {
     await _openLayer3QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     Future<void> doubleTap(Finder finder) async {
       await tester.tap(finder);
@@ -228,8 +225,7 @@ void main() {
     final secondRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).at(1),
     );
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
     expect(find.text(firstRow.body), findsOneWidget);
 
     // 先頭なので「前」（▲）は無く、「次」（▼）だけ出る。

@@ -18,6 +18,7 @@ class LongArticleActionRow extends StatelessWidget {
     required this.onEnrich,
     this.onEnrichLongPress,
     required this.onVocabulary,
+    this.onVocabularyLongPress,
     required this.onNext,
     this.languageCode = 'vi',
     this.enableActionHints = false,
@@ -31,6 +32,11 @@ class LongArticleActionRow extends StatelessWidget {
   final VoidCallback? onEnrichLongPress;
 
   final VoidCallback onVocabulary;
+
+  /// 「単語帳」の長押し。フロー本体に「＋」が無いため、使い方シート
+  /// （[LayerHelpSheet]）を出す入口としてここに割り当てる。
+  final VoidCallback? onVocabularyLongPress;
+
   final VoidCallback onNext;
 
   /// ツールチップ等の表示言語（`appSettings.language`）。
@@ -67,8 +73,12 @@ class LongArticleActionRow extends StatelessWidget {
             tooltip: '単語帳'.tr(lang),
             visible: true,
             onTap: onVocabulary,
+            onLongPress: onVocabularyLongPress,
             borderless: true,
             hintTapText: enableActionHints ? '単語帳'.tr(lang) : null,
+            hintLongPressText: enableActionHints && onVocabularyLongPress != null
+                ? 'ボタンヒント_単語帳_長押し'.tr(lang)
+                : null,
           ),
         ),
         const SizedBox(width: 12),
@@ -79,7 +89,7 @@ class LongArticleActionRow extends StatelessWidget {
             visible: true,
             onTap: onNext,
             borderless: true,
-            hintTapText: enableActionHints ? '次へ'.tr(lang) : null,
+            hintTapText: enableActionHints ? '長文読解_次へヒント'.tr(lang) : null,
           ),
         ),
       ],

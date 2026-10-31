@@ -6,18 +6,23 @@ import 'package:flutter/services.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../models/long_article.dart';
+import '../../models/saved_vocabulary_check.dart';
 import '../../services/long_article_service.dart';
+import '../../services/vocabulary_check_storage.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/history_timestamp.dart';
 import '../../widgets/confirm_history_delete_dialog.dart';
 import '../../widgets/osm_subpage_scaffold.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
-import 'long_article_reader_screen.dart';
+import 'long_article_flow_screen.dart';
+import 'vocabulary_check_detail_screen.dart';
 
 /// 保存済み長文の一覧。既定（[selectionMode]がfalse）ではタップで
-/// [LongArticleReaderScreen]（Step 3の読解画面を再利用）を開き、単語登録を
-/// 続けられる。削除・並び替え・お気に入りは[VocabularySheet]の並び替え
-/// （ドラッグハンドル＋`reorderEntries`）と同型のパターンを長文向けに移植した。
+/// [Layer1LongReadingScreen]（`initialArticle`付き）を開き、読解→
+/// （1秒チェック）→（語彙テスト）の一連を通しで辿れる（単語登録も続けられる。
+/// 保存済みなので終了時に複製・再保存はしない）。削除・並び替え・お気に入りは
+/// [VocabularySheet]の並び替え（ドラッグハンドル＋`reorderEntries`）と同型の
+/// パターンを長文向けに移植した。
 ///
 /// [selectionMode]がtrueのときは、読解画面を自前で開かず、タップした
 /// [LongArticle]をそのまま[Navigator.pop]で呼び出し元へ返す（レイヤーⅠの
@@ -95,15 +100,55 @@ class _LongArticleListScreenState extends State<LongArticleListScreen> {
     setState(() => _articles = updated);
   }
 
+  /// 一覧からの閲覧も、読解→（1秒チェック）→（語彙テスト）の一連に載せる
+  /// （[Layer1LongReadingScreen]を`initialArticle`付きで再利用。保存済み
+  /// なので終了時に複製・再保存はされない）。
   Future<void> _openArticle(LongArticle article) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => SwipeToCloseWrapper(
-          child: LongArticleReaderScreen(
-            body: article.body,
-            onFinish: () => Navigator.of(context).pop(),
+          child: Layer1LongReadingScreen(
+            initialArticle: article,
+            onBackToModeSelect: () => Navigator.of(context).pop(),
           ),
         ),
+      ),
+    );
+    // 語彙テストの採点でcounts/lastVocabularyCheckIdが変わっている可能性が
+    // あるため、一覧へ戻ったら読み直す。
+    await _load();
+  }
+
+  /// 正解率タップ時: [LongArticle.lastVocabularyCheckId]があれば履歴から
+  /// 該当[SavedVocabularyCheck]を探し、[VocabularyCheckDetailScreen]を開く。
+  /// 未実施（[LongArticle.hasVocabTestResult]がfalse）なら何もしない。
+  /// IDはあるが履歴側の記録が見つからない（削除済み等）場合はSnackBarで
+  /// 案内する（新規の簡易詳細画面は作らない）。
+  Future<void> _onAccuracyTap(LongArticle article) async {
+    if (!article.hasVocabTestResult) return;
+    final checkId = article.lastVocabularyCheckId;
+    SavedVocabularyCheck? check;
+    if (checkId != null) {
+      final checks = await VocabularyCheckStorage().loadAll();
+      for (final candidate in checks) {
+        if (candidate.id == checkId) {
+          check = candidate;
+          break;
+        }
+      }
+    }
+    if (!mounted) return;
+    if (check == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('長文読解_語彙_結果詳細なし'.tr(appSettings.language)),
+        ),
+      );
+      return;
+    }
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => VocabularyCheckDetailScreen(check: check!),
       ),
     );
   }
@@ -142,11 +187,13 @@ class _LongArticleListScreenState extends State<LongArticleListScreen> {
                   index: index,
                   article: article,
                   lang: lang,
+                  selectionMode: widget.selectionMode,
                   onTap: widget.selectionMode
                       ? () => Navigator.of(context).pop(article)
                       : () => _openArticle(article),
                   onToggleFavorite: () => _toggleFavorite(article.id),
                   onDelete: () => _delete(article.id),
+                  onAccuracyTap: () => _onAccuracyTap(article),
                 );
               },
             ),
@@ -160,17 +207,30 @@ class _LongArticleListTile extends StatelessWidget {
     required this.index,
     required this.article,
     required this.lang,
+    required this.selectionMode,
     required this.onTap,
     required this.onToggleFavorite,
     required this.onDelete,
+    required this.onAccuracyTap,
   });
 
   final int index;
   final LongArticle article;
   final String lang;
+
+  /// trueのときは行全体のタップが「選んで返す」を担うため、正解率テキストは
+  /// 独立してタップ可能にしない（既存の一覧選択UXを壊さない）。
+  final bool selectionMode;
   final VoidCallback onTap;
   final VoidCallback onToggleFavorite;
   final VoidCallback onDelete;
+  final VoidCallback onAccuracyTap;
+
+  String _accuracyLabel(String lang) {
+    final accuracy = article.vocabTestAccuracy;
+    final value = accuracy == null ? 'ー' : '${(accuracy * 100).round()}%';
+    return '長文読解_正解率'.trFmt(lang, [value]);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -231,15 +291,46 @@ class _LongArticleListTile extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          formatHistoryTimestamp(
-                            article.createdAt,
-                            languageCode: lang,
-                          ),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: palette.textOnCardSecondary,
-                          ),
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                formatHistoryTimestamp(
+                                  article.createdAt,
+                                  languageCode: lang,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: palette.textOnCardSecondary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            selectionMode
+                                ? Text(
+                                    _accuracyLabel(lang),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: palette.textOnCardSecondary,
+                                    ),
+                                  )
+                                : GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: onAccuracyTap,
+                                    child: Text(
+                                      _accuracyLabel(lang),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: article.hasVocabTestResult
+                                            ? palette.accentColor
+                                            : palette.textOnCardSecondary,
+                                      ),
+                                    ),
+                                  ),
+                          ],
                         ),
                       ],
                     ),

@@ -135,6 +135,9 @@ void main() {
       hitStars: 2,
       prepAdvice: 'PREPアドバイス',
       hitAdvice: '的中度アドバイス',
+      modelAnswer: 'わたしは、そう思います。',
+      modelAnswerRomaji: 'Watashi wa, sou omoimasu.',
+      modelAnswerVi: 'Tôi nghĩ như vậy.',
     );
     await storage.save(original);
 
@@ -144,6 +147,9 @@ void main() {
     expect(loaded.hitStars, 2);
     expect(loaded.prepAdvice, 'PREPアドバイス');
     expect(loaded.hitAdvice, '的中度アドバイス');
+    expect(loaded.modelAnswer, 'わたしは、そう思います。');
+    expect(loaded.modelAnswerRomaji, 'Watashi wa, sou omoimasu.');
+    expect(loaded.modelAnswerVi, 'Tôi nghĩ như vậy.');
   });
 
   test('AI評価が未送信の旧データはPREP・的中度がnullのまま壊れず読み込める', () async {

@@ -60,6 +60,9 @@ abstract final class PrepHitAiResponseParser {
           decoded['prepAdvice'] ?? decoded['predAdvice'],
         ),
         hitAdvice: _trimmedStringOrNull(decoded['hitAdvice']),
+        modelAnswer: _trimmedStringOrNull(decoded['modelAnswer']),
+        modelAnswerRomaji: _trimmedStringOrNull(decoded['modelAnswerRomaji']),
+        modelAnswerVi: _trimmedStringOrNull(decoded['modelAnswerVi']),
       ),
     );
   }

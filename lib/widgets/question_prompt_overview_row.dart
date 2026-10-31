@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/question_prompt.dart';
 import '../theme/app_colors.dart';
 import 'layer_numeral_badge.dart';
+import 'question_prompt_list_hints.dart';
 
 /// 起動画面から開く横断問題文一覧の1行。
 ///
@@ -10,12 +11,14 @@ import 'layer_numeral_badge.dart';
 /// [LayerNumeralIcon]（実施済=塗り、未実施=枠線）。総評が ⭕️ のときだけ
 /// そのセルをタップでき、[onSummaryTap]で総評画面へ進む。Ⅰ〜Ⅴは
 /// [onLayerTap]が渡されていればタップで該当レイヤー詳細へ進む。
+/// [onBodyLongPress]で本文長押し時に編集画面へ進む（タップは何もしない）。
 class QuestionPromptOverviewRow extends StatelessWidget {
   const QuestionPromptOverviewRow({
     super.key,
     required this.prompt,
     required this.onSummaryTap,
     this.onLayerTap,
+    this.onBodyLongPress,
   });
 
   final QuestionPrompt prompt;
@@ -23,6 +26,7 @@ class QuestionPromptOverviewRow extends StatelessWidget {
 
   /// 0=Ⅰ〜4=Ⅴ。nullならレイヤーアイコンは非インタラクティブ。
   final ValueChanged<int>? onLayerTap;
+  final VoidCallback? onBodyLongPress;
 
   /// 各レイヤー列の幅（ヘッダーと揃える）。
   static const double layerColumnWidth = 30;
@@ -52,9 +56,11 @@ class QuestionPromptOverviewRow extends StatelessWidget {
           SizedBox(
             width: 36,
             child: showSummary
-                ? InkWell(
+                ? GestureDetector(
                     onTap: onSummaryTap,
-                    borderRadius: BorderRadius.circular(8),
+                    onDoubleTap: () =>
+                        QuestionPromptListHints.showOverviewSummary(context),
+                    behavior: HitTestBehavior.opaque,
                     child: const Padding(
                       padding: EdgeInsets.symmetric(vertical: 4),
                       child: Text(
@@ -64,12 +70,17 @@ class QuestionPromptOverviewRow extends StatelessWidget {
                       ),
                     ),
                   )
-                : Text(
-                    'ー',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: palette.textOnSceneSecondary,
+                : GestureDetector(
+                    onDoubleTap: () =>
+                        QuestionPromptListHints.showOverviewSummary(context),
+                    behavior: HitTestBehavior.opaque,
+                    child: Text(
+                      'ー',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: palette.textOnSceneSecondary,
+                      ),
                     ),
                   ),
           ),
@@ -83,9 +94,11 @@ class QuestionPromptOverviewRow extends StatelessWidget {
                         size: 22,
                         filled: _layerDone(prompt, i),
                       )
-                    : InkWell(
+                    : GestureDetector(
                         onTap: () => onLayerTap(i),
-                        customBorder: const CircleBorder(),
+                        onDoubleTap: () =>
+                            QuestionPromptListHints.showOverviewLayer(context),
+                        behavior: HitTestBehavior.opaque,
                         child: Padding(
                           padding: const EdgeInsets.all(2),
                           child: LayerNumeralIcon(
@@ -98,12 +111,34 @@ class QuestionPromptOverviewRow extends StatelessWidget {
               ),
             ),
           Expanded(
-            child: Text(
-              prompt.body,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 14, color: palette.textOnScenePrimary),
-            ),
+            child: onBodyLongPress == null
+                ? Text(
+                    prompt.body,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: palette.textOnScenePrimary,
+                    ),
+                  )
+                : GestureDetector(
+                    onLongPress: onBodyLongPress,
+                    onDoubleTap: () =>
+                        QuestionPromptListHints.showOverviewBody(context),
+                    behavior: HitTestBehavior.opaque,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        prompt.body,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: palette.textOnScenePrimary,
+                        ),
+                      ),
+                    ),
+                  ),
           ),
         ],
       ),

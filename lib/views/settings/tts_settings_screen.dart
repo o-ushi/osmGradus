@@ -6,12 +6,14 @@ import 'package:flutter/material.dart';
 
 import '../../data/app_languages.dart';
 import '../../localization/app_strings.dart';
-import '../../main.dart' show appSettings, jsstCalibrationPreferences;
+import '../../main.dart'
+    show appSettings, cloudSync, jsstCalibrationPreferences;
 import '../../models/long_article_word_selection_mode.dart';
 import '../../models/vocab_answer_mode.dart';
 import '../../services/app_logger.dart';
 import '../../services/app_preferences.dart';
 import '../../services/app_reset.dart';
+import '../../services/cloud_sync/cloud_sync_service.dart';
 import '../../services/dashboard_advice_storage.dart';
 import '../../services/jsst_calibration_service.dart';
 import '../../services/native_tts_platform.dart';
@@ -22,10 +24,12 @@ import '../../services/topic_speech_reader.dart';
 import '../../services/tts_settings_service.dart';
 import '../../services/vocabulary_check_storage.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/history_timestamp.dart';
 import '../../widgets/osm_subpage_scaffold.dart';
 import '../../widgets/settings_section.dart';
 import 'alarm_sound_picker_screen.dart';
 import 'privacy_data_screen.dart';
+import 'question_prompt_tab_settings_screen.dart';
 import 'speech_recognition_debug_log_view.dart';
 
 /// アプリ設定画面。言語→読み上げ→タイマー音→データ（採点結果リセット/初期化）
@@ -314,6 +318,17 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
                 ],
               ),
 
+              // ─── 問題文 ───────────────────────────────────────
+              SettingsSectionHeader('問題文'.tr(lang), icon: Icons.label_outline),
+              SettingsSectionCard(
+                children: [
+                  SettingsNavigationRow(
+                    label: '問題文タブの管理'.tr(lang),
+                    onTap: () => QuestionPromptTabSettingsScreen.push(context),
+                  ),
+                ],
+              ),
+
               // ─── データ ───────────────────────────────────────
               SettingsSectionHeader('データ'.tr(lang), icon: Icons.import_export),
               SettingsSectionCard(
@@ -361,6 +376,9 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
                 ],
               ),
 
+              // ─── iCloud同期（iPhoneのみ。Androidでは出さない） ────
+              if (cloudSync case final sync?) _CloudSyncSection(sync: sync),
+
               // ─── 案内（スタートアップ・使い方） ─────────────────
               SettingsSectionHeader('案内'.tr(lang)),
               SettingsSectionCard(
@@ -376,6 +394,7 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
                     label: '使い方画面'.tr(lang),
                     subtitle: '使い方画面_説明'.tr(lang),
                     value: appSettings.showUsageScreen,
+                    enabled: appSettings.showStartupScreen,
                     onChanged: (value) => appSettings.showUsageScreen = value,
                   ),
                 ],
@@ -571,6 +590,100 @@ class _SpeechRateRow extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// iCloud同期（osmNichinichiの設定と同じ要素: オン／オフ・未サインインの注意・
+/// 最終同期・今すぐ同期・エラー）。
+class _CloudSyncSection extends StatelessWidget {
+  const _CloudSyncSection({required this.sync});
+
+  final CloudSyncService sync;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: sync,
+      builder: (context, _) {
+        final lang = appSettings.language;
+        final enabled = sync.isEnabled;
+        final unavailable =
+            sync.status == CloudSyncStatus.unavailable ||
+            sync.icloudAvailable == false;
+        final last = sync.lastSyncDate;
+        final errorText = switch (sync.error) {
+          CloudSyncError.tooLarge => 'iCloud同期_容量超過'.trFmt(lang, [
+            ((sync.errorBytes ?? 0) / 1000000).toStringAsFixed(1),
+          ]),
+          CloudSyncError.failed => 'iCloud同期_失敗'.tr(lang),
+          null => null,
+        };
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SettingsSectionHeader(
+              'iCloud同期'.tr(lang),
+              icon: Icons.cloud_sync_outlined,
+            ),
+            SettingsSectionCard(
+              children: [
+                SettingsSwitchRow(
+                  key: const ValueKey('settings-cloud-sync'),
+                  label: 'iCloudで同期する'.tr(lang),
+                  value: enabled,
+                  onChanged: (value) => sync.setEnabled(value),
+                ),
+                if (enabled && !unavailable) ...[
+                  const SettingsItemDivider(),
+                  SettingsValueRow(
+                    label: last == null
+                        ? 'iCloud同期_未同期'.tr(lang)
+                        : 'iCloud同期_最終同期'.tr(lang),
+                    value: last == null
+                        ? ''
+                        : formatHistoryDetailTimestamp(
+                            last,
+                            languageCode: lang,
+                          ),
+                  ),
+                  const SettingsItemDivider(),
+                  SettingsValueRow(
+                    key: const ValueKey('settings-cloud-sync-now'),
+                    label: sync.isWorking
+                        ? 'iCloud同期_同期中'.tr(lang)
+                        : 'iCloud同期_今すぐ同期'.tr(lang),
+                    value: '',
+                    enabled: !sync.isWorking,
+                    onTap: sync.manualSync,
+                  ),
+                ],
+              ],
+            ),
+            if (enabled && unavailable)
+              _CloudSyncWarning('iCloud同期_未サインイン'.tr(lang)),
+            if (enabled && errorText != null) _CloudSyncWarning(errorText),
+            SettingsNoteText('iCloud同期_説明'.tr(lang)),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CloudSyncWarning extends StatelessWidget {
+  const _CloudSyncWarning(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 2, 16, 4),
+      child: Text(
+        text,
+        style: const TextStyle(color: Colors.red, fontSize: 13),
       ),
     );
   }

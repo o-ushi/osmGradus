@@ -40,9 +40,16 @@ class AppSettings extends ChangeNotifier {
   /// 起動時のスタートアップ（案内）画面を出すか。
   bool get showStartupScreen => _prefs.showStartupScreen;
 
+  /// OFFにするときは使い方画面も一緒にOFFにする（不変条件：使い方は
+  /// スタートアップがONのときだけON。スタートアップだけ再度ONにしても
+  /// 使い方は自動では戻さない）。
   set showStartupScreen(bool value) {
-    if (_prefs.showStartupScreen == value) return;
+    final usageShouldTurnOff = !value && _prefs.showUsageScreen;
+    if (_prefs.showStartupScreen == value && !usageShouldTurnOff) return;
     _prefs.showStartupScreen = value;
+    if (usageShouldTurnOff) {
+      _prefs.showUsageScreen = false;
+    }
     notifyListeners();
   }
 

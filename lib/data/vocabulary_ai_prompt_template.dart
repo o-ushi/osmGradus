@@ -2,6 +2,7 @@ import '../models/vocab_test_session.dart';
 import '../models/vocabulary_entry.dart';
 import '../services/learner_answer_language.dart';
 import 'google_ai_search.dart';
+import 'learner_friendly_japanese.dart';
 
 /// レイヤーⅠ「語彙を増やす」単語テスト用のChrome AIプロンプト。
 /// [PronunciationAiPromptTemplate]と同じ組み立て方式を使うが、固定カテゴリを
@@ -25,7 +26,8 @@ abstract final class VocabularyAiPromptTemplate {
 }''';
 
   /// [questions]（出題した単語・読み・学習者の回答）を含めた語彙評価
-  /// プロンプトを組み立てる。
+  /// プロンプトを組み立てる。1秒チェックは既に機械採点済みなのでここには
+  /// 載せない。Chrome AIの結果へ後から先頭に付け足す。
   static String evaluationPrompt({
     required List<VocabTestQuestion> questions,
     required String lang,
@@ -202,7 +204,7 @@ abstract final class VocabularyAiPromptTemplate {
       jsonInstructionNote:
           'questionEvaluationsは出題順に質問と同じ件数だけ含めてください。'
           'overallScoreは1〜5の整数にしてください。feedbackとsummaryは'
-          '日本語で書いてください。',
+          '日本語で書いてください。$learnerFriendlyJapaneseAdvice',
     ),
   };
 }

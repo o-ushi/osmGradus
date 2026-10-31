@@ -67,63 +67,68 @@ class _TextEditSheetState extends State<TextEditSheet> {
           20,
           24 + MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: palette.cardBorder,
-                  borderRadius: BorderRadius.circular(2),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: palette.cardBorder,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: palette.textOnCardPrimary,
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              minLines: 3,
-              maxLines: 8,
-              style: TextStyle(color: palette.textOnCardPrimary, fontSize: 15),
-              decoration: InputDecoration(
-                hintText: widget.hintText,
-                hintStyle: TextStyle(color: palette.textOnCardSecondary),
-                filled: true,
-                fillColor: palette.subpageBackground,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+              const SizedBox(height: 16),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: palette.textOnCardPrimary,
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('キャンセル'.tr(lang)),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _controller,
+                autofocus: true,
+                minLines: 3,
+                maxLines: 8,
+                style: TextStyle(
+                  color: palette.textOnCardPrimary,
+                  fontSize: 15,
                 ),
-                const Spacer(),
-                FilledButton(
-                  onPressed: () =>
-                      Navigator.of(context).pop(_controller.text.trim()),
-                  child: Text('保存'.tr(lang)),
+                decoration: InputDecoration(
+                  hintText: widget.hintText,
+                  hintStyle: TextStyle(color: palette.textOnCardSecondary),
+                  filled: true,
+                  fillColor: palette.subpageBackground,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text('キャンセル'.tr(lang)),
+                  ),
+                  const Spacer(),
+                  FilledButton(
+                    onPressed: () =>
+                        Navigator.of(context).pop(_controller.text.trim()),
+                    child: Text('保存'.tr(lang)),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

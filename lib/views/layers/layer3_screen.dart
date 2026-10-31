@@ -6,7 +6,7 @@ import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings, topicSpeechReader;
 import '../../services/alarm_sound_service.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/category_select_field.dart';
+import '../../widgets/question_prompt_draw_select_field.dart';
 import '../../widgets/dice_action_row.dart';
 import '../../widgets/dice_topic_card.dart';
 import '../../widgets/genki_transport_row.dart';
@@ -36,7 +36,7 @@ class _Layer3ScreenState extends PracticeLayerScreenState<Layer3Screen>
     with ResetButtonVisibilityMixin {
   String _resetStateKey() => [
     buttonPhase.name,
-    selectedCategory.name,
+    drawSelection.labelKey,
     timerController.option.name,
     drawnTopic?.text ?? '',
   ].join('|');
@@ -126,10 +126,10 @@ class _Layer3ScreenState extends PracticeLayerScreenState<Layer3Screen>
               const SizedBox(height: 4),
               ListenableBuilder(
                 listenable: timerController,
-                builder: (context, _) => CategorySelectField(
-                  selected: selectedCategory,
-                  availableCategories: availableCategories,
-                  onChanged: onCategoryChanged,
+                builder: (context, _) => QuestionPromptDrawSelectField(
+                  selected: drawSelection,
+                  showSituational: showSituationalInDrawSelect,
+                  onChanged: onDrawSelectionChanged,
                 ),
               ),
               const SizedBox(height: 4),

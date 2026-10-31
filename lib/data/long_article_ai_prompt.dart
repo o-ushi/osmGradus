@@ -4,8 +4,17 @@ import 'google_ai_search.dart';
 /// 長文読解のキーワード画面で選んだ条件から、Chrome AIに1本の日本語読み物を
 /// 生成させるプロンプト。[VocabularyAiImportPrompt]と同じく、生成言語は
 /// 常に日本語固定（[GoogleAiSearch.withJapanesePrefix]）。
+///
+/// 1秒チェックに加え、語彙力テスト用の単語（最大[vocabMaxWords]語）も同じ
+/// 1往復で取得する（[QuestionPromptVocabExtractionAiPromptTemplate]と違い、
+/// 長文側は生成と抽出を別AI往復にしない）。訳語はアプリ表示言語に関わらず
+/// 英語（en）・ベトナム語（vi）を必ず両方取得する
+/// （[LongArticleVocabWord]がアプリ言語切替後の再生成を不要にするため）。
 abstract final class LongArticleAiPrompt {
   LongArticleAiPrompt._();
+
+  /// 語彙テスト用に抽出させる単語数の上限。
+  static const vocabMaxWords = 9;
 
   static String _jlptDescription(LongArticleJlptLevel level) => switch (level) {
     LongArticleJlptLevel.n1 => 'JLPT N1相当（上級）の語彙・文法を中心に使う、やや難しい文章',
@@ -37,18 +46,37 @@ abstract final class LongArticleAiPrompt {
         '  （語彙の暗記・発音・単純な言い換えを問う問題は不可）\n'
         '- 選択肢は短い日本語テキスト（1〜2文以内）にする\n'
         '- 正解（correctOption）は"A"または"B"のみ\n'
-        '- 解説（explanation）は1行で、なぜ正解か／なぜもう一方が違うかを書く\n'
+        '- 解説（explanation）は、なぜ正解か／なぜもう一方が違うかを、'
+        '日本語（ja）・英語（en）・ベトナム語（vi）の3言語でそれぞれ1行ずつ書く'
+        '（学習者が問題文の日本語を読めなくても解説は理解できるようにするため）\n'
         '- レイヤーⅠ（インプット確認）の範囲に閉じる\n'
         '\n'
+        'さらに、語彙暗記クイズ用に本文中の難語を最大$vocabMaxWords語抽出してください'
+        '（1秒チェックとは別役割）。\n'
+        '【語彙抽出】\n'
+        '- 除外: 代名詞・助詞・初級語・オノマトペ\n'
+        '- 優先: N1〜N2相当の抽象名詞・動詞・複合語\n'
+        '- $vocabMaxWords語未満可（0語は不可）\n'
+        '- 各語にword/reading/pos/jlpt/meaningEn（英訳）/meaningVi（越訳）/'
+        'example（日本語例文）/exampleTranslationEn/exampleTranslationViを必須'
+        '（訳は英越両方、再問い合わせ不要のため）\n'
+        '\n'
         '【出力形式（このJSON形式のみで回答し、前後に説明文を付けないでください）】\n'
-        '{"body": "（ここに生成した文章本文）", '
+        '{"body": "（本文）", '
         '"comprehensionCheck": {'
-        '"question": "（この文章から読み取れる内容を問う問題文）", '
-        '"optionA": "（選択肢A）", '
-        '"optionB": "（選択肢B）", '
+        '"question": "（問題文）", '
+        '"optionA": "（A）", '
+        '"optionB": "（B）", '
         '"correctOption": "A", '
-        '"explanation": "（1行解説）"'
-        '}}';
+        '"explanation": {'
+        '"ja": "（日本語解説）", "en": "（English)", "vi": "（Tiếng Việt）"'
+        '}'
+        '}, '
+        '"vocabTestWords": ['
+        '{"word": "", "reading": "", "pos": "", "jlpt": "", '
+        '"meaningEn": "", "meaningVi": "", "example": "", '
+        '"exampleTranslationEn": "", "exampleTranslationVi": ""}'
+        ']}';
   }
 
   static Uri buildSearchUrl(LongArticleGenerationSettings settings) =>
@@ -61,5 +89,6 @@ abstract final class LongArticleAiPrompt {
   /// （UI表示言語とは独立）。
   static ChromeAiLaunchPlan buildLaunchPlan(
     LongArticleGenerationSettings settings,
-  ) => GoogleAiSearch.buildLaunchPlan(prompt: buildPrompt(settings), lang: 'ja');
+  ) =>
+      GoogleAiSearch.buildLaunchPlan(prompt: buildPrompt(settings), lang: 'ja');
 }

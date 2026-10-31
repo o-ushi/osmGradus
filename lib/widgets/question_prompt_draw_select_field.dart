@@ -2,36 +2,34 @@ import 'package:flutter/material.dart';
 
 import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
-import '../models/topic_category.dart';
+import '../models/question_prompt_draw_selection.dart';
 import '../theme/app_colors.dart';
-import '../views/topics/category_select_sheet.dart';
+import '../views/topics/question_prompt_draw_select_sheet.dart';
 
-/// タップでカテゴリ一覧シート（`CategorySelectSheet`）を開く、
-/// osmWashabeのカテゴリPickerに相当するトリガー行。
-class CategorySelectField extends StatelessWidget {
-  const CategorySelectField({
+/// 問題文のカテゴリ／タブ選択シートを開くトリガー行。
+/// レイヤーⅡ〜Ⅳランダム・手動追加・編集などで使う。
+class QuestionPromptDrawSelectField extends StatelessWidget {
+  const QuestionPromptDrawSelectField({
     super.key,
     required this.selected,
+    required this.showSituational,
     required this.onChanged,
-    this.availableCategories = TopicCategory.values,
+    this.showRandom = true,
     this.onCardBackground = false,
   });
 
-  final TopicCategory selected;
-  final ValueChanged<TopicCategory> onChanged;
-
-  /// 一覧シートに表示する選択肢。既定は全カテゴリ。
-  final List<TopicCategory> availableCategories;
-
-  /// trueのとき[AiImportCard]など[cardFill]上に載せる想定で、
-  /// 文字色を[AppPalette.textOnCardPrimary]に切り替える。
+  final QuestionPromptDrawSelection selected;
+  final bool showSituational;
+  final bool showRandom;
+  final ValueChanged<QuestionPromptDrawSelection> onChanged;
   final bool onCardBackground;
 
   Future<void> _openSheet(BuildContext context) async {
-    final picked = await CategorySelectSheet.show(
+    final picked = await QuestionPromptDrawSelectSheet.show(
       context,
       selected: selected,
-      categories: availableCategories,
+      showSituational: showSituational,
+      showRandom: showRandom,
     );
     if (picked != null) onChanged(picked);
   }
@@ -61,7 +59,7 @@ class CategorySelectField extends StatelessWidget {
             const SizedBox(width: 8),
             Flexible(
               child: Text(
-                selected.labelKey().tr(lang),
+                selected.labelKey.tr(lang),
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 16,
@@ -70,11 +68,7 @@ class CategorySelectField extends StatelessWidget {
                 ),
               ),
             ),
-            Icon(
-              Icons.keyboard_arrow_down,
-              color: textColor,
-              size: 22,
-            ),
+            Icon(Icons.keyboard_arrow_down, color: textColor, size: 22),
           ],
         ),
       ),

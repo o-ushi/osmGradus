@@ -1,6 +1,7 @@
 import '../models/pronunciation_exercise.dart';
 import '../models/question_prompt.dart';
 import 'google_ai_search.dart';
+import 'learner_friendly_japanese.dart';
 import 'jsst_reference_samples.dart';
 
 /// 総評画面（Step 7）用：1問題文についてレイヤーⅠ〜Ⅴを横断した結果から
@@ -175,7 +176,7 @@ abstract final class QuestionPromptSummaryAiPromptTemplate {
           'この問題文に絞って、できていた点・次に直すべき点・具体的な'
           '練習方法を、簡潔で実行可能な総合アドバイスとして書いてください。'
           'プレーンテキストのみで回答し（JSONや見出し記法は不要）、'
-          '4〜8文程度にまとめてください。',
+          '4〜8文程度にまとめてください。$learnerFriendlyJapaneseAdvice',
     ),
   };
 }

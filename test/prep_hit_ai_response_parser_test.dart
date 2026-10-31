@@ -6,7 +6,7 @@ void main() {
   group('PrepHitAiResponseParser', () {
     test('正常なJSONを解析できる', () {
       final result = PrepHitAiResponseParser.parse('''
-{"prepStars": 4, "hitStars": 2, "prepAdvice": "結論を先に。", "hitAdvice": "質問に沿って。"}
+{"prepStars": 4, "hitStars": 2, "prepAdvice": "結論を先に。", "hitAdvice": "質問に沿って。", "modelAnswer": "週末は、映画を見ます。"}
 ''');
 
       expect(result.isSuccess, isTrue);
@@ -14,6 +14,36 @@ void main() {
       expect(result.evaluation!.hitStars, 2);
       expect(result.evaluation!.prepAdvice, '結論を先に。');
       expect(result.evaluation!.hitAdvice, '質問に沿って。');
+      expect(result.evaluation!.modelAnswer, '週末は、映画を見ます。');
+    });
+
+    test('模範回答のローマ字・ベトナム語訳を読み取る（無ければnull）', () {
+      final result = PrepHitAiResponseParser.parse(
+        '{"prepStars": 4, "hitStars": 4, "modelAnswer": "週末は映画を見ます。", '
+        '"modelAnswerRomaji": "Shuumatsu wa eiga o mimasu.", '
+        '"modelAnswerVi": "Cuối tuần tôi xem phim."}',
+      );
+      expect(
+        result.evaluation!.modelAnswerRomaji,
+        'Shuumatsu wa eiga o mimasu.',
+      );
+      expect(result.evaluation!.modelAnswerVi, 'Cuối tuần tôi xem phim.');
+
+      final legacy = PrepHitAiResponseParser.parse(
+        '{"prepStars": 4, "hitStars": 4, "modelAnswer": "週末は映画を見ます。"}',
+      );
+      expect(legacy.evaluation!.modelAnswer, '週末は映画を見ます。');
+      expect(legacy.evaluation!.modelAnswerRomaji, isNull);
+      expect(legacy.evaluation!.modelAnswerVi, isNull);
+    });
+
+    test('模範回答が空文字ならnullになる', () {
+      final result = PrepHitAiResponseParser.parse(
+        '{"prepStars": 2, "hitStars": 2, "modelAnswer": "  "}',
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(result.evaluation!.modelAnswer, isNull);
     });
 
     test('前後に説明文が付いていても抽出できる', () {

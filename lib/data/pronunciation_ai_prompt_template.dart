@@ -1,6 +1,7 @@
 import '../models/pronunciation_exercise.dart';
 import '../models/pronunciation_practice_session.dart';
 import 'google_ai_search.dart';
+import 'learner_friendly_japanese.dart';
 import 'pronunciation_ai_json_schema.dart';
 
 /// レイヤーⅤ「うまく日本語を発音できない」用のChrome AIプロンプト。
@@ -133,7 +134,8 @@ abstract final class PronunciationAiPromptTemplate {
       formatHeading: '【出力フォーマット（必ず次のJSON形式のみで回答し、前後に説明文を付けないでください）】',
       jsonInstructionNote:
           'scoreは1〜5の整数、confidenceはlow/medium/highのいずれかにしてください。'
-          'feedbackとsummaryは日本語で書いてください。',
+          'feedbackとsummaryは日本語で書いてください。'
+          '$learnerFriendlyJapaneseAdvice',
     ),
   };
 

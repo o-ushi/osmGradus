@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +10,11 @@ import '../../controllers/prep_stage_controller.dart';
 import '../../main.dart' show appSettings, topicSpeechReader, ttsSettings;
 import '../../models/drawn_topic.dart';
 import '../../models/practice_timer_models.dart';
+import '../../models/question_prompt.dart';
+import '../../models/question_prompt_draw_selection.dart';
 import '../../models/topic_category.dart';
 import '../../services/alarm_sound_service.dart';
+import '../../services/question_prompt_service.dart';
 import '../../services/recording_stt_service.dart';
 import '../../services/screen_wake_service.dart';
 import '../../services/tick_beep_player.dart';
@@ -28,7 +32,9 @@ import '../../widgets/speech_processing_consent_dialog.dart';
 abstract class PracticeLayerScreenState<T extends StatefulWidget>
     extends State<T> {
   final topicService = TopicService();
+  final questionPromptService = QuestionPromptService();
   final recordingService = RecordingSttService();
+  final _idRandom = Random();
 
   late final prepStageController = PrepStageController();
   late final timerController = PracticeTimerController(
@@ -39,6 +45,8 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
   );
 
   TopicCategory selectedCategory = TopicCategory.general;
+  QuestionPromptDrawSelection drawSelection =
+      const QuestionPromptDrawSelection.generalRandom();
   DrawnTopic? drawnTopic;
   TopicSpeakerTimerPhase buttonPhase = TopicSpeakerTimerPhase.idle;
 
@@ -85,22 +93,8 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
   /// （読み上げ中・カウントダウン中のまま裏に回って動き続けないようにするため）。
   Future<void> resetAttempt();
 
-  /// シチュエーションはosmWashabeと同じく「15+60秒」モード専用。分野は
-  /// その他（[TopicCategory.general]）／シチュエーションの2つのみ
-  /// （`question-prompt-tabs.md` Step 3、旧日常／ビジネスの3分類UIは廃止）。
-  List<TopicCategory> get availableCategories =>
-      timerController.usesTwoPhaseTimer
-      ? const [TopicCategory.general, TopicCategory.situational]
-      : const [TopicCategory.general];
-
-  /// 読み上げ中・カウントダウン中にレイヤー切替・分野変更・プリセット変更が
-  /// 起きたとき、裏で動き続けないよう「リセット」ボタンと同じ処理を挟む
-  /// 共通ガード。アイドル中は何もしない。
-  void _resetIfActive() {
-    if (buttonPhase != TopicSpeakerTimerPhase.idle) {
-      unawaited(resetAttempt());
-    }
-  }
+  /// シチュエーションはosmWashabeと同じく「15+60秒」モード専用。
+  bool get showSituationalInDrawSelect => timerController.usesTwoPhaseTimer;
 
   void onPresetTap(NormalTimerOption option) {
     // timerController.setOption自体はタイマーの秒数を静かに作り直すだけで、
@@ -110,22 +104,37 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
     // 45/60秒モードへ切り替えたとき、シチュエーションが選ばれていたら
     // osmWashabeと同じくリセットする（他のモードでは選べないため）。
     if (option != NormalTimerOption.prep15speaking60 &&
-        selectedCategory == TopicCategory.situational) {
+        drawSelection.kind == QuestionPromptDrawKind.situational) {
       setState(() {
+        drawSelection = const QuestionPromptDrawSelection.generalRandom();
         selectedCategory = TopicCategory.general;
         drawnTopic = null;
       });
     }
   }
 
-  /// 分野セレクタの変更。レイヤーⅢ・Ⅳの`CategorySelectField.onChanged`に
-  /// そのまま渡す共通実装。
-  void onCategoryChanged(TopicCategory category) {
+  /// カテゴリ／タブ選択シートの変更。レイヤーⅢ・Ⅳの
+  /// [QuestionPromptDrawSelectField.onChanged]に渡す。
+  void onDrawSelectionChanged(QuestionPromptDrawSelection selection) {
     _resetIfActive();
     setState(() {
-      selectedCategory = category;
+      drawSelection = selection;
+      selectedCategory = selection.category;
       drawnTopic = null;
     });
+  }
+
+  /// [drawSelection]に従い[QuestionPromptService]のプールから1件抽選する。
+  /// 該当0件のときはnull。
+  Future<QuestionPrompt?> drawRandomQuestionPrompt() async {
+    final all = await questionPromptService.loadAll();
+    final prompts = questionPromptService.filter(
+      all,
+      category: drawSelection.category,
+      tag: drawSelection.filterTag,
+    );
+    if (prompts.isEmpty) return null;
+    return prompts[_idRandom.nextInt(prompts.length)];
   }
 
   Future<void> onButtonTap() async {
@@ -143,12 +152,29 @@ abstract class PracticeLayerScreenState<T extends StatefulWidget>
     }
   }
 
-  /// 実際にどのお題を読み上げるかを決める。既定はサイコロ抽選
-  /// （[TopicService.drawRandom]）。レイヤーⅣの「一覧から選ぶ」経由
-  /// （特定の[QuestionPrompt]に固定された詳細画面）はこれをオーバーライドし、
-  /// 抽選をスキップして固定の問題文をそのまま返す
-  /// （録音・タイマー・採点のエンジン自体は共通のまま再利用するため）。
-  Future<DrawnTopic> pickTopic() => topicService.drawRandom(selectedCategory);
+  /// 実際にどのお題を読み上げるかを決める。既定は[drawRandomQuestionPrompt]
+  /// で[QuestionPromptService]から抽選する。レイヤーⅣの「一覧から選ぶ」
+  /// 経由はオーバーライドして固定の問題文を返す。
+  Future<DrawnTopic> pickTopic() async {
+    final prompt = await drawRandomQuestionPrompt();
+    if (prompt == null) {
+      return topicService.drawRandom(drawSelection.category);
+    }
+    return DrawnTopic(
+      category: prompt.category,
+      text: prompt.body,
+      subtext: prompt.situationCondition,
+    );
+  }
+
+  /// 読み上げ中・カウントダウン中にレイヤー切替・分野変更・プリセット変更が
+  /// 起きたとき、裏で動き続けないよう「リセット」ボタンと同じ処理を挟む
+  /// 共通ガード。アイドル中は何もしない。
+  void _resetIfActive() {
+    if (buttonPhase != TopicSpeakerTimerPhase.idle) {
+      unawaited(resetAttempt());
+    }
+  }
 
   Future<void> drawAndSpeak() async {
     final topic = await pickTopic();

@@ -1,4 +1,6 @@
 import '../data/thinking_matrix_presets.dart';
+import '../localization/app_strings.dart';
+import '../main.dart' show appSettings;
 import '../models/thinking_matrix_cell.dart';
 import '../models/thinking_matrix_cell_status.dart';
 import '../models/thinking_matrix_set.dart';
@@ -16,6 +18,16 @@ class ThinkingMatrixService {
     toJson: (set) => set.toJson(),
     idOf: (set) => set.id,
   );
+
+  /// 25マス拡充度（`thinking-matrix-expansion-dashboard.md`）の母数65マスを
+  /// 構成する、日常／ビジネス／シチュエーションの安定ID。オリジナルや
+  /// ユーザーが追加で作った同カテゴリセットはここに含めない
+  /// （拡充度の計算・[ensureSystemPresets]の対象外）。
+  static const systemSetIds = <TopicCategory, String>{
+    TopicCategory.daily: 'tm_system_daily',
+    TopicCategory.business: 'tm_system_business',
+    TopicCategory.situational: 'tm_system_situational',
+  };
 
   Future<List<ThinkingMatrixSet>> loadAll() => _store.loadAll();
 
@@ -91,6 +103,40 @@ class ThinkingMatrixService {
     );
     await save(set);
     return set;
+  }
+
+  /// 25マス拡充度（Step 1）: 日常／ビジネス／シチュエーションの3セット
+  /// （[systemSetIds]の安定ID）が無ければ、空セル付きで作成する。
+  /// 拡充度の母数は常にこの65マス（25+25+15）分であるべきなので、
+  /// レイヤーⅡ／Ⅲの25マス画面・ダッシュボードの読込前など、複数箇所から
+  /// 冪等に呼べる（既に3セットとも揃っていれば何もしない）。
+  ///
+  /// 既存の同IDセットがあれば中身には一切触れない（ユーザーの進捗を守る。
+  /// 「IDが無ければ作るだけ」に留め、カテゴリ・列・テーマの食い違いを検出
+  /// しての修復はしない）。
+  ///
+  /// 削除ポリシー: システムセットも他のセットと同じ操作（スワイプ削除等）で
+  /// 削除できる（既存の25マス一覧UXを変えない）。削除された場合、次回この
+  /// メソッドが呼ばれたタイミングで空の新規セットとして再生成する
+  /// （削除前の進捗は戻らない）。
+  Future<void> ensureSystemPresets() async {
+    final all = await loadAll();
+    final existingIds = all.map((s) => s.id).toSet();
+    final lang = appSettings.language;
+    for (final entry in systemSetIds.entries) {
+      if (existingIds.contains(entry.value)) continue;
+      final category = entry.key;
+      final set = ThinkingMatrixSet.create(
+        id: entry.value,
+        title: category.storageKey.tr(lang),
+        category: category,
+        themes: ThinkingMatrixPresets.themesFor(
+          category,
+        ).map(ThinkingTheme.create).toList(),
+        columns: ThinkingMatrixPresets.columnsFor(category),
+      );
+      await save(set);
+    }
   }
 
   Future<ThinkingMatrixSet> renameSet(String id, String title) async {

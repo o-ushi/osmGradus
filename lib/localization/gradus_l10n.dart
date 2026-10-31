@@ -7,6 +7,18 @@ abstract final class GradusL10n {
   };
 
   static const _ja = <String, String>{
+    'iCloud同期': 'iCloud同期',
+    'iCloudで同期する': 'iCloudで同期する',
+    'iCloud同期_説明':
+        '単語帳・問題文・長文・採点や単語テストの履歴・Podcastの番組とエピソードの再生位置・読み上げなどの設定を、同じApple IDのiPhoneどうしで同期します。表示言語・案内の表示・音声送信の同意は端末ごとです。録音した音声は同期しません。',
+    'iCloud同期_未サインイン':
+        'iCloudにサインインしていないため同期できません。設定アプリでApple IDにサインインし、iCloudをオンにしてください。',
+    'iCloud同期_最終同期': '最終同期',
+    'iCloud同期_未同期': 'まだ同期していません',
+    'iCloud同期_今すぐ同期': '今すぐ同期',
+    'iCloud同期_同期中': '同期中…',
+    'iCloud同期_失敗': 'iCloudと同期できませんでした。しばらくしてから「今すぐ同期」をお試しください。',
+    'iCloud同期_容量超過': 'データ（%@ MB）がiCloud同期の上限（1 MB）を超えているため、送れませんでした。',
     '採点結果をリセット': '採点結果をリセット',
     'コンセプトサブタイトル': '磨きたいレイヤーを\n選んでください',
     '起動_操作ヒント': '各画面の＋ボタン長押しで\n操作方法を確認できます',
@@ -20,10 +32,10 @@ abstract final class GradusL10n {
     '使い方画面_説明': 'Chrome AIのコピー方法や、＋の長押し・ダブルタップなどの基本操作を表示します',
     '使い方_タイトル': '使い方',
     '使い方_コピー本文':
-        'ChromeのAIモードで答えが出たら、画面の下のほうにあるコピーボタンをタップしてください。重なった2つの四角のアイコンです（下の写真の赤丸）。\n\nこのボタンを押さずにアプリへ戻ると、貼り付けできません。コピーできたら、osmGradusに戻ってください。',
+        'ChromeのAIモードで答えが出たら、画面の下のほうにあるコピーボタンをタップしてください。下の画像の赤い矢印と TAP! が指している、左端の重なった2つの四角です。\n\nこのボタンを押さずにアプリへ戻ると、貼り付けできません。コピーできたら、osmGradusに戻ってください。',
     '使い方_プラス長押し': '各画面の＋ボタンを長押しすると、その画面の操作方法が表示されます。',
     '使い方_ダブルタップ': 'ボタンをダブルタップすると、タップしたときと長押ししたときの動作がポップアップで表示されます。',
-    '使い方_コピー画像_説明': 'Chrome AIモードのコピーボタン（赤丸）',
+    '使い方_コピー画像_説明': 'Chrome AIモードのコピーボタン（赤い矢印と TAP!）',
     'ホーム画面へ': 'ホーム画面へ',
     '標準のJLPT語彙を含める': '標準のJLPT語彙を含める',
     '標準のJLPT語彙を含める_説明':
@@ -367,8 +379,15 @@ abstract final class GradusL10n {
     '問題文一覧_使い方_追加': '1️⃣ {{icon}} で問題文を追加できる',
     '問題文一覧_使い方_フィルタ': '2️⃣ {{icon}} で入手元・カテゴリ・タブ・実施状況を絞り込める',
     '問題文一覧_使い方_詳細': '3️⃣ 行をタップすると詳細が開く',
-    '問題文一覧_使い方_編集': '4️⃣ 本文を長押しすると問題文を編集できる',
+    '問題文一覧_使い方_編集': '4️⃣ 行を長押しすると問題文を編集できる',
     '問題文一覧_使い方_削除': '5️⃣ 行を左スワイプすると削除できる（標準問題文は削除できません）',
+    '問題文一覧_ヒント_追加_タップ': '問題文を追加',
+    '問題文一覧_ヒント_追加_長押し': '操作方法を表示',
+    '問題文一覧_ヒント_フィルタ_タップ': 'フィルタを開く',
+    '問題文一覧_ヒント_行_タップ': '問題を選択する',
+    '問題文一覧_ヒント_行_長押し': '問題文を編集',
+    '問題文横断一覧_ヒント_総評_タップ': '総評画面を開く',
+    '問題文横断一覧_ヒント_レイヤー_タップ': 'レイヤー詳細を開く',
     '問題文横断一覧_使い方_総評': '3️⃣ 総評列の「⭕️」（Ⅰ〜Ⅴのいずれか実施済み）をタップすると総評画面が開く',
     '問題文横断一覧_使い方_レイヤー': '4️⃣ Ⅰ〜Ⅴのマークをタップすると、その問題文の該当レイヤー詳細が開く（右スワイプでこの一覧に戻れる）',
     '本文': '本文',
@@ -381,6 +400,21 @@ abstract final class GradusL10n {
     '新しいタブ': '新しいタブ',
     'タブ名を入力': 'タブ名を入力',
     'タブを1つ以上選択してください': 'タブを1つ以上選択してください',
+    '問題文': '問題文',
+    '問題文タブの管理': '問題文タブの管理',
+    '問題文タブ_管理説明': '組み込みタブは変更できません。独自タブは名前の変更・削除ができます。削除すると、付いていた問題文からもタブが外れます。',
+    '組み込みタブ': '組み込みタブ',
+    '独自タブ': '独自タブ',
+    '独自タブはまだありません': '独自タブはまだありません',
+    'タブ名を変更': 'タブ名を変更',
+    'タブを削除': 'タブを削除',
+    'タブを変更しました': 'タブを変更しました',
+    'タブを削除しました': 'タブを削除しました',
+    'タブを追加しました': 'タブを追加しました',
+    'タブ名が既に使われています': 'タブ名が既に使われています',
+    'タブ_削除確認': '「%1」を削除しますか？',
+    'タブ_削除確認_使用中': '「%1」は%2件の問題文で使われています。削除すると、それらの問題文からもタブが外れます。よろしいですか？',
+    'タブ_使用件数': '%1件の問題文で使用中',
     '問題文を入力してください': '問題文を入力してください',
     'すべて': 'すべて',
     '組み込み': '組み込み',
@@ -476,6 +510,7 @@ abstract final class GradusL10n {
 
     // UXプランStep 7: ダブルタップの機能ヒント
     'ボタンヒント_タップ': 'タップ：%1',
+    'ボタンヒント_タップなし': 'なし',
     'ボタンヒント_長押し': '長押し：%1',
     'ボタンヒント_長押しなし': 'なし',
     'ボタンヒント_訳付_長押し': '自動送信で訳付け',
@@ -589,8 +624,11 @@ abstract final class GradusL10n {
     'help.gradus.overview.summary': '起動画面でレイヤーを選び、段階的に練習する。',
     'help.gradus.overview.tip1': 'Ⅰ〜Ⅴはいつでもヘッダーから切り替えられる',
     'help.gradus.overview.tip2': '各画面は右スワイプで閉じる',
-    'help.gradus.overview.tip3': '起動画面下の単語帳・ダッシュボード・問題文一覧・「…」から各機能を開く',
-    'help.gradus.overview.tip4': '言語は「…」→設定で日本語・English・Tiếng Việtから選べる',
+    'help.gradus.overview.tip3':
+        '起動画面下の単語帳・ダッシュボード・問題文一覧・「…」から各機能を開く。'
+        '問題文一覧は総評・Ⅰ〜Ⅴ・本文の横断一覧で、本文長押しで編集できる',
+    'help.gradus.overview.tip4':
+        '言語は「…」→設定、またはスタートアップ／使い方画面右上の国旗から、日本語・English・Tiếng Việtを選べる',
     'help.gradus.layer1.title': 'レイヤーⅠ：語彙とリスニング',
     'help.gradus.layer1.summary': '問題文解析・長文読解・語彙テストとPodcastで基礎を育てる',
     'help.gradus.layer1.tip1': 'はじめに「問題文解析」「長文読解」「語彙テスト」「日本語に耳を慣らす」から選ぶ',
@@ -615,11 +653,11 @@ abstract final class GradusL10n {
     'help.gradus.layer2.summary': '回答をイメージして瞬発力を鍛える',
     'help.gradus.layer2.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」「25マスで考える」「話題を増やす」から選ぶ',
     'help.gradus.layer2.tip2':
-        '「問題文一覧から選ぶ」では問題文一覧から選び、要約を記入する。'
-        '「解答例」ではChrome AIに45秒で話せる模範解答を作ってもらえる',
+        '「問題文一覧から選ぶ」では行タップで問題を選択し、行長押しで編集できる。'
+        '要約を記入する。「解答例」ではChrome AIに45秒で話せる模範解答を作ってもらえる',
     'help.gradus.layer2.tip3':
-        '「ランダム」ではサイコロで問題文を引き、どんな回答をするか想像する。'
-        'ここでも「解答例」ボタンでChrome AIに模範解答を依頼できる',
+        '「ランダム」では先にカテゴリ（趣味・健康…・ランダム・シチュエーション）を選び、'
+        'サイコロで問題文を引いて回答を想像する。ここでも「解答例」ボタンで模範解答を依頼できる',
     'help.gradus.layer2.tip4': '声に出さなくて良いから、どんな回答をするかイメージする',
     'help.gradus.layer2.tip5': '「話題を増やす」ではタップで直接Google検索が開く',
     'help.gradus.layer2.tip6': '「25マスで考える」ではテーマ×視点をキーワードで埋める。声に出さなくてもよい',
@@ -630,7 +668,9 @@ abstract final class GradusL10n {
     'help.gradus.layer3.summary': '話の型を身につける',
     'help.gradus.layer3.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」「25マスで考える」から選ぶ',
     'help.gradus.layer3.tip2': '一覧：結論・理由・具体例を記入する（評点ではない。評点はレイヤーⅣ）',
-    'help.gradus.layer3.tip3': 'ランダム：PREPガイド点灯に沿って話す。タイマーは45・60・15+60秒',
+    'help.gradus.layer3.tip3':
+        'ランダム：先にカテゴリを選び、サイコロで問題文を引く。'
+        'PREPガイド点灯に沿って話す。タイマーは45・60・15+60秒',
     'help.gradus.layer3.tip4': '母語で回答してOK',
     'help.gradus.layer3.tip5':
         '「25マスで考える」ではⅡで埋めたキーワードに結論・理由・例示を足して深掘りし、'
@@ -638,7 +678,7 @@ abstract final class GradusL10n {
     'help.gradus.layer3.tip6': '標準シートでの進み具合も、ダッシュボードの25マス拡充度に反映される',
     'help.gradus.layer4.title': 'レイヤーⅣ：採点',
     'help.gradus.layer4.summary': '日本語で話し切る',
-    'help.gradus.layer4.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」から選ぶ',
+    'help.gradus.layer4.tip1': 'はじめに「問題文一覧から選ぶ」「ランダム」から選ぶ（ランダムは先にカテゴリを選ぶ）',
     'help.gradus.layer4.tip2': 'タイマー終了後、自動で録音→JSST参考レベルを採点する',
     'help.gradus.layer4.tip3': '紙飛行機でPREP評価・的中度も依頼する（評点。レイヤーⅢのPREPガイドとは別）',
     'help.gradus.layer4.tip4':
@@ -651,8 +691,7 @@ abstract final class GradusL10n {
     'help.gradus.layer5.title': 'レイヤーⅤ：発音',
     'help.gradus.layer5.summary': '発音を整える',
     'help.gradus.layer5.tip1':
-        'はじめに「問題文一覧から選ぶ」「ランダム」「長文読み上げ」から選ぶ。'
-        '長文は一覧が空だと選べない。録音は最短15秒',
+        'はじめに「問題文一覧から選ぶ」「ランダム」「長文読み上げ」から選ぶ。長文は一覧が空だと選べない。長文読み上げの録音は最短15秒',
     'help.gradus.layer5.tip2':
         'ランダム／問題文：「つ」「ざ行」「ラ行」「長音」「促音」がバランスよく入った単文10問を声に出して読む。'
         '問題文経路では「問題作成」で問題文に関連した単文を作る',
@@ -691,26 +730,49 @@ abstract final class GradusL10n {
     'help.gradus.transcript.tip3': 'ダッシュボードと同じ計算で総合判定が決まる',
     'help.gradus.transcript.tip4':
         '総合はテスト総合と拡充度総合を組み合わせて決まる。25マスは発行時点の日常・ビジネス・シチュエーションの拡充度を表示する',
-    'help.gradus.backup.title': 'エクスポート・インポート',
-    'help.gradus.backup.summary': 'データをバックアップする',
-    'help.gradus.backup.tip1': '起動画面の「…」から開く',
-    'help.gradus.backup.tip2': 'エクスポートでアプリ全体のJSONを書き出す（語彙・履歴・長文・問題文など）',
-    'help.gradus.backup.tip3': 'インポートでフルバックアップを読み込む',
+    'help.gradus.backup.title': 'バックアップと同期',
+    'help.gradus.backup.summary': 'データを書き出す・取り込む・iCloudで同期する',
+    'help.gradus.backup.tip1': '起動画面の「…」→エクスポート／インポートから開き、「問題のみ」か「全て」を選ぶ',
+    'help.gradus.backup.tip2':
+        '「全て」は単語帳・履歴・長文・問題文・設定などアプリ全体のJSON。インポートは端末のデータを残したまま追加する',
+    'help.gradus.backup.tip3':
+        '「問題のみ」は問題文（理解・要約・PREP・スコアなどの記入内容を含む）だけのJSON。手を付けていない標準問題文は含まない',
     'help.gradus.backup.tip4':
-        '問題文だけのJSONはレイヤーⅡ〜Ⅳの「＋」→「ファイルをインポート／エクスポート」'
-        '（取り込み済みのみ。標準問題文は含まない。フルバックアップとは別）',
+        'レイヤーⅡ〜Ⅳの「＋」→「ファイルをインポート」「エクスポート」は、取り込んだお題の本文だけの簡易JSON（上の2つとは別）',
+    'help.gradus.backup.tip5':
+        'iPhoneでは「…」→設定→「iCloudで同期する」をオンにすると、同じApple IDのiPhoneどうしでデータが自動で同期される（Podcastの再生位置も含む。表示言語・案内の表示・録音は端末ごと）。すぐ反映したいときは「今すぐ同期」',
     'help.gradus.settings.title': '設定',
-    'help.gradus.settings.summary': '言語・読み上げ・ボタンヒント・初期化を管理する',
+    'help.gradus.settings.summary': '言語・読み上げ・iCloud同期・ボタンヒント・初期化を管理する',
     'help.gradus.settings.tip1': '起動画面の「…」→設定から開く',
-    'help.gradus.settings.tip2': '読み上げ・言語・語彙テストの入力方式（音声/キーボード）を変更',
-    'help.gradus.settings.tip3': '初期化ですべてのデータを削除する',
-    'help.gradus.settings.tip4':
-        'ボタンヒント（アイコンをダブルタップするとタップ／長押しの機能が出る）の表示期間と「次のアクションまで表示」を変えられる',
+    'help.gradus.settings.tip2':
+        '読み上げ・タイマー音・言語・語彙テストの入力方式・長文読解の単語選択方式・標準JLPT語彙の表示・スタートアップ／使い方画面の表示可否を変更できる（スタートアップをOFFにすると使い方も自動でOFFになる）',
+    'help.gradus.settings.tip3': '採点結果のリセット、または初期化ですべてのデータを削除する',
+    'help.gradus.settings.tip4': '「問題文」→「問題文タブの管理」で独自タブの追加・名前変更・削除ができる',
+    'help.gradus.settings.tip5':
+        'ボタンヒント（アイコンや一覧の要素をダブルタップするとタップ／長押しの機能が出る）の'
+        '表示期間と「次のアクションまで表示」を変えられる',
+    'help.gradus.settings.tip6':
+        'iCloud同期（iPhoneのみ）のオン／オフ・最終同期・今すぐ同期と、「プライバシーとデータ」の確認もここから',
+    'help.gradus.questionPrompts.title': '問題文の分類と一覧',
+    'help.gradus.questionPrompts.summary': 'シチュエーション／その他＋タブで整理する',
+    'help.gradus.questionPrompts.tip1':
+        'その他（一般）の問題文には趣味・健康・旅行・家族・環境・会社などのタブを複数付けられる。'
+        'シチュエーションは状況＋条件で、タブは持たない',
+    'help.gradus.questionPrompts.tip2': '一覧のフィルタで入手元・カテゴリ・タブ・実施状況を絞り込める',
+    'help.gradus.questionPrompts.tip3':
+        '起動画面の問題文一覧（横断）では総評・Ⅰ〜Ⅴ・本文の列。'
+        'Ⅰ〜Ⅴタップで各レイヤー詳細、本文長押しで編集',
+    'help.gradus.questionPrompts.tip4':
+        '各レイヤーの問題文一覧では行タップで問題を選択、行長押しで編集。'
+        '左スワイプで削除（標準問題文は不可）',
+    'help.gradus.questionPrompts.tip5': '設定の「問題文タブの管理」で独自タブを追加・改名・削除できる',
     'help.gradus.gesture.title': '操作の基本',
     'help.gradus.gesture.summary': '戻るボタンはない',
     'help.gradus.gesture.tip1': '右スワイプで前の画面へ戻る',
     'help.gradus.gesture.tip2': 'ヘッダーのⅠ〜Ⅴでレイヤーを即切り替える',
-    'help.gradus.gesture.tip3': 'アイコンボタンをダブルタップすると、タップと長押しの機能が表示される',
+    'help.gradus.gesture.tip3':
+        'アイコンや問題文一覧の行・Ⅰ〜Ⅴなどをダブルタップすると、'
+        'タップと長押しの機能が表示される',
     'help.gradus.gesture.tip4':
         'ChromeのAIモードで答えが出たら、画面下のほうのコピーボタン'
         '（重なった2つの四角）を押してから戻る。押さずに戻ると貼り付けできない',
@@ -740,10 +802,6 @@ abstract final class GradusL10n {
     '全てクリア': '全てクリア',
     '取り込む': '取り込む',
     'Chrome AIの解析結果を読み取れませんでした': 'Chrome AIの解析結果を読み取れませんでした',
-    '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
-        '日常・ビジネス・シチュエーションすべての取り込み済み問題文を削除します。この操作は取り消せません。',
-    'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
-        'その他・シチュエーションすべての取り込み済み問題文を削除します。この操作は取り消せません。',
     'その他 %lld 件、シチュエーション %lld 件を追加しました。': 'その他 %lld 件、シチュエーション %lld 件を追加しました。',
     'お題を読み取れませんでした。【その他】【シチュエーション】の見出し付きで貼り付けてください。':
         'お題を読み取れませんでした。【その他】【シチュエーション】の見出し付きで貼り付けてください。',
@@ -854,6 +912,20 @@ abstract final class GradusL10n {
   };
 
   static const _en = <String, String>{
+    'iCloud同期': 'iCloud sync',
+    'iCloudで同期する': 'Sync with iCloud',
+    'iCloud同期_説明':
+        'Syncs your vocabulary, question prompts, long articles, scoring and vocabulary test history, podcast shows and episode playback positions, and settings such as read-aloud across iPhones signed in to the same Apple ID. Display language, onboarding screens, and voice-sending consent stay on each device. Recordings are not synced.',
+    'iCloud同期_未サインイン':
+        'You are not signed in to iCloud, so sync is unavailable. Sign in with your Apple ID in the Settings app and turn on iCloud.',
+    'iCloud同期_最終同期': 'Last synced',
+    'iCloud同期_未同期': 'Not synced yet',
+    'iCloud同期_今すぐ同期': 'Sync now',
+    'iCloud同期_同期中': 'Syncing…',
+    'iCloud同期_失敗':
+        'Could not sync with iCloud. Please try "Sync now" again later.',
+    'iCloud同期_容量超過':
+        'Your data (%@ MB) exceeds the iCloud sync limit (1 MB), so it was not sent.',
     '採点結果をリセット': 'Reset scoring results',
     'コンセプトサブタイトル': 'Choose the layer\nyou want to polish',
     '起動_操作ヒント': 'Long-press the + button on each screen to see how to use it',
@@ -868,10 +940,11 @@ abstract final class GradusL10n {
         'Show how to copy from Chrome AI, long-press +, and double-tap for button hints',
     '使い方_タイトル': 'How to use',
     '使い方_コピー本文':
-        'When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom of the screen — the icon of two overlapping squares (red circle in the photo).\n\nIf you skip this and return to the app, you won’t be able to paste. After copying, come back to osmGradus.',
-    '使い方_プラス長押し': 'Long-press the + button on each screen to see how to use it.',
+        'When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom of the screen — the leftmost icon of two overlapping squares, marked TAP! with a red arrow.\n\nIf you skip this and return to the app, you won’t be able to paste. After copying, come back to osmGradus.',
+    '使い方_プラス長押し':
+        'Long-press the + button on each screen to see how to use it.',
     '使い方_ダブルタップ': 'Double-tap a button to see what tap and long-press do.',
-    '使い方_コピー画像_説明': 'Copy button in Chrome AI Mode (red circle)',
+    '使い方_コピー画像_説明': 'Copy button in Chrome AI Mode (red arrow and TAP!)',
     'ホーム画面へ': 'Go to Home',
     '標準のJLPT語彙を含める': 'Include built-in JLPT vocabulary',
     '標準のJLPT語彙を含める_説明':
@@ -1259,9 +1332,16 @@ abstract final class GradusL10n {
     '問題文一覧_使い方_フィルタ':
         '2️⃣ {{icon}} to narrow by source, category, tag, or status',
     '問題文一覧_使い方_詳細': '3️⃣ Tap a row to open its details',
-    '問題文一覧_使い方_編集': '4️⃣ Long-press the body to edit the prompt',
+    '問題文一覧_使い方_編集': '4️⃣ Long-press a row to edit the prompt',
     '問題文一覧_使い方_削除':
         '5️⃣ Swipe a row left to delete it (built-in prompts can\'t be deleted)',
+    '問題文一覧_ヒント_追加_タップ': 'Add a prompt',
+    '問題文一覧_ヒント_追加_長押し': 'Show how to use this screen',
+    '問題文一覧_ヒント_フィルタ_タップ': 'Open filters',
+    '問題文一覧_ヒント_行_タップ': 'Select a prompt',
+    '問題文一覧_ヒント_行_長押し': 'Edit the prompt',
+    '問題文横断一覧_ヒント_総評_タップ': 'Open summary',
+    '問題文横断一覧_ヒント_レイヤー_タップ': 'Open layer details',
     '問題文横断一覧_使い方_総評':
         '3️⃣ Tap “⭕️” in the Summary column (shown when any of Ⅰ–Ⅴ is done) to open the summary',
     '問題文横断一覧_使い方_レイヤー':
@@ -1276,6 +1356,23 @@ abstract final class GradusL10n {
     '新しいタブ': 'New tag',
     'タブ名を入力': 'Enter a tag name',
     'タブを1つ以上選択してください': 'Please select at least one tag',
+    '問題文': 'Prompts',
+    '問題文タブの管理': 'Manage prompt tags',
+    '問題文タブ_管理説明':
+        'Built-in tags cannot be changed. You can rename or delete custom tags. Deleting removes the tag from all prompts that use it.',
+    '組み込みタブ': 'Built-in tags',
+    '独自タブ': 'Custom tags',
+    '独自タブはまだありません': 'No custom tags yet',
+    'タブ名を変更': 'Rename tag',
+    'タブを削除': 'Delete tag',
+    'タブを変更しました': 'Tag updated',
+    'タブを削除しました': 'Tag deleted',
+    'タブを追加しました': 'Tag added',
+    'タブ名が既に使われています': 'That tag name is already in use',
+    'タブ_削除確認': 'Delete “%1”?',
+    'タブ_削除確認_使用中':
+        '“%1” is used on %2 prompt(s). Deleting will remove it from those prompts. Continue?',
+    'タブ_使用件数': 'Used on %1 prompt(s)',
     '問題文を入力してください': 'Please enter the prompt text',
     'すべて': 'All',
     '組み込み': 'Built-in',
@@ -1389,6 +1486,7 @@ abstract final class GradusL10n {
 
     // UX plan Step 7: double-tap action hints
     'ボタンヒント_タップ': 'Tap: %1',
+    'ボタンヒント_タップなし': 'None',
     'ボタンヒント_長押し': 'Long press: %1',
     'ボタンヒント_長押しなし': 'None',
     'ボタンヒント_訳付_長押し': 'Auto-submit for translation',
@@ -1509,9 +1607,10 @@ abstract final class GradusL10n {
     'help.gradus.overview.tip1': 'Switch layers anytime from the I–V header',
     'help.gradus.overview.tip2': 'Swipe right to close any screen',
     'help.gradus.overview.tip3':
-        'Open Vocabulary, Dashboard, Prompt List, or “…” from the bottom of the launch screen',
+        'Open Vocabulary, Dashboard, Prompt List, or “…” from the bottom of the launch screen. '
+        'The prompt list shows Summary · I–V · Body; long-press body text to edit',
     'help.gradus.overview.tip4':
-        'Choose Japanese, English, or Vietnamese in “… → Settings”',
+        'Choose Japanese, English, or Vietnamese in “… → Settings”, or with the flag at the top right of the startup/how-to screens',
     'help.gradus.layer1.title': 'Layer I: Vocabulary & listening',
     'help.gradus.layer1.summary':
         'Grow basics with prompt analysis, long reading, vocabulary tests, and podcasts',
@@ -1546,11 +1645,11 @@ abstract final class GradusL10n {
         'First choose “Choose from prompt list,” “Random,” “Think in 25 cells,” '
         'or “Add more topics”',
     'help.gradus.layer2.tip2':
-        '“Choose from prompt list”: pick from the prompt list and write a '
-        'summary. “Sample answer” asks Chrome AI for a 45-second sample answer',
+        '“Choose from prompt list”: tap a row to select; long-press a row to edit. '
+        'Write a summary. “Sample answer” asks Chrome AI for a 45-second sample answer',
     'help.gradus.layer2.tip3':
-        '“Random”: roll the dice for a prompt and imagine your answer. '
-        '“Sample answer” works here too, asking Chrome AI for a sample answer',
+        '“Random”: pick a category (Hobbies, Health, …, Random, Situations) first, '
+        'then roll the dice and imagine your answer. “Sample answer” works here too',
     'help.gradus.layer2.tip4': 'Imagine your answer — no need to say it aloud',
     'help.gradus.layer2.tip5':
         '“Add more topics”: tap to open a Google search directly',
@@ -1568,7 +1667,8 @@ abstract final class GradusL10n {
     'help.gradus.layer3.tip2':
         'List: fill Point / Reason / Example (not scored — scoring is Layer IV)',
     'help.gradus.layer3.tip3':
-        'Random: follow PREP guide lights. Timers: 45, 60, 15+60 sec',
+        'Random: pick a category first, then roll the dice. '
+        'Follow PREP guide lights. Timers: 45, 60, 15+60 sec',
     'help.gradus.layer3.tip4': 'Answer in your native language',
     'help.gradus.layer3.tip5':
         '“Think in 25 cells”: add Point / Reason / Example to the keywords '
@@ -1580,7 +1680,7 @@ abstract final class GradusL10n {
     'help.gradus.layer4.title': 'Layer IV: Scoring',
     'help.gradus.layer4.summary': 'Speak through in Japanese',
     'help.gradus.layer4.tip1':
-        'First choose “Choose from prompt list” or “Random”',
+        'First choose “Choose from prompt list” or “Random” (pick a category first in Random)',
     'help.gradus.layer4.tip2':
         'When the timer ends, recording starts and an approximate JSST level is scored',
     'help.gradus.layer4.tip3':
@@ -1599,9 +1699,7 @@ abstract final class GradusL10n {
     'help.gradus.layer5.title': 'Layer V: Pronunciation',
     'help.gradus.layer5.summary': 'Refine your pronunciation',
     'help.gradus.layer5.tip1':
-        'First choose “Choose from prompt list”, “Random”, or '
-        '“Long read-aloud”. Long is disabled when the list is empty. '
-        'Recording requires at least 15 seconds',
+        'First choose “Choose from prompt list”, “Random”, or “Long read-aloud”. Long is disabled when the list is empty. Long read-aloud recordings must be at least 15 seconds',
     'help.gradus.layer5.tip2':
         'Random / prompt: read 10 sentences covering tsu, z-row, r-row, long '
         'vowels, and sokuon. On the prompt path, tap “Create quiz” to make '
@@ -1652,33 +1750,58 @@ abstract final class GradusL10n {
         'Overall grade uses the same calculation as the Dashboard',
     'help.gradus.transcript.tip4':
         'Overall combines Test overall and Expansion overall. The 25-cell block shows Daily / Business / Situations expansion at issue time',
-    'help.gradus.backup.title': 'Export & import',
-    'help.gradus.backup.summary': 'Back up your data',
-    'help.gradus.backup.tip1': 'Open from “…” on the launch screen',
+    'help.gradus.backup.title': 'Backup & sync',
+    'help.gradus.backup.summary':
+        'Export, import, and sync your data with iCloud',
+    'help.gradus.backup.tip1':
+        'Open “…” → Export / Import on the launch screen, then choose “Prompts only” or “Everything”',
     'help.gradus.backup.tip2':
-        'Export writes a full-app JSON (vocabulary, history, articles, prompts, …)',
-    'help.gradus.backup.tip3': 'Import restores a full backup file',
+        '“Everything” is a JSON of the whole app (vocabulary, history, articles, prompts, settings, …). Importing adds to the data already on the device',
+    'help.gradus.backup.tip3':
+        '“Prompts only” is a JSON of question prompts with what you wrote for them (comprehension, summary, PREP, scores, …). Untouched built-in prompts are not included',
     'help.gradus.backup.tip4':
-        'Prompts-only JSON is under Layer II–IV “+” → “Import from file / Export” '
-        '(imported prompts only; built-ins excluded — separate from full backup)',
+        'Layer II–IV “+” → “Import from file” / “Export” is a simple JSON of imported topic texts only (separate from the two above)',
+    'help.gradus.backup.tip5':
+        'On iPhone, turn on “… → Settings → Sync with iCloud” to sync your data automatically across iPhones with the same Apple ID (including podcast playback positions; display language, onboarding screens, and recordings stay on each device). Tap “Sync now” to sync right away',
     'help.gradus.settings.title': 'Settings',
     'help.gradus.settings.summary':
-        'Manage language, speech, button hints, and reset',
+        'Manage language, speech, iCloud sync, button hints, and reset',
     'help.gradus.settings.tip1':
         'Open from “… → Settings” on the launch screen',
     'help.gradus.settings.tip2':
-        'Change speech, language, and vocab test input mode (voice/keyboard)',
-    'help.gradus.settings.tip3': 'Reset deletes all local data',
+        'Change speech, timer sound, language, vocab input mode, long-reading word selection, whether built-in JLPT vocabulary is included, and whether the startup/how-to screens are shown (turning off the startup screen also turns off the how-to screen)',
+    'help.gradus.settings.tip3': 'Reset scoring results, or reset all data',
     'help.gradus.settings.tip4':
-        'Change how long button hints stay (double-tap an icon to see tap / '
-        'long-press actions) and whether they stay until the next action',
+        'Under “Prompts” → “Manage prompt tags” to add, rename, or delete custom tags',
+    'help.gradus.settings.tip5':
+        'Change button-hint duration and “show until next action” (double-tap icons '
+        'or list elements to see tap / long-press actions)',
+    'help.gradus.settings.tip6':
+        'Also here: iCloud sync (iPhone only) on/off, last sync, Sync now, and “Privacy & Data”',
+    'help.gradus.questionPrompts.title': 'Prompt categories & lists',
+    'help.gradus.questionPrompts.summary':
+        'Organize with Situations vs General + tags',
+    'help.gradus.questionPrompts.tip1':
+        'General prompts can have multiple tags (Hobbies, Health, Travel, Family, '
+        'Environment, Work, …). Situations use situation + condition and have no tags',
+    'help.gradus.questionPrompts.tip2':
+        'Filter lists by source, category, tag, and completion status',
+    'help.gradus.questionPrompts.tip3':
+        'Launch-screen prompt list: Summary · I–V · Body. Tap I–V for layer details; '
+        'long-press body to edit',
+    'help.gradus.questionPrompts.tip4':
+        'Layer prompt lists: tap a row to select; long-press a row to edit. Swipe left to delete '
+        '(built-in prompts cannot be deleted)',
+    'help.gradus.questionPrompts.tip5':
+        'Add, rename, or delete custom tags in Settings → Manage prompt tags',
     'help.gradus.gesture.title': 'Basic controls',
     'help.gradus.gesture.summary': 'There is no back button',
     'help.gradus.gesture.tip1': 'Swipe right to go back',
     'help.gradus.gesture.tip2':
         'Tap I–V in the header to switch layers instantly',
     'help.gradus.gesture.tip3':
-        'Double-tap an icon button to see its tap and long-press actions',
+        'Double-tap icons or list elements (rows, I–V, …) to see tap and '
+        'long-press actions',
     'help.gradus.gesture.tip4':
         'When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom '
         '(two overlapping squares) before returning — skip it and you won’t be able '
@@ -1710,8 +1833,6 @@ abstract final class GradusL10n {
     '全てクリア': 'Clear all',
     '取り込む': 'Import',
     'Chrome AIの解析結果を読み取れませんでした': 'Could not read Chrome AI analysis result',
-    '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
-        'This deletes all imported prompts (Daily, Business, Situation). This cannot be undone.',
     'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
         'This deletes all imported prompts (General, Situation). This cannot be undone.',
     'その他 %lld 件、シチュエーション %lld 件を追加しました。':
@@ -1834,6 +1955,20 @@ abstract final class GradusL10n {
   };
 
   static const _vi = <String, String>{
+    'iCloud同期': 'Đồng bộ iCloud',
+    'iCloudで同期する': 'Đồng bộ bằng iCloud',
+    'iCloud同期_説明':
+        'Đồng bộ sổ từ vựng, đề bài, bài đọc dài, lịch sử chấm điểm và kiểm tra từ vựng, chương trình podcast và vị trí phát của từng tập, cùng các cài đặt như đọc to giữa các iPhone dùng cùng Apple ID. Ngôn ngữ hiển thị, màn hình hướng dẫn và sự đồng ý gửi giọng nói được giữ riêng trên từng thiết bị. Bản ghi âm không được đồng bộ.',
+    'iCloud同期_未サインイン':
+        'Bạn chưa đăng nhập iCloud nên không thể đồng bộ. Hãy đăng nhập Apple ID trong ứng dụng Cài đặt và bật iCloud.',
+    'iCloud同期_最終同期': 'Lần đồng bộ gần nhất',
+    'iCloud同期_未同期': 'Chưa đồng bộ',
+    'iCloud同期_今すぐ同期': 'Đồng bộ ngay',
+    'iCloud同期_同期中': 'Đang đồng bộ…',
+    'iCloud同期_失敗':
+        'Không thể đồng bộ với iCloud. Vui lòng thử lại "Đồng bộ ngay" sau ít phút.',
+    'iCloud同期_容量超過':
+        'Dữ liệu (%@ MB) vượt quá giới hạn đồng bộ iCloud (1 MB) nên chưa được gửi.',
     '採点結果をリセット': 'Đặt lại kết quả chấm điểm',
     'コンセプトサブタイトル': 'Chọn tầng bạn\nmuốn rèn luyện',
     '起動_操作ヒント': 'Nhấn giữ nút + trên mỗi màn hình để xem cách sử dụng',
@@ -1848,10 +1983,10 @@ abstract final class GradusL10n {
         'Hiện cách sao chép từ Chrome AI, nhấn giữ +, và nhấn đúp để xem gợi ý nút',
     '使い方_タイトル': 'Cách dùng',
     '使い方_コピー本文':
-        'Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới màn hình — biểu tượng hai hình vuông chồng lên nhau (khoanh đỏ trong ảnh).\n\nNếu quay lại ứng dụng mà chưa chạm nút này, bạn sẽ không dán được. Sau khi sao chép, hãy quay lại osmGradus.',
+        'Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới màn hình — biểu tượng ngoài cùng bên trái gồm hai hình vuông chồng lên nhau, có mũi tên đỏ và chữ TAP!.\n\nNếu quay lại ứng dụng mà chưa chạm nút này, bạn sẽ không dán được. Sau khi sao chép, hãy quay lại osmGradus.',
     '使い方_プラス長押し': 'Nhấn giữ nút + trên mỗi màn hình để xem cách sử dụng.',
     '使い方_ダブルタップ': 'Nhấn đúp một nút để xem thao tác khi chạm và khi nhấn giữ.',
-    '使い方_コピー画像_説明': 'Nút sao chép trong Chrome AI Mode (khoanh đỏ)',
+    '使い方_コピー画像_説明': 'Nút sao chép trong Chrome AI Mode (mũi tên đỏ và TAP!)',
     'ホーム画面へ': 'Về màn hình chính',
     '標準のJLPT語彙を含める': 'Bao gồm từ vựng JLPT có sẵn',
     '標準のJLPT語彙を含める_説明':
@@ -2234,9 +2369,16 @@ abstract final class GradusL10n {
     '問題文一覧_使い方_追加': '1️⃣ Nhấn {{icon}} để thêm đề bài',
     '問題文一覧_使い方_フィルタ':
         '2️⃣ Nhấn {{icon}} để lọc theo nguồn, danh mục, thẻ, tình trạng',
-    '問題文一覧_使い方_詳細': '3️⃣ Nhấn vào một dòng để xem chi tiết',
-    '問題文一覧_使い方_編集': '4️⃣ Nhấn giữ nội dung để chỉnh sửa đề bài',
+    '問題文一覧_使い方_詳細': '3️⃣ Nhấn một dòng để xem chi tiết',
+    '問題文一覧_使い方_編集': '4️⃣ Nhấn giữ một dòng để chỉnh sửa đề bài',
     '問題文一覧_使い方_削除': '5️⃣ Vuốt sang trái để xóa (không thể xóa đề bài mặc định)',
+    '問題文一覧_ヒント_追加_タップ': 'Thêm đề bài',
+    '問題文一覧_ヒント_追加_長押し': 'Xem hướng dẫn sử dụng',
+    '問題文一覧_ヒント_フィルタ_タップ': 'Mở bộ lọc',
+    '問題文一覧_ヒント_行_タップ': 'Chọn đề bài',
+    '問題文一覧_ヒント_行_長押し': 'Chỉnh sửa đề bài',
+    '問題文横断一覧_ヒント_総評_タップ': 'Mở tổng kết',
+    '問題文横断一覧_ヒント_レイヤー_タップ': 'Mở chi tiết lớp',
     '問題文横断一覧_使い方_総評':
         '3️⃣ Nhấn “⭕️” ở cột Tổng kết (hiện khi đã làm bất kỳ lớp Ⅰ–Ⅴ) để mở tổng kết',
     '問題文横断一覧_使い方_レイヤー':
@@ -2251,6 +2393,23 @@ abstract final class GradusL10n {
     '新しいタブ': 'Thẻ mới',
     'タブ名を入力': 'Nhập tên thẻ',
     'タブを1つ以上選択してください': 'Vui lòng chọn ít nhất một thẻ',
+    '問題文': 'Đề bài',
+    '問題文タブの管理': 'Quản lý thẻ đề bài',
+    '問題文タブ_管理説明':
+        'Thẻ có sẵn không thể thay đổi. Bạn có thể đổi tên hoặc xóa thẻ tự tạo. Xóa sẽ gỡ thẻ khỏi mọi đề bài đang dùng.',
+    '組み込みタブ': 'Thẻ có sẵn',
+    '独自タブ': 'Thẻ tự tạo',
+    '独自タブはまだありません': 'Chưa có thẻ tự tạo',
+    'タブ名を変更': 'Đổi tên thẻ',
+    'タブを削除': 'Xóa thẻ',
+    'タブを変更しました': 'Đã cập nhật thẻ',
+    'タブを削除しました': 'Đã xóa thẻ',
+    'タブを追加しました': 'Đã thêm thẻ',
+    'タブ名が既に使われています': 'Tên thẻ này đã được dùng',
+    'タブ_削除確認': 'Xóa “%1”?',
+    'タブ_削除確認_使用中':
+        '“%1” đang được dùng ở %2 đề bài. Xóa sẽ gỡ thẻ khỏi các đề bài đó. Tiếp tục?',
+    'タブ_使用件数': 'Đang dùng ở %1 đề bài',
     '問題文を入力してください': 'Vui lòng nhập nội dung đề bài',
     'すべて': 'Tất cả',
     '組み込み': 'Có sẵn',
@@ -2363,6 +2522,7 @@ abstract final class GradusL10n {
 
     // Kế hoạch UX Step 7: gợi ý chức năng khi chạm đúp
     'ボタンヒント_タップ': 'Chạm: %1',
+    'ボタンヒント_タップなし': 'Không có',
     'ボタンヒント_長押し': 'Chạm giữ: %1',
     'ボタンヒント_長押しなし': 'Không có',
     'ボタンヒント_訳付_長押し': 'Tự động gửi để dịch',
@@ -2482,9 +2642,10 @@ abstract final class GradusL10n {
     'help.gradus.overview.tip1': 'Chuyển tầng I–V bất cứ lúc nào từ thanh đầu',
     'help.gradus.overview.tip2': 'Vuốt sang phải để đóng màn hình',
     'help.gradus.overview.tip3':
-        'Mở Sổ từ, Bảng điều khiển, Danh sách đề bài hoặc “…” ở cuối màn hình khởi động',
+        'Mở Sổ từ, Bảng điều khiển, Danh sách đề bài hoặc “…” ở cuối màn hình khởi động. '
+        'Danh sách đề bài hiện Tổng kết · I–V · Nội dung; nhấn giữ nội dung để chỉnh sửa',
     'help.gradus.overview.tip4':
-        'Chọn tiếng Nhật, English hoặc Tiếng Việt trong “… → Cài đặt”',
+        'Chọn tiếng Nhật, English hoặc Tiếng Việt trong “… → Cài đặt”, hoặc bằng lá cờ ở góc trên bên phải màn hình khởi động/hướng dẫn',
     'help.gradus.layer1.title': 'Tầng I: Từ vựng & nghe',
     'help.gradus.layer1.summary':
         'Rèn nền tảng bằng phân tích đề bài, đọc đoạn văn dài, kiểm tra từ vựng và podcast',
@@ -2517,11 +2678,11 @@ abstract final class GradusL10n {
         'Trước hết chọn “Chọn từ danh sách đề bài”, “Ngẫu nhiên”, '
         '“Suy nghĩ 25 ô” hoặc “Thêm chủ đề”',
     'help.gradus.layer2.tip2':
-        '“Chọn từ danh sách đề bài”: chọn từ danh sách đề bài và viết tóm tắt. '
-        '“Câu trả lời mẫu” nhờ Chrome AI tạo câu trả lời mẫu 45 giây',
+        '“Chọn từ danh sách đề bài”: chạm một dòng để chọn; nhấn giữ dòng để chỉnh sửa. '
+        'Viết tóm tắt. “Câu trả lời mẫu” nhờ Chrome AI tạo câu trả lời mẫu 45 giây',
     'help.gradus.layer2.tip3':
-        '“Ngẫu nhiên”: tung xúc xắc để ra đề bài và hình dung câu trả lời. '
-        '“Câu trả lời mẫu” cũng dùng được ở đây, nhờ Chrome AI tạo câu trả lời mẫu',
+        '“Ngẫu nhiên”: chọn danh mục trước (Sở thích, Sức khỏe, …, Ngẫu nhiên, Tình huống), '
+        'rồi tung xúc xắc và hình dung câu trả lời. “Câu trả lời mẫu” cũng dùng được ở đây',
     'help.gradus.layer2.tip4':
         'Hình dung câu trả lời — không cần nói thành tiếng',
     'help.gradus.layer2.tip5':
@@ -2540,7 +2701,8 @@ abstract final class GradusL10n {
     'help.gradus.layer3.tip2':
         'Danh sách: điền Kết luận / Lý do / Ví dụ (chưa chấm điểm — điểm ở Tầng IV)',
     'help.gradus.layer3.tip3':
-        'Ngẫu nhiên: nói theo đèn PREP. Hẹn giờ: 45, 60, 15+60 giây',
+        'Ngẫu nhiên: chọn danh mục trước, rồi tung xúc xắc. '
+        'Nói theo đèn PREP. Hẹn giờ: 45, 60, 15+60 giây',
     'help.gradus.layer3.tip4': 'Trả lời bằng tiếng mẹ đẻ cũng được',
     'help.gradus.layer3.tip5':
         '“Suy nghĩ 25 ô”: thêm Kết luận / Lý do / Ví dụ vào từ khóa đã điền '
@@ -2551,7 +2713,7 @@ abstract final class GradusL10n {
     'help.gradus.layer4.title': 'Tầng IV: Chấm điểm',
     'help.gradus.layer4.summary': 'Nói trọn vẹn bằng tiếng Nhật',
     'help.gradus.layer4.tip1':
-        'Trước hết chọn “Chọn từ danh sách đề bài” hoặc “Ngẫu nhiên”',
+        'Trước hết chọn “Chọn từ danh sách đề bài” hoặc “Ngẫu nhiên” (Ngẫu nhiên: chọn danh mục trước)',
     'help.gradus.layer4.tip2':
         'Hết giờ thì tự ghi âm và chấm mức JSST tham khảo',
     'help.gradus.layer4.tip3':
@@ -2569,9 +2731,7 @@ abstract final class GradusL10n {
     'help.gradus.layer5.title': 'Tầng V: Phát âm',
     'help.gradus.layer5.summary': 'Chỉnh phát âm',
     'help.gradus.layer5.tip1':
-        'Trước hết chọn “Chọn từ danh sách đề bài”, “Ngẫu nhiên” hoặc '
-        '“Đọc đoạn dài”. Đoạn dài không chọn được nếu danh sách trống. '
-        'Ghi âm tối thiểu 15 giây',
+        'Trước hết chọn “Chọn từ danh sách đề bài”, “Ngẫu nhiên” hoặc “Đọc đoạn dài”. Đoạn dài không chọn được nếu danh sách trống. Ghi âm khi đọc đoạn dài tối thiểu 15 giây',
     'help.gradus.layer5.tip2':
         'Ngẫu nhiên / đề bài: đọc to 10 câu gồm つ, hàng ざ, hàng ら, âm dài, '
         'âm ngắt. Ở đường đề bài, nhấn “Tạo bài kiểm tra” để tạo câu liên '
@@ -2622,32 +2782,56 @@ abstract final class GradusL10n {
         'Đánh giá tổng hợp dùng cùng cách tính với Bảng điều khiển',
     'help.gradus.transcript.tip4':
         'Đánh giá tổng hợp kết hợp Tổng hợp bài kiểm tra và Tổng hợp mở rộng. Khối 25 ô hiện mức mở rộng Hàng ngày / Công việc / Tình huống tại thời điểm cấp',
-    'help.gradus.backup.title': 'Xuất & nhập dữ liệu',
-    'help.gradus.backup.summary': 'Sao lưu dữ liệu của bạn',
-    'help.gradus.backup.tip1': 'Mở từ “…” trên màn hình khởi động',
+    'help.gradus.backup.title': 'Sao lưu & đồng bộ',
+    'help.gradus.backup.summary': 'Xuất, nhập và đồng bộ dữ liệu bằng iCloud',
+    'help.gradus.backup.tip1':
+        'Mở “…” → Xuất / Nhập trên màn hình khởi động, rồi chọn “Chỉ đề bài” hoặc “Tất cả”',
     'help.gradus.backup.tip2':
-        'Xuất ghi JSON toàn app (từ vựng, lịch sử, bài dài, đề bài, …)',
-    'help.gradus.backup.tip3': 'Nhập để khôi phục bản sao lưu đầy đủ',
+        '“Tất cả” là JSON của toàn bộ ứng dụng (từ vựng, lịch sử, bài dài, đề bài, cài đặt, …). Khi nhập, dữ liệu sẵn có trên máy vẫn được giữ và phần mới được thêm vào',
+    'help.gradus.backup.tip3':
+        '“Chỉ đề bài” là JSON chỉ gồm đề bài và nội dung bạn đã ghi (hiểu, tóm tắt, PREP, điểm, …). Đề bài mặc định chưa dùng không được đưa vào',
     'help.gradus.backup.tip4':
-        'JSON chỉ chứa đề bài nằm ở Tầng II–IV “+” → “Nhập từ tệp / Xuất” '
-        '(chỉ đề bài đã nhập; không gồm mặc định — khác bản sao lưu đầy đủ)',
+        'Tầng II–IV “+” → “Nhập từ tệp” / “Xuất dữ liệu” là JSON đơn giản chỉ gồm nội dung chủ đề đã nhập (khác với hai mục trên)',
+    'help.gradus.backup.tip5':
+        'Trên iPhone, bật “… → Cài đặt → Đồng bộ bằng iCloud” để dữ liệu tự động đồng bộ giữa các iPhone dùng cùng Apple ID (kể cả vị trí phát podcast; ngôn ngữ hiển thị, màn hình hướng dẫn và bản ghi âm được giữ riêng trên từng máy). Nhấn “Đồng bộ ngay” để đồng bộ ngay lập tức',
     'help.gradus.settings.title': 'Cài đặt',
     'help.gradus.settings.summary':
-        'Quản lý ngôn ngữ, giọng đọc, gợi ý nút bấm và đặt lại',
+        'Quản lý ngôn ngữ, giọng đọc, đồng bộ iCloud, gợi ý nút bấm và đặt lại',
     'help.gradus.settings.tip1': 'Mở từ “… → Cài đặt” trên màn hình khởi động',
     'help.gradus.settings.tip2':
-        'Đổi giọng đọc, ngôn ngữ và chế độ nhập bài kiểm tra từ vựng '
-        '(giọng nói/bàn phím)',
-    'help.gradus.settings.tip3': 'Đặt lại xóa toàn bộ dữ liệu cục bộ',
+        'Đổi giọng đọc, âm hẹn giờ, ngôn ngữ, chế độ nhập từ vựng, cách chọn từ khi đọc dài, có hiển thị từ JLPT chuẩn hay không, và có hiện màn hình khởi động/hướng dẫn hay không (tắt màn hình khởi động sẽ tự tắt luôn màn hình hướng dẫn)',
+    'help.gradus.settings.tip3':
+        'Đặt lại kết quả chấm điểm, hoặc đặt lại toàn bộ dữ liệu',
     'help.gradus.settings.tip4':
-        'Đổi thời gian hiện gợi ý nút (chạm đúp biểu tượng để xem chạm / '
-        'chạm giữ) và tùy chọn hiện đến khi có thao tác tiếp theo',
+        '“Đề bài” → “Quản lý thẻ đề bài” để thêm, đổi tên hoặc xóa thẻ tự tạo',
+    'help.gradus.settings.tip5':
+        'Đổi thời gian gợi ý nút và “hiện đến khi có thao tác tiếp theo” '
+        '(chạm đúp biểu tượng hoặc phần tử danh sách để xem chạm / chạm giữ)',
+    'help.gradus.settings.tip6':
+        'Cũng tại đây: bật/tắt đồng bộ iCloud (chỉ iPhone), lần đồng bộ gần nhất, Đồng bộ ngay và “Quyền riêng tư & Dữ liệu”',
+    'help.gradus.questionPrompts.title': 'Phân loại & danh sách đề bài',
+    'help.gradus.questionPrompts.summary':
+        'Sắp xếp bằng Tình huống / Chung + thẻ',
+    'help.gradus.questionPrompts.tip1':
+        'Đề bài Chung có thể gắn nhiều thẻ (Sở thích, Sức khỏe, Du lịch, Gia đình, '
+        'Môi trường, Công ty, …). Tình huống dùng tình huống + điều kiện, không có thẻ',
+    'help.gradus.questionPrompts.tip2':
+        'Lọc danh sách theo nguồn, danh mục, thẻ và tình trạng hoàn thành',
+    'help.gradus.questionPrompts.tip3':
+        'Danh sách trên màn khởi động: Tổng kết · I–V · Nội dung. '
+        'Chạm I–V để mở chi tiết tầng; nhấn giữ nội dung để chỉnh sửa',
+    'help.gradus.questionPrompts.tip4':
+        'Danh sách từng tầng: chạm một dòng để chọn; nhấn giữ dòng để chỉnh sửa. '
+        'Vuốt trái để xóa (không xóa được đề bài mặc định)',
+    'help.gradus.questionPrompts.tip5':
+        'Thêm, đổi tên hoặc xóa thẻ tự tạo trong Cài đặt → Quản lý thẻ đề bài',
     'help.gradus.gesture.title': 'Thao tác cơ bản',
     'help.gradus.gesture.summary': 'Không có nút quay lại',
     'help.gradus.gesture.tip1': 'Vuốt sang phải để quay lại',
     'help.gradus.gesture.tip2': 'Chạm I–V trên thanh đầu để chuyển tầng ngay',
     'help.gradus.gesture.tip3':
-        'Chạm đúp nút biểu tượng để xem chức năng chạm và chạm giữ',
+        'Chạm đúp biểu tượng hoặc phần tử danh sách (dòng, I–V, …) '
+        'để xem chức năng chạm và chạm giữ',
     'help.gradus.gesture.tip4':
         'Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới '
         '(hai hình vuông chồng nhau) trước khi quay lại — nếu bỏ qua bạn sẽ không '
@@ -2680,8 +2864,6 @@ abstract final class GradusL10n {
     '取り込む': 'Nhập',
     'Chrome AIの解析結果を読み取れませんでした':
         'Không đọc được kết quả phân tích từ Chrome AI',
-    '日常・ビジネス・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
-        'Xóa tất cả đề bài đã nhập (Đời sống, Công việc, Tình huống). Không thể hoàn tác.',
     'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
         'Xóa tất cả đề bài đã nhập (Chung, Tình huống). Không thể hoàn tác.',
     'その他 %lld 件、シチュエーション %lld 件を追加しました。':

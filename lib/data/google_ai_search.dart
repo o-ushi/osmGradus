@@ -26,9 +26,11 @@ abstract final class GoogleAiSearch {
     });
   }
 
-  /// 検索語句なしでAIモード画面だけ開く（長いプロンプトはクリップボードから貼る）。
-  static Uri aiModeEntryUrl() {
+  /// 長いプロンプトはクリップボードから貼る。`q` なしだと Google AIモードが
+  /// 真っ白のままになることがあるので、言語接頭辞だけ載せて入力欄を出す。
+  static Uri aiModeEntryUrl({String lang = 'ja'}) {
     return Uri.https('www.google.co.jp', '/search', {
+      'q': withLangPrefix('', lang).trim(),
       'udm': '50',
       'hl': 'ja',
       'gl': 'jp',
@@ -36,7 +38,7 @@ abstract final class GoogleAiSearch {
   }
 
   /// [prompt]をURLに載せられる長さならそのまま開き、長すぎる場合は
-  /// AIモードの空画面を開いてクリップボード貼り付けを促す。
+  /// AIモードを言語接頭辞だけで開いてクリップボード貼り付けを促す。
   static ChromeAiLaunchPlan buildLaunchPlan({
     required String prompt,
     required String lang,
@@ -51,7 +53,7 @@ abstract final class GoogleAiSearch {
       );
     }
     return (
-      url: aiModeEntryUrl(),
+      url: aiModeEntryUrl(lang: lang),
       prompt: prompt,
       requiresClipboardPaste: true,
     );

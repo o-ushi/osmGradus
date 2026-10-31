@@ -126,11 +126,11 @@ OFF ならフラグは true のままホームへ。
 | ヘルプ | `lib/views/help/help_screen.dart` / `lib/data/layer_help_tips.dart` |
 | スタートアップテスト | `test/startup_screen_test.dart` |
 | 設定テスト | `test/tts_settings_screen_test.dart` |
-| スクショ（配置済） | `assets/images/chrome_ai_copy_button.png` |
+| 案内画像（配置済） | `assets/images/chrome_ai_copy_button.png` |
 | pubspec 資産 | `pubspec.yaml` の `flutter.assets` |
 
-スクリーンショットはリポジトリに配置済み（Chrome AI モード、下のコピーボタンを赤丸で示したもの）。  
-無い場合だけ、会話添付の同画像を同じパスへコピーする。新規撮影しない。
+案内画像はリポジトリに配置済み。**Chrome AI の操作バー（コピー・共有・評価・メニュー）に、左端のコピーへ赤い矢印と TAP! を付けた図**（約 657×479）。  
+全画面スクショや手描き赤丸、2アイコンだけの切り抜きは使わない。無い場合だけ会話添付の同図を同じパスへコピーする。新規撮影しない。
 
 ---
 
@@ -147,8 +147,8 @@ OFF ならフラグは true のままホームへ。
 アプリアイコンと「osmGradus」タイトルは**出さない**（ブランド画面と役割を分ける）。
 
 1. 見出し「使い方」
-2. スクショ `assets/images/chrome_ai_copy_button.png`（横幅いっぱいに近い、`BoxFit.contain`、角丸可。赤丸が切れないこと）。`semanticLabel` を付ける
-3. コピー手順（素人向け・優しく。アイコン名「重なった2つの四角」と「赤丸」を本文で言う）
+2. 案内画像 `assets/images/chrome_ai_copy_button.png`（操作バー＋赤い矢印＋ TAP!。横幅はパディング内いっぱいでよい、`BoxFit.contain`、白地＋角丸）。`semanticLabel` を付ける
+3. コピー手順（素人向け・優しく。**赤い矢印と TAP! が指す、左端の重なった2つの四角**と本文で言う。手描き赤丸には触れない）
 4. ＋長押しの説明
 5. ダブルタップの説明
 6. 「次回から表示しない」チェック（見た目はスタートアップ踏襲。2画面だけなので共通ウィジェット化は必須ではない）
@@ -161,10 +161,10 @@ OFF ならフラグは true のままホームへ。
 | キー | 文言 |
 |------|------|
 | `使い方_タイトル` | `使い方` |
-| `使い方_コピー本文` | `ChromeのAIモードで答えが出たら、画面の下のほうにあるコピーボタンをタップしてください。重なった2つの四角のアイコンです（下の写真の赤丸）。\n\nこのボタンを押さずにアプリへ戻ると、貼り付けできません。コピーできたら、osmGradusに戻ってください。` |
+| `使い方_コピー本文` | `ChromeのAIモードで答えが出たら、画面の下のほうにあるコピーボタンをタップしてください。下の画像の赤い矢印と TAP! が指している、左端の重なった2つの四角です。\n\nこのボタンを押さずにアプリへ戻ると、貼り付けできません。コピーできたら、osmGradusに戻ってください。` |
 | `使い方_プラス長押し` | `各画面の＋ボタンを長押しすると、その画面の操作方法が表示されます。` |
 | `使い方_ダブルタップ` | `ボタンをダブルタップすると、タップしたときと長押ししたときの動作がポップアップで表示されます。` |
-| `使い方_コピー画像_説明` | `Chrome AIモードのコピーボタン（赤丸）` |
+| `使い方_コピー画像_説明` | `Chrome AIモードのコピーボタン（赤い矢印と TAP!）` |
 | `ホーム画面へ` | `ホーム画面へ` |
 | `使い方画面` | `使い方画面` |
 | `使い方画面_説明` | `Chrome AIのコピー方法や、＋の長押し・ダブルタップなどの基本操作を表示します` |
@@ -174,10 +174,10 @@ OFF ならフラグは true のままホームへ。
 | キー | 文言 |
 |------|------|
 | `使い方_タイトル` | `How to use` |
-| `使い方_コピー本文` | `When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom of the screen — the icon of two overlapping squares (red circle in the photo).\n\nIf you skip this and return to the app, you won’t be able to paste. After copying, come back to osmGradus.` |
+| `使い方_コピー本文` | `When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom of the screen — the leftmost icon of two overlapping squares, marked TAP! with a red arrow.\n\nIf you skip this and return to the app, you won’t be able to paste. After copying, come back to osmGradus.` |
 | `使い方_プラス長押し` | `Long-press the + button on each screen to see how to use it.` |
 | `使い方_ダブルタップ` | `Double-tap a button to see what tap and long-press do.` |
-| `使い方_コピー画像_説明` | `Copy button in Chrome AI Mode (red circle)` |
+| `使い方_コピー画像_説明` | `Copy button in Chrome AI Mode (red arrow and TAP!)` |
 | `ホーム画面へ` | `Go to Home` |
 | `使い方画面` | `How-to screen` |
 | `使い方画面_説明` | `Show how to copy from Chrome AI, long-press +, and double-tap for button hints` |
@@ -187,10 +187,10 @@ OFF ならフラグは true のままホームへ。
 | キー | 文言 |
 |------|------|
 | `使い方_タイトル` | `Cách dùng` |
-| `使い方_コピー本文` | `Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới màn hình — biểu tượng hai hình vuông chồng lên nhau (khoanh đỏ trong ảnh).\n\nNếu quay lại ứng dụng mà chưa chạm nút này, bạn sẽ không dán được. Sau khi sao chép, hãy quay lại osmGradus.` |
+| `使い方_コピー本文` | `Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới màn hình — biểu tượng ngoài cùng bên trái gồm hai hình vuông chồng lên nhau, có mũi tên đỏ và chữ TAP!.\n\nNếu quay lại ứng dụng mà chưa chạm nút này, bạn sẽ không dán được. Sau khi sao chép, hãy quay lại osmGradus.` |
 | `使い方_プラス長押し` | `Nhấn giữ nút + trên mỗi màn hình để xem cách sử dụng.` |
 | `使い方_ダブルタップ` | `Nhấn đúp một nút để xem thao tác khi chạm và khi nhấn giữ.` |
-| `使い方_コピー画像_説明` | `Nút sao chép trong Chrome AI Mode (khoanh đỏ)` |
+| `使い方_コピー画像_説明` | `Nút sao chép trong Chrome AI Mode (mũi tên đỏ và TAP!)` |
 | `ホーム画面へ` | `Về màn hình chính` |
 | `使い方画面` | `Màn hình hướng dẫn` |
 | `使い方画面_説明` | `Hiện cách sao chép từ Chrome AI, nhấn giữ +, và nhấn đúp để xem gợi ý nút` |

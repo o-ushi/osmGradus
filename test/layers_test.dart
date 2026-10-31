@@ -44,7 +44,7 @@ import 'package:osm_gradus/views/layers/scoring_result_screen.dart';
 import 'package:osm_gradus/views/layers/vocabulary_check_detail_screen.dart';
 import 'package:osm_gradus/views/launch_screen.dart';
 import 'package:osm_gradus/widgets/app_header.dart';
-import 'package:osm_gradus/widgets/category_select_field.dart';
+import 'package:osm_gradus/widgets/question_prompt_draw_select_field.dart';
 import 'package:osm_gradus/widgets/curated_show_card.dart';
 import 'package:osm_gradus/widgets/dice_action_row.dart';
 import 'package:osm_gradus/widgets/genki_transport_row.dart';
@@ -588,7 +588,7 @@ void main() {
   });
 
   testWidgets('レイヤーⅡ「ランダム」画面はサイコロで問題文をランダムに引ける。'
-      '45/60/15+60は隠れたまま、カテゴリに「ランダム」は選べない', (WidgetTester tester) async {
+      '45/60/15+60は隠れたまま、カテゴリはタブ＋ランダム＋シチュエーション', (WidgetTester tester) async {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
@@ -610,20 +610,20 @@ void main() {
       expect(ignorePointer.ignoring, isTrue);
     }
 
-    expect(find.text(_t('問題文カテゴリ_その他')), findsOneWidget);
+    expect(find.byType(QuestionPromptDrawSelectField), findsOneWidget);
     expect(find.byIcon(Icons.casino), findsOneWidget);
     expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
     expect(find.text(_t('どんな回答をするか想像して')), findsOneWidget);
 
-    // question-prompt-tabs.md Step 3で日常／ビジネスの3分類UIを廃止し、
-    // その他／シチュエーションの2択になった。QuestionPrompt.categoryは
-    // randomを取らないため「ランダム」も出ない。
-    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
+    await tester.tap(find.byType(QuestionPromptDrawSelectField));
     await tester.pumpAndSettle();
+    for (final tag in ['趣味', '健康', '旅行', '家族', '環境', '会社']) {
+      expect(find.text(_t(tag)), findsOneWidget);
+    }
+    expect(find.text(_t('ランダム')), findsNWidgets(2));
     expect(find.text(_t('シチュエーション')), findsOneWidget);
     expect(find.text(_t('日常')), findsNothing);
     expect(find.text(_t('ビジネス')), findsNothing);
-    expect(find.text(_t('ランダム')), findsNothing);
     await tester.tap(find.text(_t('シチュエーション')));
     await tester.pumpAndSettle();
     expect(find.text(_t('シチュエーション')), findsOneWidget);
@@ -671,11 +671,8 @@ void main() {
     await tester.tap(find.text(_t('ランダム')));
     await tester.pumpAndSettle();
 
-    // 既定は「その他」選択済みなので、直下のタブ横スクロール行から「会社」を
-    // 選ぶ（組み込みビジネス10問は全問「会社」タグのため、旧businessTopics
-    // 一覧との包含判定で抽選プールが切り替わったことを確認できる）。
-    // 横スクロール行の右寄りにあり初期表示では画面外のため、先にスクロールする。
-    await tester.ensureVisible(find.text(_t('会社')));
+    await tester.tap(find.byType(QuestionPromptDrawSelectField));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(_t('会社')));
     await tester.pumpAndSettle();
 
@@ -866,9 +863,8 @@ void main() {
     // 持つため、pumpAndSettle()は永久に終わらない。以降は明示的なpump()を使う。
     await tester.pump();
 
-    // 分野リストとお題カードはレイヤーⅡと同じく表示される
-    // （question-prompt-tabs.md Step 3で分野は「その他」既定に変わった）。
-    expect(find.text(_t('問題文カテゴリ_その他')), findsOneWidget);
+    // 分野リストとお題カードはレイヤーⅡと同じく表示される（既定カテゴリはランダム）。
+    expect(find.byType(QuestionPromptDrawSelectField), findsOneWidget);
     expect(find.text(_t('ボタンを押してお題を引いてください')), findsOneWidget);
 
     // 45/60/15+60はレイヤーⅡと違い実際に選択できる（IgnorePointerでignoring: false）。
@@ -936,7 +932,7 @@ void main() {
     // 同テキストを再タップすると曖昧になる。バリアの外側をタップして閉じる）。
     // PREPガイドが常時点滅しているため、pumpAndSettle()ではなく明示的な
     // pump()を使う。
-    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
+    await tester.tap(find.byType(QuestionPromptDrawSelectField));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text(_t('シチュエーション')), findsNothing);
@@ -944,10 +940,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
 
-    // 「15+60」に切り替えると、分野の一覧にシチュエーションが出るようになる。
+    // 「15+60」に切り替えると、カテゴリ一覧にシチュエーションが出る。
     await tester.tap(find.text('15+60'));
     await tester.pump();
-    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
+    await tester.tap(find.byType(QuestionPromptDrawSelectField));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.text(_t('シチュエーション')), findsOneWidget);
@@ -956,10 +952,10 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
 
     // 45/60秒モードへ戻すと、シチュエーション選択中だった分野が
-    // その他にリセットされる（osmWashabeと同じ挙動）。
+    // ランダムにリセットされる（osmWashabeと同じ挙動）。
     await tester.tap(find.text('45'));
     await tester.pump();
-    expect(find.text(_t('問題文カテゴリ_その他')), findsOneWidget);
+    expect(find.text(_t('ランダム')), findsOneWidget);
     expect(find.text(_t('シチュエーション')), findsNothing);
 
     // サイコロボタンをタップするとお題が引かれ、スピーカーアイコンに変わる
@@ -1245,7 +1241,7 @@ void main() {
     final categoryIgnorePointer = tester.widget<IgnorePointer>(
       find
           .ancestor(
-            of: find.byType(CategorySelectField),
+            of: find.byKey(const Key('layer5_category_spacer')),
             matching: find.byType(IgnorePointer),
           )
           .first,

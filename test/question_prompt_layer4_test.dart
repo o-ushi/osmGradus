@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'question_prompt_list_test_helpers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -22,7 +24,7 @@ import 'package:osm_gradus/services/topic_speech_reader.dart';
 import 'package:osm_gradus/services/tts_settings_service.dart';
 import 'package:osm_gradus/theme/app_colors.dart';
 import 'package:osm_gradus/views/layers/layer4_screen.dart';
-import 'package:osm_gradus/widgets/category_select_field.dart';
+import 'package:osm_gradus/widgets/question_prompt_draw_select_field.dart';
 import 'package:osm_gradus/widgets/dice_action_row.dart';
 import 'package:osm_gradus/widgets/layer_numeral_badge.dart';
 import 'package:osm_gradus/widgets/question_prompt_list_row.dart';
@@ -197,11 +199,12 @@ void main() {
     await tester.pump();
 
     expect(find.byIcon(Icons.casino), findsOneWidget);
-    expect(find.byType(CategorySelectField), findsOneWidget);
+    expect(find.byType(QuestionPromptDrawSelectField), findsOneWidget);
   });
 
-  testWidgets('ランダム：カテゴリ選択はその他のみ（シチュエーション・日常・ビジネス・ランダムは出ない、'
-      'question-prompt-tabs.md Step 3）', (tester) async {
+  testWidgets('ランダム：カテゴリ選択はタブ6種＋ランダム（45秒ではシチュエーションは出ない）', (
+    tester,
+  ) async {
     await tester.pumpWidget(const OsmGradusApp());
     await tester.tap(find.text('Tầng I'));
     await tester.pumpAndSettle();
@@ -210,16 +213,39 @@ void main() {
     await tester.tap(find.text(_t('ランダム')));
     await tester.pump();
 
-    await tester.tap(find.text(_t('問題文カテゴリ_その他')));
+    // 既定はランダム（general 全件）。カテゴリ行をタップしてシートを開く。
+    await tester.tap(find.byType(QuestionPromptDrawSelectField));
     await tester.pumpAndSettle();
 
-    // 既定は45秒モード（シチュエーションは「15+60秒」専用のため出ない）。
-    // question-prompt-tabs.md Step 3で日常／ビジネスの3分類UIを廃止した
-    // ため、選択肢は「その他」のみになる。
+    for (final tag in ['趣味', '健康', '旅行', '家族', '環境', '会社']) {
+      expect(find.text(_t(tag)), findsOneWidget);
+    }
+    expect(find.text(_t('ランダム')), findsNWidgets(2));
     expect(find.text(_t('シチュエーション')), findsNothing);
     expect(find.text(_t('日常')), findsNothing);
     expect(find.text(_t('ビジネス')), findsNothing);
-    expect(find.text(_t('ランダム')), findsNothing);
+    expect(find.text(_t('問題文カテゴリ_その他')), findsNothing);
+  });
+
+  testWidgets('ランダム：15+60秒ではシチュエーションが区切り線の下に出る', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.tap(find.text('Tầng I'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Ⅳ'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('ランダム')));
+    await tester.pump();
+
+    await tester.tap(find.text('15+60'));
+    await tester.pump();
+
+    // 既定はランダム（general 全件）。カテゴリ行をタップしてシートを開く。
+    await tester.tap(find.byType(QuestionPromptDrawSelectField));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_t('シチュエーション')), findsOneWidget);
   });
 
   testWidgets('ランダム：サイコロは問題文プールから抽選し、抽選前は解答例アイコンが出ず、抽選後だけ出る（Step 4）', (
@@ -413,8 +439,7 @@ void main() {
       );
 
       await _openLayer4QuestionPromptList(tester);
-      await tester.tap(find.byType(QuestionPromptListRow).first);
-      await tester.pumpAndSettle();
+      await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
       await tester.tap(find.byIcon(Icons.play_circle_fill_rounded));
       await tester.pump();
@@ -605,8 +630,7 @@ void main() {
       );
 
       await _openLayer4QuestionPromptList(tester);
-      await tester.tap(find.byType(QuestionPromptListRow).first);
-      await tester.pumpAndSettle();
+      await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
       await tester.longPress(find.byIcon(Icons.add_rounded));
       await tester.pumpAndSettle();
@@ -637,13 +661,12 @@ void main() {
 
   testWidgets('行タップで詳細が開き、予約席レイアウト（分野非表示・開始ボタン・本文）を持つ', (tester) async {
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     expect(find.byType(DiceActionRow), findsOneWidget);
     // 一覧から選ぶモードでは、分野は既に固定されているため表示せず、
     // 同じ枠に前後移動の▲▼ボタン（QuestionPromptNavRow）を表示する。
-    expect(find.byType(CategorySelectField), findsNothing);
+    expect(find.byType(QuestionPromptDrawSelectField), findsNothing);
     // 問題文が1件しかないと前後どちらも無いため、両方隠れていることもある。
     // サイコロの代わりに「開始」アイコンで、抽選前から問題文が見えている。
     expect(find.byIcon(Icons.play_circle_fill_rounded), findsOneWidget);
@@ -653,8 +676,7 @@ void main() {
 
   testWidgets('「＋」長押しの使い方シートに、解答例の作成・閲覧の案内がある', (tester) async {
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.longPress(find.byIcon(Icons.add_rounded));
     await tester.pumpAndSettle();
@@ -671,8 +693,7 @@ void main() {
     final firstRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).first,
     );
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     final state = tester.state<Layer4ScreenState>(find.byType(Layer4Screen));
     await state.debugPersistScoreToPrompt(jsstScore: 3);
@@ -685,8 +706,7 @@ void main() {
 
   testWidgets('AI評価（PREP・的中度）が届くと紙飛行機の代わりに「V」バッジが出る', (tester) async {
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     expect(find.byType(LayerNumeralBadge), findsNothing);
 
@@ -710,8 +730,7 @@ void main() {
     final firstRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).first,
     );
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
     expect(find.text(firstRow.body), findsOneWidget);
 
     final state = tester.state<Layer4ScreenState>(find.byType(Layer4Screen));
@@ -732,8 +751,7 @@ void main() {
     tester,
   ) async {
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     // 一覧から選ぶ経路はⅡ一覧詳細と同じく常時表示（未取得でも新規作成できる）。
     expect(find.byIcon(Icons.menu_book_rounded), findsOneWidget);
@@ -754,8 +772,7 @@ void main() {
     tester,
   ) async {
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     final icon = find.byIcon(Icons.menu_book_rounded);
     await tester.tap(icon);
@@ -776,8 +793,7 @@ void main() {
     _mockClipboard(tester);
 
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     await tester.tap(find.byIcon(Icons.menu_book_rounded));
     await tester.pump(_tapConfirmWait);
@@ -815,8 +831,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await tester.pump();
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
     expect(
       tester.widget<Icon>(find.byIcon(Icons.menu_book_rounded)).color,
       Colors.orange,
@@ -839,8 +854,7 @@ void main() {
         'Mohan kaitou honbun desu.';
     await service.update(target.copyWith(sampleAnswer: sampleAnswer));
 
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     final icon = find.byIcon(Icons.menu_book_rounded);
     expect(icon, findsOneWidget);
@@ -872,8 +886,7 @@ void main() {
       target.copyWith(sampleAnswer: '[質問]\n${target.body}\n[日本語]\n模範解答。'),
     );
 
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     // 1件目（解答例あり）は橙。
     expect(
@@ -903,8 +916,7 @@ void main() {
     tester,
   ) async {
     await _openLayer4QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
     final state = tester.state<Layer4ScreenState>(find.byType(Layer4Screen));
     state.debugSetEvaluatedResult(_buildScoredResult());
@@ -943,8 +955,7 @@ void main() {
       _mockClipboard(tester);
 
       await _openLayer4QuestionPromptList(tester);
-      await tester.tap(find.byType(QuestionPromptListRow).first);
-      await tester.pumpAndSettle();
+      await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
 
       // 解答例を送信して貼り付け待ちにする（同意→送信）。
       await tester.tap(find.byIcon(Icons.menu_book_rounded));

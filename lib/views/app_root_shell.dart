@@ -78,13 +78,16 @@ class _AppRootShellState extends State<AppRootShell> {
   }
 
   void _finishStartup(bool dontShowAgain) {
+    // 「はじめる」の着地は使い方フラグのみを見る（仕様B）。チェックONだと
+    // setter側の不変条件で保存値の使い方がfalseになるため、その前の値を
+    // 見ておく（今セッションの着地を消さないため）。
+    final showUsageNow = appSettings.showUsageScreen;
     if (dontShowAgain) {
       appSettings.showStartupScreen = false;
     }
     setState(() {
       _showingStartup = false;
-      // 「はじめる」の着地は使い方フラグのみを見る（仕様B）。
-      _showingUsage = appSettings.showUsageScreen;
+      _showingUsage = showUsageNow;
     });
   }
 
@@ -93,6 +96,16 @@ class _AppRootShellState extends State<AppRootShell> {
       appSettings.showUsageScreen = false;
     }
     setState(() => _showingUsage = false);
+  }
+
+  /// 使い方画面を左端からの右スワイプで閉じたときに呼ぶ。「次回から表示
+  /// しない」を確定していない（「ホーム画面へ」を押していない）ため、
+  /// フラグは保存せずスタートアップへ戻るだけ。
+  void _swipeUsageToStartup() {
+    setState(() {
+      _showingUsage = false;
+      _showingStartup = true;
+    });
   }
 
   /// レイヤー一覧画面（[LaunchScreen]）を左端からの右スワイプで閉じたときに
@@ -138,7 +151,10 @@ class _AppRootShellState extends State<AppRootShell> {
             ),
           ),
         if (!_showingStartup && _showingUsage)
-          UsageScreen(onContinue: _finishUsage),
+          UsageScreen(
+            onContinue: _finishUsage,
+            onSwipeToStartup: _swipeUsageToStartup,
+          ),
         if (_showingStartup) StartupScreen(onContinue: _finishStartup),
       ],
     );

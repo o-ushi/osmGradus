@@ -35,12 +35,27 @@ class VocabularyCheckDetailScreen extends StatelessWidget {
             badgeLabels: [
               if (check.evaluation == null) '未解析'.tr(lang),
               if (check.questionPromptId != null) 'レイヤーⅠ_語彙_問題文の見直し'.tr(lang),
+              if (check.longArticleId != null) '長文読解_語彙_履歴バッジ'.tr(lang),
             ],
           ),
           if (check.questionPromptId != null) ...[
             const SizedBox(height: 12),
             _QuestionPromptCard(
               body: check.questionPromptBody ?? '',
+              lang: lang,
+            ),
+          ],
+          if (check.longArticleId != null) ...[
+            const SizedBox(height: 12),
+            _LongArticleCard(
+              title: check.longArticleTitle ?? '',
+              lang: lang,
+            ),
+          ],
+          if (check.comprehensionQuiz != null) ...[
+            const SizedBox(height: 12),
+            _ComprehensionQuizCard(
+              quiz: check.comprehensionQuiz!,
               lang: lang,
             ),
           ],
@@ -69,12 +84,9 @@ class VocabularyCheckDetailScreen extends StatelessWidget {
         const SizedBox(height: 8),
         for (var i = 0; i < questions.length; i++)
           _QuestionResultTile(
-            index: i + 1,
+            index: i + 1 + check.vocabEvaluationOffset,
             question: questions[i],
-            questionEvaluation:
-                evaluation != null && i < evaluation.questionEvaluations.length
-                ? evaluation.questionEvaluations[i]
-                : null,
+            questionEvaluation: check.vocabQuestionEvaluationAt(i),
             languageCode: lang,
           ),
         const SizedBox(height: 16),
@@ -101,14 +113,29 @@ class VocabularyCheckDetailScreen extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 'レイヤーⅠ_語彙_正解数'.trFmt(lang, [
-                  '${evaluation.correctCount}',
-                  '${questions.length}',
+                  '${check.combinedCorrectCount}',
+                  '${check.combinedQuestionCount}',
                 ]),
                 style: TextStyle(
                   fontSize: 13,
                   color: palette.textOnCardSecondary,
                 ),
               ),
+              if (check.comprehensionQuiz != null) ...[
+                const SizedBox(height: 4),
+                Text(
+                  '長文読解_語彙_内訳'.trFmt(lang, [
+                    '${check.vocabEvaluationOffset == 1 ? evaluation.correctCount - (check.comprehensionQuiz!.isCorrect ? 1 : 0) : evaluation.correctCount}',
+                    '${questions.length}',
+                    check.comprehensionQuiz!.isCorrect ? '1' : '0',
+                    '1',
+                  ]),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: palette.textOnCardSecondary,
+                  ),
+                ),
+              ],
               if (evaluation.summary != null) ...[
                 const SizedBox(height: 8),
                 Text(
@@ -179,6 +206,147 @@ class _QuestionPromptCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             body,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: palette.textOnCardPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 長文読解の1秒チェック結果。長文タイトルの下・出題単語の上に置く。
+class _ComprehensionQuizCard extends StatelessWidget {
+  const _ComprehensionQuizCard({required this.quiz, required this.lang});
+
+  final SavedComprehensionQuizResult quiz;
+  final String lang;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppColors.current;
+    final accent = quiz.isCorrect ? Colors.green : Colors.redAccent;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.cardFill,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.cardBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '長文読解_1秒チェック_見出し'.tr(lang),
+            style: TextStyle(fontSize: 12, color: palette.textOnCardSecondary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            quiz.question,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: palette.textOnCardPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'A. ${quiz.optionA}',
+            style: TextStyle(fontSize: 13, color: palette.textOnCardPrimary),
+          ),
+          Text(
+            'B. ${quiz.optionB}',
+            style: TextStyle(fontSize: 13, color: palette.textOnCardPrimary),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(
+                quiz.isCorrect
+                    ? Icons.check_circle_rounded
+                    : Icons.cancel_rounded,
+                size: 18,
+                color: accent,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                (quiz.isCorrect
+                        ? '長文読解_1秒チェック_正解'
+                        : '長文読解_1秒チェック_不正解')
+                    .tr(lang),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: palette.textOnCardPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '長文読解_語彙_選択'.trFmt(lang, [quiz.selectedOption]),
+            style: TextStyle(fontSize: 13, color: palette.textOnCardSecondary),
+          ),
+          if (!quiz.isCorrect) ...[
+            const SizedBox(height: 2),
+            Text(
+              '長文読解_1秒チェック_正解表示'.trFmt(lang, [quiz.correctOption]),
+              style: TextStyle(
+                fontSize: 13,
+                color: palette.textOnCardSecondary,
+              ),
+            ),
+          ],
+          if (quiz.explanationFor(lang).isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              quiz.explanationFor(lang),
+              style: TextStyle(
+                fontSize: 13,
+                color: palette.textOnCardSecondary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// レイヤーⅠ「長文読解」の語彙テスト経由の記録で、出題元の長文タイトルを
+/// 表示する（[_QuestionPromptCard]と同じ構成。長文は問題文と違い本文が長い
+/// ため、全文ではなく保存時点のタイトルのみを複製している）。
+class _LongArticleCard extends StatelessWidget {
+  const _LongArticleCard({required this.title, required this.lang});
+
+  final String title;
+  final String lang;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppColors.current;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: palette.cardFill,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.cardBorder, width: 1),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '長文読解_語彙_履歴バッジ'.tr(lang),
+            style: TextStyle(fontSize: 12, color: palette.textOnCardSecondary),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,

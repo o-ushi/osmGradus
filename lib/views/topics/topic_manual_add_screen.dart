@@ -4,24 +4,22 @@ import 'package:flutter/material.dart';
 
 import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
+import '../../models/question_prompt_draw_selection.dart';
 import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
 import '../../services/question_prompt_auto_tag_service.dart';
+import '../../services/question_prompt_service.dart';
+import '../../services/question_prompt_tab_registry.dart';
 import '../../services/topic_service.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/ai_import_shared.dart';
-import '../../widgets/category_select_field.dart';
+import '../../widgets/question_prompt_editor_form.dart';
+import '../../widgets/question_prompt_editor_helpers.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
 
 /// [TopicImportScreen]（AI取り込み）に対する、キーボードでの手動追加版。
-/// 分野を選んでテキストを1件ずつ入力し、[TopicService.importTopics]と
-/// 同じ保存先へそのまま追加する（サイコロで引く側は取り込み経路を問わない）。
 class TopicManualAddScreen extends StatefulWidget {
   const TopicManualAddScreen({super.key, required this.initialCategory});
 
-  /// 呼び出し元レイヤーで選択中だった分野。[_selectableCategories]に
-  /// 含まれない値（「ランダム」や25マス専用の旧`daily`/`business`）は
-  /// その他（[TopicCategory.general]）にフォールバックする。
   final TopicCategory initialCategory;
 
   static Future<void> push(
@@ -44,34 +42,57 @@ class TopicManualAddScreen extends StatefulWidget {
 }
 
 class _TopicManualAddScreenState extends State<TopicManualAddScreen> {
-  static const _selectableCategories = [
-    TopicCategory.general,
-    TopicCategory.situational,
-  ];
-
   final _service = TopicService();
+  final _promptService = QuestionPromptService();
+  final _tabRegistry = QuestionPromptTabRegistry();
   final _autoTagService = QuestionPromptAutoTagService();
-  final _textController = TextEditingController();
+  final _bodyController = TextEditingController();
+  final _conditionController = TextEditingController();
 
-  late TopicCategory _category =
-      _selectableCategories.contains(widget.initialCategory)
-      ? widget.initialCategory
-      : TopicCategory.general;
+  late QuestionPromptDrawSelection _drawSelection =
+      QuestionPromptDrawSelection.fromTopicCategory(
+        normalizeToGeneral(widget.initialCategory),
+      );
+  late Set<String> _selectedTags = _initialTags();
+  List<String> _tabKeys = const [];
 
   int _count = 0;
   String? _resultMessage;
   bool _resultIsError = false;
+  bool _adding = false;
+
+  TopicCategory get _category => _drawSelection.category;
+
+  Set<String> _initialTags() {
+    if (_drawSelection.kind == QuestionPromptDrawKind.tagged) {
+      return {_drawSelection.tag!};
+    }
+    return {};
+  }
 
   @override
   void initState() {
     super.initState();
+    _bodyController.addListener(_onBodyChanged);
+    unawaited(_loadTabKeys());
     unawaited(_loadCount());
   }
 
   @override
   void dispose() {
-    _textController.dispose();
+    _bodyController
+      ..removeListener(_onBodyChanged)
+      ..dispose();
+    _conditionController.dispose();
     super.dispose();
+  }
+
+  void _onBodyChanged() => setState(() {});
+
+  Future<void> _loadTabKeys() async {
+    final tabKeys = await _tabRegistry.allTabKeys();
+    if (!mounted) return;
+    setState(() => _tabKeys = tabKeys);
   }
 
   Future<void> _loadCount() async {
@@ -80,136 +101,180 @@ class _TopicManualAddScreenState extends State<TopicManualAddScreen> {
     setState(() => _count = imported.length);
   }
 
-  void _changeCategory(TopicCategory category) {
+  void _changeDrawSelection(QuestionPromptDrawSelection selection) {
     setState(() {
-      _category = category;
+      _drawSelection = selection;
       _resultMessage = null;
+      if (selection.kind == QuestionPromptDrawKind.situational) {
+        _selectedTags = {};
+      } else if (selection.kind == QuestionPromptDrawKind.tagged) {
+        _selectedTags = {selection.tag!};
+      } else if (_selectedTags.isEmpty) {
+        _selectedTags = _autoTagService
+            .suggestTags(_bodyController.text.trim())
+            .toSet();
+      }
     });
     unawaited(_loadCount());
   }
 
+  void _toggleTag(String tag) {
+    setState(() {
+      if (!_selectedTags.remove(tag)) _selectedTags.add(tag);
+    });
+  }
+
+  Future<void> _addCustomTag() async {
+    final lang = appSettings.language;
+    final name = await showQuestionPromptNewTagDialog(context, lang);
+    if (name == null) return;
+    await _tabRegistry.addCustomTab(name);
+    final tabKeys = await _tabRegistry.allTabKeys();
+    if (!mounted) return;
+    setState(() {
+      _tabKeys = tabKeys;
+      if (tabKeys.contains(name)) _selectedTags.add(name);
+    });
+  }
+
+  List<String> Function(String body)? get _tagsForBody {
+    if (_category == TopicCategory.situational) return null;
+    if (_selectedTags.isNotEmpty) return (_) => _selectedTags.toList();
+    return switch (_drawSelection.kind) {
+      QuestionPromptDrawKind.tagged => (_) => [_drawSelection.tag!],
+      QuestionPromptDrawKind.generalRandom => _autoTagService.suggestTags,
+      QuestionPromptDrawKind.situational => null,
+    };
+  }
+
   Future<void> _add() async {
-    final text = _textController.text.trim();
-    if (text.isEmpty) return;
+    final lang = appSettings.language;
+    final body = _bodyController.text.trim();
+    if (body.isEmpty) return;
+    if (_category == TopicCategory.general) {
+      final tags = _tagsForBody?.call(body) ?? const <String>[];
+      if (tags.isEmpty) {
+        setState(() {
+          _resultIsError = true;
+          _resultMessage = 'タブを1つ以上選択してください';
+        });
+        return;
+      }
+    }
+
+    setState(() {
+      _adding = true;
+      _resultMessage = null;
+    });
     final added = await _service.importTopics(
       _category,
-      [text],
+      [body],
       source: QuestionPromptSource.manual,
-      tagsForBody: _category == TopicCategory.general
-          ? _autoTagService.suggestTags
-          : null,
+      tagsForBody: _tagsForBody,
     );
     if (!mounted) return;
+
     if (added == 0) {
       setState(() {
+        _adding = false;
         _resultIsError = true;
         _resultMessage = 'このお題はすでに追加されています。';
       });
       return;
     }
-    _textController.clear();
+
+    if (_category == TopicCategory.situational) {
+      final condition = _conditionController.text.trim();
+      if (condition.isNotEmpty) {
+        final all = await _promptService.loadAll();
+        final prompt = all.lastWhere(
+          (p) =>
+              p.category == TopicCategory.situational &&
+              p.body == body &&
+              p.source == QuestionPromptSource.manual,
+        );
+        await _promptService.updateContent(
+          id: prompt.id,
+          body: body,
+          situationCondition: condition,
+          category: TopicCategory.situational,
+          tags: const [],
+        );
+      }
+    }
+
+    _bodyController.clear();
+    _conditionController.clear();
     await _loadCount();
     if (!mounted) return;
     setState(() {
+      _adding = false;
       _resultIsError = false;
       _resultMessage = 'お題を追加しました。';
     });
+  }
+
+  bool get _canAdd {
+    final body = _bodyController.text.trim();
+    return body.isNotEmpty && !_adding;
   }
 
   @override
   Widget build(BuildContext context) {
     final lang = appSettings.language;
     final palette = AppColors.current;
-    final canAdd = _textController.text.trim().isNotEmpty;
     return SwipeToCloseWrapper(
       child: Material(
         color: palette.scene,
         child: SafeArea(
           child: Column(
             children: [
-              AiImportHeader(title: 'お題を自分で追加'.tr(lang), lang: lang),
+              QuestionPromptEditorHeader(
+                titleKey: 'お題を自分で追加',
+                lang: lang,
+              ),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                   children: [
-                    AiImportCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    QuestionPromptEditorForm(
+                      lang: lang,
+                      drawSelection: _drawSelection,
+                      onDrawSelectionChanged: _changeDrawSelection,
+                      showRandomInCategory: true,
+                      bodyController: _bodyController,
+                      conditionController: _conditionController,
+                      category: _category,
+                      tabKeys: _tabKeys,
+                      selectedTags: _selectedTags,
+                      onToggleTag: _toggleTag,
+                      onAddCustomTag: _addCustomTag,
+                      submitIcon: Icons.add_rounded,
+                      submitTooltipKey: '追加',
+                      onSubmit: _add,
+                      canSubmit: _canAdd,
+                      isSubmitting: _adding,
+                      bodyHintKey: 'お題を入力',
+                      statusMessage: _resultMessage,
+                      statusIsError: _resultIsError,
+                      footer: Row(
                         children: [
-                          CategorySelectField(
-                            selected: _category,
-                            onChanged: _changeCategory,
-                            availableCategories: _selectableCategories,
-                            onCardBackground: true,
-                          ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _textController,
-                            minLines: 2,
-                            maxLines: 6,
-                            onChanged: (_) => setState(() {}),
-                            style: TextStyle(
-                              color: palette.textOnCardPrimary,
-                              fontSize: 14,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: 'お題を入力'.tr(lang),
-                              hintStyle: TextStyle(
-                                color: palette.textOnCardSecondary,
-                              ),
-                              filled: true,
-                              fillColor: palette.subpageBackground,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            width: double.infinity,
-                            child: QuickActionButton(
-                              icon: Icons.add,
-                              label: '追加'.tr(lang),
-                              onTap: canAdd ? _add : null,
-                              filled: true,
-                            ),
-                          ),
-                          if (_resultMessage != null) ...[
-                            const SizedBox(height: 12),
-                            Text(
-                              _resultMessage!.tr(lang),
+                          Expanded(
+                            child: Text(
+                              '追加済みのお題'.tr(lang),
                               style: TextStyle(
-                                fontSize: 12,
-                                color: _resultIsError
-                                    ? Colors.orange
-                                    : Colors.green,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: palette.textOnCardPrimary,
                               ),
                             ),
-                          ],
-                          const SizedBox(height: 16),
-                          Divider(color: palette.cardBorder),
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  '追加済みのお題'.tr(lang),
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: palette.textOnCardPrimary,
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                '%lld 件'.trFmt(lang, [_count.toString()]),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: palette.textOnCardSecondary,
-                                ),
-                              ),
-                            ],
+                          ),
+                          Text(
+                            '%lld 件'.trFmt(lang, [_count.toString()]),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: palette.textOnCardSecondary,
+                            ),
                           ),
                         ],
                       ),

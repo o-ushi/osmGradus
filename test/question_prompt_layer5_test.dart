@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import 'question_prompt_list_test_helpers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -19,7 +21,6 @@ import 'package:osm_gradus/services/topic_speech_reader.dart';
 import 'package:osm_gradus/services/tts_settings_service.dart';
 import 'package:osm_gradus/views/launch_screen.dart';
 import 'package:osm_gradus/views/layers/layer5_screen.dart';
-import 'package:osm_gradus/widgets/category_select_field.dart';
 import 'package:osm_gradus/widgets/dice_action_row.dart';
 import 'package:osm_gradus/widgets/pronunciation_mic_button.dart';
 import 'package:osm_gradus/widgets/question_prompt_list_row.dart';
@@ -162,13 +163,12 @@ void main() {
     final firstRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).first,
     );
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     expect(find.byType(DiceActionRow), findsOneWidget);
     // 分野は一覧のフィルタで絞り込めるため表示せず、同じ枠に前後移動の
     // ▲▼ボタン（QuestionPromptNavRow）を表示する。
-    expect(find.byType(CategorySelectField), findsNothing);
+    expect(find.byType(QuestionPromptNavRow), findsOneWidget);
     expect(find.byType(PronunciationMicButton), findsOneWidget);
     // サイコロをタップするまでは、「ランダム」と同じ案内文だけでなく問題文
     // 本文もそのまま見せる（▲▼で移動しても見た目が変わらず反応がないように
@@ -182,8 +182,7 @@ void main() {
     tester,
   ) async {
     await _openLayer5QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     final state = tester.state<Layer5ScreenState>(find.byType(Layer5Screen));
     expect(state.debugArmed, isFalse);
@@ -208,8 +207,7 @@ void main() {
       final firstRow = tester.widget<QuestionPromptListRow>(
         find.byType(QuestionPromptListRow).first,
       );
-      await tester.tap(find.byType(QuestionPromptListRow).first);
-      await tester.pumpAndSettle();
+      await tapQuestionPromptListRow(tester);
 
       final iconBefore = tester.widget<Icon>(find.byIcon(Icons.quiz_outlined));
       expect(iconBefore.color, isNot(Colors.orange));
@@ -267,8 +265,7 @@ void main() {
     final firstRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).first,
     );
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     final state = tester.state<Layer5ScreenState>(find.byType(Layer5Screen));
     await state.debugApplyEvaluation(_buildEvaluation());
@@ -285,8 +282,7 @@ void main() {
 
   testWidgets('AI評価が届くと「総評」バッジが出て、タップで総評画面へ遷移する', (tester) async {
     await _openLayer5QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     expect(find.byIcon(Icons.fact_check_rounded), findsNothing);
 
@@ -308,8 +304,7 @@ void main() {
 
   testWidgets('詳細画面の常設ヘッダー「Ⅴ」をタップすると、3択画面ではなく問題文一覧へ直接飛ぶ（回帰）', (tester) async {
     await _openLayer5QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     await tester.tap(find.text('Ⅴ'));
     await tester.pumpAndSettle();
@@ -320,8 +315,7 @@ void main() {
 
   testWidgets('詳細画面の常設ヘッダーを長押しすると、一覧ではなくスタート画面へジャンプする', (tester) async {
     await _openLayer5QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     await tester.longPress(find.text('Ⅴ'));
     await tester.pump();
@@ -332,8 +326,7 @@ void main() {
 
   testWidgets('問題文経路の「＋」長押し使い方に問題作成と総評が含まれ、録音モード行は出ない', (tester) async {
     await _openLayer5QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     await tester.longPress(find.byIcon(Icons.add_rounded));
     await tester.pumpAndSettle();
@@ -355,8 +348,7 @@ void main() {
 
   testWidgets('録音中（isBusy）は▲▼ボタン自体が隠れており、前後の問題文へ移動できない', (tester) async {
     await _openLayer5QuestionPromptList(tester);
-    await tester.tap(find.byType(QuestionPromptListRow).first);
-    await tester.pumpAndSettle();
+    await tapQuestionPromptListRow(tester);
 
     final state = tester.state<Layer5ScreenState>(find.byType(Layer5Screen));
     state.debugForceRecordingStatus();
