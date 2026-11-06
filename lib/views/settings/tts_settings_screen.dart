@@ -26,9 +26,10 @@ import '../../services/vocabulary_check_storage.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/history_timestamp.dart';
 import '../../widgets/osm_subpage_scaffold.dart';
+import '../../theme/surface_theme.dart';
+import '../../widgets/gradus_expand_card.dart';
 import '../../widgets/settings_section.dart';
 import 'alarm_sound_picker_screen.dart';
-import 'privacy_data_screen.dart';
 import 'question_prompt_tab_settings_screen.dart';
 import 'speech_recognition_debug_log_view.dart';
 
@@ -39,10 +40,14 @@ class TtsSettingsScreen extends StatefulWidget {
     super.key,
     required this.settings,
     required this.speechReader,
+    this.startExpanded = false,
   });
 
   final TtsSettingsService settings;
   final TopicSpeechReader speechReader;
+
+  /// すべてのグループを開いた状態で始める。
+  final bool startExpanded;
 
   static Future<void> push(
     BuildContext context, {
@@ -234,6 +239,38 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
     });
   }
 
+  /// 開いているグループ（見出しの翻訳キー）。
+  final Set<String> _openGroups = {};
+
+  Widget _group(
+    String titleKey,
+    IconData icon,
+    Color accent,
+    List<Widget> children,
+  ) {
+    final open = widget.startExpanded || _openGroups.contains(titleKey);
+    return Padding(
+      key: ValueKey('settings-group-$titleKey'),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+      child: GradusExpandCard(
+        title: titleKey.tr(appSettings.language),
+        icon: icon,
+        accent: accent,
+        open: open,
+        onToggle: () => setState(() {
+          if (!_openGroups.remove(titleKey)) _openGroups.add(titleKey);
+        }),
+        child: Theme(
+          data: SurfaceTheme.card(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [...children, const SizedBox(height: 12)],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return OsmSubpageScaffold(
@@ -269,195 +306,162 @@ class _TtsSettingsScreenState extends State<TtsSettingsScreen> {
                 ],
               ),
 
-              // ─── 読み上げ ─────────────────────────────────────
-              SettingsSectionHeader('読み上げ'.tr(lang), icon: Icons.volume_up),
-              SettingsSectionCard(
-                children: [
-                  SettingsValueRow(
-                    label: '声質'.tr(lang),
-                    value: widget.settings.speechVoiceGender.tr(lang),
-                    onTap: _showGenderPicker,
-                  ),
-                  const SettingsItemDivider(),
-                  _SpeechRateRow(
-                    lang: lang,
-                    rate: widget.settings.speechRate,
-                    displayRate: _displayRate(widget.settings.speechRate),
-                    onChanged: widget.settings.setSpeechRate,
-                  ),
-                  const SettingsItemDivider(),
-                  SettingsValueRow(
-                    label: '使用中の声'.tr(lang),
-                    value: widget.speechReader.activeVoiceDescription,
-                  ),
-                ],
-              ),
-              if (!widget.speechReader.ttsAvailable)
-                _TtsUnavailableNotice(
-                  text: (Platform.isIOS ? '読み上げ_音声なし_iOS' : '読み上げ_音声なし').tr(
-                    lang,
-                  ),
-                  onTap: () => NativeTtsPlatform.openSettings(),
-                ),
-
-              // ─── タイマー ─────────────────────────────────────
-              SettingsSectionHeader(
-                'タイマー音'.tr(lang),
-                icon: Icons.notifications_none,
-              ),
-              SettingsSectionCard(
-                children: [
-                  SettingsValueRow(
-                    label: 'タイマー音'.tr(lang),
-                    value: widget.settings.alarmSoundTitle,
-                    onTap: () => AlarmSoundPickerScreen.push(
-                      context,
-                      settings: widget.settings,
-                    ),
-                  ),
-                ],
-              ),
-
-              // ─── 問題文 ───────────────────────────────────────
-              SettingsSectionHeader('問題文'.tr(lang), icon: Icons.label_outline),
-              SettingsSectionCard(
-                children: [
-                  SettingsNavigationRow(
-                    label: '問題文タブの管理'.tr(lang),
-                    onTap: () => QuestionPromptTabSettingsScreen.push(context),
-                  ),
-                ],
-              ),
-
-              // ─── データ ───────────────────────────────────────
-              SettingsSectionHeader('データ'.tr(lang), icon: Icons.import_export),
-              SettingsSectionCard(
-                children: [
-                  SettingsSwitchRow(
-                    label: '標準のJLPT語彙を含める'.tr(lang),
-                    subtitle: '標準のJLPT語彙を含める_説明'.tr(lang),
-                    value: appSettings.includeDefaultVocabulary,
-                    onChanged: (value) =>
-                        appSettings.includeDefaultVocabulary = value,
-                  ),
-                  const SettingsItemDivider(),
-                  SettingsSwitchRow(
-                    label: '長文読解_単語選択方式'.tr(lang),
-                    subtitle: '長文読解_単語選択方式_単語単位_説明'.tr(lang),
-                    value:
-                        appSettings.longArticleWordSelectionMode ==
-                        LongArticleWordSelectionMode.chunk,
-                    onChanged: (value) =>
-                        appSettings.longArticleWordSelectionMode = value
-                        ? LongArticleWordSelectionMode.chunk
-                        : LongArticleWordSelectionMode.character,
-                  ),
-                  const SettingsItemDivider(),
-                  SettingsSwitchRow(
-                    label: '単語テスト_キーボード入力'.tr(lang),
-                    subtitle: '単語テスト_キーボード入力_説明'.tr(lang),
-                    value:
-                        appSettings.vocabAnswerMode == VocabAnswerMode.keyboard,
-                    onChanged: (value) => appSettings.vocabAnswerMode = value
-                        ? VocabAnswerMode.keyboard
-                        : VocabAnswerMode.voice,
-                  ),
-                  const SettingsItemDivider(),
-                  SettingsDestructiveActionRow(
-                    label: '採点結果をリセット'.tr(lang),
-                    enabled: _hasSavedResults,
-                    onTap: _resetSavedResults,
-                  ),
-                  const SettingsItemDivider(),
-                  SettingsDestructiveActionRow(
-                    label: 'すべてのデータを初期化'.tr(lang),
-                    onTap: _confirmReset,
-                  ),
-                ],
-              ),
-
-              // ─── iCloud同期（iPhoneのみ。Androidでは出さない） ────
-              if (cloudSync case final sync?) _CloudSyncSection(sync: sync),
-
-              // ─── 案内（スタートアップ・使い方） ─────────────────
-              SettingsSectionHeader('案内'.tr(lang)),
-              SettingsSectionCard(
-                children: [
-                  SettingsSwitchRow(
-                    label: 'スタートアップ画面'.tr(lang),
-                    subtitle: 'スタートアップ画面_説明'.tr(lang),
-                    value: appSettings.showStartupScreen,
-                    onChanged: (value) => appSettings.showStartupScreen = value,
-                  ),
-                  const SettingsItemDivider(),
-                  SettingsSwitchRow(
-                    label: '使い方画面'.tr(lang),
-                    subtitle: '使い方画面_説明'.tr(lang),
-                    value: appSettings.showUsageScreen,
-                    enabled: appSettings.showStartupScreen,
-                    onChanged: (value) => appSettings.showUsageScreen = value,
-                  ),
-                ],
-              ),
-
-              // ─── ボタンヒント（Step 7のダブルタップヒントの消え方）───
-              SettingsSectionHeader(
-                'ボタンヒント_設定セクション'.tr(lang),
-                icon: Icons.touch_app_outlined,
-              ),
-              SettingsSectionCard(
-                children: [
-                  SettingsSwitchRow(
-                    label: 'ボタンヒント_次のアクションまで表示'.tr(lang),
-                    subtitle: 'ボタンヒント_次のアクションまで表示_説明'.tr(lang),
-                    value: appSettings.buttonHintPersistUntilNextAction,
-                    onChanged: (value) =>
-                        appSettings.buttonHintPersistUntilNextAction = value,
-                  ),
-                  const SettingsItemDivider(),
-                  SettingsValueRow(
-                    label: 'ボタンヒント_表示期間'.tr(lang),
-                    value: 'ボタンヒント_表示期間_秒'.trFmt(lang, [
-                      '${appSettings.buttonHintDisplaySeconds}',
-                    ]),
-                    enabled: !appSettings.buttonHintPersistUntilNextAction,
-                    onTap: _showButtonHintDisplaySecondsPicker,
-                  ),
-                ],
-              ),
-
-              // ─── プライバシー ─────────────────────────────────
-              SettingsSectionHeader(
-                'プライバシー'.tr(lang),
-                icon: Icons.privacy_tip_outlined,
-              ),
-              SettingsSectionCard(
-                children: [
-                  SettingsNavigationRow(
-                    label: 'プライバシーとデータ'.tr(lang),
-                    onTap: () => PrivacyDataScreen.push(context),
-                  ),
-                ],
-              ),
-
-              // ─── 開発者向け ───────────────────────────────────
-              if (showDeveloperTools) ...[
-                SettingsSectionHeader('開発者向け'.tr(lang)),
-                SettingsSectionCard(
+              const SizedBox(height: 20),
+              _group('読み上げとタイマー', Icons.volume_up, Colors.orange, [
+                Column(
                   children: [
                     SettingsValueRow(
-                      label: '補正係数'.tr(lang),
-                      value: _calibrationBiasValue(lang),
+                      label: '声質'.tr(lang),
+                      value: widget.settings.speechVoiceGender.tr(lang),
+                      onTap: _showGenderPicker,
                     ),
                     const SettingsItemDivider(),
-                    SettingsNavigationRow(
-                      label: '音声認識ログ'.tr(lang),
-                      onTap: () => SpeechRecognitionDebugLogView.push(context),
+                    _SpeechRateRow(
+                      lang: lang,
+                      rate: widget.settings.speechRate,
+                      displayRate: _displayRate(widget.settings.speechRate),
+                      onChanged: widget.settings.setSpeechRate,
+                    ),
+                    const SettingsItemDivider(),
+                    SettingsValueRow(
+                      label: '使用中の声'.tr(lang),
+                      value: widget.speechReader.activeVoiceDescription,
                     ),
                   ],
                 ),
-                SettingsNoteText('音声認識ログ_設定説明'.tr(lang)),
-              ],
+                if (!widget.speechReader.ttsAvailable)
+                  _TtsUnavailableNotice(
+                    text: (Platform.isIOS ? '読み上げ_音声なし_iOS' : '読み上げ_音声なし').tr(
+                      lang,
+                    ),
+                    onTap: () => NativeTtsPlatform.openSettings(),
+                  ),
+                Column(
+                  children: [
+                    SettingsValueRow(
+                      label: 'タイマー音'.tr(lang),
+                      value: widget.settings.alarmSoundTitle,
+                      onTap: () => AlarmSoundPickerScreen.push(
+                        context,
+                        settings: widget.settings,
+                      ),
+                    ),
+                  ],
+                ),
+              ]),
+              _group('問題文と語彙', Icons.label_outline, Colors.blue, [
+                Column(
+                  children: [
+                    SettingsNavigationRow(
+                      label: '問題文タブの管理'.tr(lang),
+                      onTap: () =>
+                          QuestionPromptTabSettingsScreen.push(context),
+                    ),
+                  ],
+                ),
+
+                const SettingsItemDivider(),
+                SettingsSwitchRow(
+                  label: '標準のJLPT語彙を含める'.tr(lang),
+                  subtitle: '標準のJLPT語彙を含める_説明'.tr(lang),
+                  value: appSettings.includeDefaultVocabulary,
+                  onChanged: (value) =>
+                      appSettings.includeDefaultVocabulary = value,
+                ),
+                const SettingsItemDivider(),
+                SettingsSwitchRow(
+                  label: '長文読解_単語選択方式'.tr(lang),
+                  subtitle: '長文読解_単語選択方式_単語単位_説明'.tr(lang),
+                  value:
+                      appSettings.longArticleWordSelectionMode ==
+                      LongArticleWordSelectionMode.chunk,
+                  onChanged: (value) =>
+                      appSettings.longArticleWordSelectionMode = value
+                      ? LongArticleWordSelectionMode.chunk
+                      : LongArticleWordSelectionMode.character,
+                ),
+                const SettingsItemDivider(),
+                SettingsSwitchRow(
+                  label: '単語テスト_キーボード入力'.tr(lang),
+                  subtitle: '単語テスト_キーボード入力_説明'.tr(lang),
+                  value:
+                      appSettings.vocabAnswerMode == VocabAnswerMode.keyboard,
+                  onChanged: (value) => appSettings.vocabAnswerMode = value
+                      ? VocabAnswerMode.keyboard
+                      : VocabAnswerMode.voice,
+                ),
+              ]),
+              _group('案内とヒント', Icons.touch_app_outlined, Colors.teal, [
+                Column(
+                  children: [
+                    SettingsSwitchRow(
+                      label: 'スタートアップ画面'.tr(lang),
+                      subtitle: 'スタートアップ画面_説明'.tr(lang),
+                      value: appSettings.showStartupScreen,
+                      onChanged: (value) =>
+                          appSettings.showStartupScreen = value,
+                    ),
+                    const SettingsItemDivider(),
+                    SettingsSwitchRow(
+                      label: '使い方画面'.tr(lang),
+                      subtitle: '使い方画面_説明'.tr(lang),
+                      value: appSettings.showUsageScreen,
+                      enabled: appSettings.showStartupScreen,
+                      onChanged: (value) => appSettings.showUsageScreen = value,
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    SettingsSwitchRow(
+                      label: 'ボタンヒント_次のアクションまで表示'.tr(lang),
+                      subtitle: 'ボタンヒント_次のアクションまで表示_説明'.tr(lang),
+                      value: appSettings.buttonHintPersistUntilNextAction,
+                      onChanged: (value) =>
+                          appSettings.buttonHintPersistUntilNextAction = value,
+                    ),
+                    const SettingsItemDivider(),
+                    SettingsValueRow(
+                      label: 'ボタンヒント_表示期間'.tr(lang),
+                      value: 'ボタンヒント_表示期間_秒'.trFmt(lang, [
+                        '${appSettings.buttonHintDisplaySeconds}',
+                      ]),
+                      enabled: !appSettings.buttonHintPersistUntilNextAction,
+                      onTap: _showButtonHintDisplaySecondsPicker,
+                    ),
+                  ],
+                ),
+              ]),
+              _group('データ', Icons.import_export, Colors.indigo, [
+                SettingsDestructiveActionRow(
+                  label: '採点結果をリセット'.tr(lang),
+                  enabled: _hasSavedResults,
+                  onTap: _resetSavedResults,
+                ),
+                const SettingsItemDivider(),
+                SettingsDestructiveActionRow(
+                  label: 'すべてのデータを初期化'.tr(lang),
+                  onTap: _confirmReset,
+                ),
+                // iCloud同期（iPhoneのみ。Androidでは出さない）。
+                if (cloudSync case final sync?) ...[
+                  const SettingsItemDivider(),
+                  _CloudSyncSection(sync: sync),
+                ],
+              ]),
+              if (showDeveloperTools)
+                _group('開発者向け', Icons.code_rounded, Colors.grey, [
+                  SettingsValueRow(
+                    label: '補正係数'.tr(lang),
+                    value: _calibrationBiasValue(lang),
+                  ),
+                  const SettingsItemDivider(),
+                  SettingsNavigationRow(
+                    label: '音声認識ログ'.tr(lang),
+                    onTap: () => SpeechRecognitionDebugLogView.push(context),
+                  ),
+                  SettingsNoteText('音声認識ログ_設定説明'.tr(lang), onCard: true),
+                ]),
 
               GestureDetector(
                 onTap: _onDevAreaTap,
@@ -638,11 +642,7 @@ class _CloudSyncSection extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SettingsSectionHeader(
-              'iCloud同期'.tr(lang),
-              icon: Icons.cloud_sync_outlined,
-            ),
-            SettingsSectionCard(
+            Column(
               children: [
                 SettingsSwitchRow(
                   key: const ValueKey('settings-cloud-sync'),
@@ -679,7 +679,7 @@ class _CloudSyncSection extends StatelessWidget {
             if (enabled && unavailable)
               _CloudSyncWarning('iCloud同期_未サインイン'.tr(lang)),
             if (enabled && errorText != null) _CloudSyncWarning(errorText),
-            SettingsNoteText('iCloud同期_説明'.tr(lang)),
+            SettingsNoteText('iCloud同期_説明'.tr(lang), onCard: true),
           ],
         );
       },

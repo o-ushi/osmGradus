@@ -50,58 +50,56 @@ void main() {
     });
   });
 
-  testWidgets(
-    '設定で全て初期化→トップに戻る→問題文一覧を開いてもフリーズしない',
-    (tester) async {
-      // 事前に「使い込んだ」状態を作る：手入力問題文・単語帳エントリなど。
-      await QuestionPromptService().recordImport(
-        category: TopicCategory.daily,
-        bodies: ['初期化前に追加した問題文'],
-        source: QuestionPromptSource.manual,
-      );
-      await VocabularyService().addEntry(
-        '促進',
-        'thúc đẩy',
-        reading: 'そくしん',
-        level: VocabularyLevel.n2,
-      );
-      await QuestionPromptService().loadAll();
+  testWidgets('設定で全て初期化→トップに戻る→問題文一覧を開いてもフリーズしない', (tester) async {
+    // 事前に「使い込んだ」状態を作る：手入力問題文・単語帳エントリなど。
+    await QuestionPromptService().recordImport(
+      category: TopicCategory.daily,
+      bodies: ['初期化前に追加した問題文'],
+      source: QuestionPromptSource.manual,
+    );
+    await VocabularyService().addEntry(
+      '促進',
+      'thúc đẩy',
+      reading: 'そくしん',
+      level: VocabularyLevel.n2,
+    );
+    await QuestionPromptService().loadAll();
 
-      // 設定画面が長いので、スクロールなしで全項目が収まる大きな
-      // テストサーフェスにしておく。
-      tester.view.physicalSize = const Size(800, 4000);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+    // 設定画面が長いので、スクロールなしで全項目が収まる大きな
+    // テストサーフェスにしておく。
+    tester.view.physicalSize = const Size(800, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
 
-      await tester.pumpWidget(const OsmGradusApp());
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.pumpAndSettle();
 
-      // トップ画面「•••」→「設定」
-      await tester.tap(find.byIcon(Icons.more_horiz));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.settings_outlined));
-      await tester.pumpAndSettle();
+    // トップ画面「•••」→「設定」
+    await tester.tap(find.byIcon(Icons.more_horiz));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.settings_outlined));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text(_t('すべてのデータを初期化')));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('settings-group-データ')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(_t('すべてのデータを初期化')));
+    await tester.pumpAndSettle();
 
-      expect(find.text(_t('本当に初期化しますか？')), findsOneWidget);
-      await tester.tap(find.widgetWithText(TextButton, _t('初期化')));
-      await tester.pumpAndSettle();
+    expect(find.text(_t('本当に初期化しますか？')), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextButton, _t('初期化')));
+    await tester.pumpAndSettle();
 
-      // 設定画面から戻ってトップ画面へ（設定画面はスワイプで閉じる方式で、
-      // 通常の戻るボタンが無いため直接pop）。
-      Navigator.of(tester.element(find.byType(TtsSettingsScreen))).pop();
-      await tester.pumpAndSettle();
+    // 設定画面から戻ってトップ画面へ（設定画面はスワイプで閉じる方式で、
+    // 通常の戻るボタンが無いため直接pop）。
+    Navigator.of(tester.element(find.byType(TtsSettingsScreen))).pop();
+    await tester.pumpAndSettle();
 
-      // トップ画面「問題文一覧」アイコンをタップ。
-      await tester.tap(find.byIcon(Icons.list_alt_rounded));
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+    // トップ画面「問題文一覧」アイコンをタップ。
+    await tester.tap(find.byIcon(Icons.list_alt_rounded));
+    await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      expect(tester.takeException(), isNull);
-      expect(find.text(_t('問題文一覧')), findsOneWidget);
-    },
-    timeout: const Timeout(Duration(seconds: 20)),
-  );
+    expect(tester.takeException(), isNull);
+    expect(find.text(_t('問題文一覧')), findsOneWidget);
+  }, timeout: const Timeout(Duration(seconds: 20)));
 }

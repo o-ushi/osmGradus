@@ -1,36 +1,18 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../data/layer_help_tips.dart';
 import '../../localization/app_strings.dart';
 import '../../main.dart';
 import '../../theme/app_colors.dart';
-import '../../theme/surface_theme.dart';
+import '../../widgets/gradus_expand_card.dart';
 import '../../widgets/osm_subpage_scaffold.dart';
+import '../settings/privacy_data_screen.dart';
 
-/// osmGradus ヘルプ。最新機能をレイヤー色付きカードと箇条書きで整理する。
+/// ヘルプ。上から 練習 → 閲覧 → 困った時 → その他 の順。
 class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
-
-  /// Google スライド操作マニュアル（言語別・閲覧用 preview）。
-  /// 共有は「リンクを知っている全員」。編集 URL ではなく preview を開く。
-  /// 英語・ベトナム語は同じファイルを上書き更新する前提（ID は固定）。
-  static const userManualPresentationIdJa =
-      '1_Xs9VaUB0ZDCFCrXxmAo6RBL2J1fdJUusNsjLIW4m_w';
-  static const userManualPresentationIdEn =
-      '1arF2q9iGxKhmA9gfeyNiHpr2oXtOKqSXm6dbDubmImM';
-  static const userManualPresentationIdVi =
-      '1sIUXEkSvGabriacxxfKvko1l6JEXxdNQbucgydHI4uM';
-
-  static String userManualUrlFor(String language) {
-    final id = switch (language) {
-      'en' => userManualPresentationIdEn,
-      'ja' => userManualPresentationIdJa,
-      _ => userManualPresentationIdVi,
-    };
-    return 'https://docs.google.com/presentation/d/$id/preview';
-  }
 
   static Future<void> push(BuildContext context) {
     return Navigator.of(
@@ -45,81 +27,49 @@ class HelpScreen extends StatefulWidget {
 class _HelpScreenState extends State<HelpScreen> {
   String? _versionLabel;
 
-  static const _extraSections = [
-    _HelpSectionSpec(
-      icon: Icons.space_dashboard_outlined,
-      titleKey: 'help.gradus.dashboard.title',
-      summaryKey: 'help.gradus.dashboard.summary',
-      tipKeys: [
-        'help.gradus.dashboard.tip1',
-        'help.gradus.dashboard.tip2',
-        'help.gradus.dashboard.tip3',
-        'help.gradus.dashboard.tip4',
-        'help.gradus.dashboard.tip5',
-        'help.gradus.dashboard.tip6',
-      ],
-    ),
-    _HelpSectionSpec(
-      icon: Icons.style_rounded,
-      titleKey: 'help.gradus.vocabulary.title',
-      summaryKey: 'help.gradus.vocabulary.summary',
-      tipKeys: [
-        'help.gradus.vocabulary.tip1',
-        'help.gradus.vocabulary.tip2',
-        'help.gradus.vocabulary.tip3',
-        'help.gradus.vocabulary.tip4',
-      ],
-    ),
-    _HelpSectionSpec(
-      icon: Icons.workspace_premium_outlined,
-      titleKey: 'help.gradus.transcript.title',
-      summaryKey: 'help.gradus.transcript.summary',
-      tipKeys: [
-        'help.gradus.transcript.tip1',
-        'help.gradus.transcript.tip2',
-        'help.gradus.transcript.tip3',
-        'help.gradus.transcript.tip4',
-      ],
-    ),
-    _HelpSectionSpec(
-      icon: Icons.upload_outlined,
-      titleKey: 'help.gradus.backup.title',
-      summaryKey: 'help.gradus.backup.summary',
-      tipKeys: [
-        'help.gradus.backup.tip1',
-        'help.gradus.backup.tip2',
-        'help.gradus.backup.tip3',
-        'help.gradus.backup.tip4',
-        'help.gradus.backup.tip5',
-      ],
-    ),
-    _HelpSectionSpec(
-      icon: Icons.settings_outlined,
-      titleKey: 'help.gradus.settings.title',
-      summaryKey: 'help.gradus.settings.summary',
-      tipKeys: [
-        'help.gradus.settings.tip1',
-        'help.gradus.settings.tip2',
-        'help.gradus.settings.tip3',
-        'help.gradus.settings.tip4',
-        'help.gradus.settings.tip5',
-        'help.gradus.settings.tip6',
-      ],
-    ),
-    _HelpSectionSpec(
-      icon: Icons.swipe_rounded,
-      titleKey: 'help.gradus.gesture.title',
-      summaryKey: 'help.gradus.gesture.summary',
-      tipKeys: [
-        'help.gradus.gesture.tip1',
-        'help.gradus.gesture.tip2',
-        'help.gradus.gesture.tip3',
-        'help.gradus.gesture.tip4',
-      ],
-    ),
-  ];
+  /// 開いている節。
+  final Set<String> _openSections = {};
 
-  static const _numerals = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ'];
+  /// 色はまとまりごとに揃える。
+  List<_HelpSection> get _sections => [
+    const _HelpSection('g_l1', Icons.style_rounded, Colors.orange, 3),
+    const _HelpSection(
+      'g_l2',
+      Icons.lightbulb_outline_rounded,
+      Colors.orange,
+      3,
+    ),
+    const _HelpSection('g_l3', Icons.account_tree_outlined, Colors.orange, 3),
+    const _HelpSection('g_l4', Icons.mic_none_rounded, Colors.orange, 3),
+    const _HelpSection(
+      'g_l5',
+      Icons.record_voice_over_outlined,
+      Colors.orange,
+      3,
+    ),
+    const _HelpSection('g_vocab', Icons.menu_book_rounded, Colors.blue, 3),
+    const _HelpSection('g_prompts', Icons.list_alt_rounded, Colors.blue, 3),
+    const _HelpSection(
+      'g_dashboard',
+      Icons.space_dashboard_outlined,
+      Colors.blue,
+      3,
+    ),
+    const _HelpSection(
+      'g_certificate',
+      Icons.workspace_premium_outlined,
+      Colors.blue,
+      1,
+    ),
+    const _HelpSection('g_copy', Icons.copy_rounded, Colors.purple, 2),
+    const _HelpSection('g_hint', Icons.touch_app_outlined, Colors.purple, 1),
+    const _HelpSection('g_close', Icons.swipe_rounded, Colors.purple, 1),
+    const _HelpSection('g_export', Icons.upload_outlined, Colors.purple, 2),
+    const _HelpSection('g_import', Icons.download_outlined, Colors.purple, 2),
+    // iCloud同期はiPhoneだけの機能（Androidでは設定にも出さない）。
+    if (!Platform.isAndroid)
+      const _HelpSection('g_icloud', Icons.cloud_sync_outlined, Colors.teal, 1),
+  ];
 
   @override
   void initState() {
@@ -154,7 +104,7 @@ class _HelpScreenState extends State<HelpScreen> {
     return OsmSubpageScaffold(
       title: Text('ヘルプ'.tr(lang)),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
           _HelpHero(
             title: 'help.gradus.title'.tr(lang),
@@ -162,100 +112,70 @@ class _HelpScreenState extends State<HelpScreen> {
             versionLabel: _versionLabel,
           ),
           const SizedBox(height: 20),
-          _HelpManualLink(
-            lang: lang,
-            accentColor: palette.scene,
-            onTap: () => launchUrl(
-              Uri.parse(HelpScreen.userManualUrlFor(lang)),
-              mode: LaunchMode.externalApplication,
-            ),
-          ),
-          const SizedBox(height: 20),
-          _HelpLeadCard(
-            title: 'help.gradus.overview.title'.tr(lang),
-            summary: 'help.gradus.overview.summary'.tr(lang),
-            tips: [
-              'help.gradus.overview.tip1'.tr(lang),
-              'help.gradus.overview.tip2'.tr(lang),
-              'help.gradus.overview.tip3'.tr(lang),
-              'help.gradus.overview.tip4'.tr(lang),
-            ],
-            accentColor: palette.scene,
-          ),
-          const SizedBox(height: 20),
-          _HelpLeadCard(
-            title: 'help.gradus.questionPrompts.title'.tr(lang),
-            summary: 'help.gradus.questionPrompts.summary'.tr(lang),
-            tips: [
-              'help.gradus.questionPrompts.tip1'.tr(lang),
-              'help.gradus.questionPrompts.tip2'.tr(lang),
-              'help.gradus.questionPrompts.tip3'.tr(lang),
-              'help.gradus.questionPrompts.tip4'.tr(lang),
-              'help.gradus.questionPrompts.tip5'.tr(lang),
-            ],
-            accentColor: palette.scene,
-          ),
-          const SizedBox(height: 20),
-          Text(
-            'help.gradus.sections.layers'.tr(lang),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.6,
-              color: palette.textOnSubpageSecondary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          for (var i = 0; i < LayerHelpTips.layers.length; i++)
-            _HelpSectionCard(
-              lang: lang,
-              spec: _HelpSectionSpec(
-                layerIndex: i,
-                titleKey: LayerHelpTips.layers[i].titleKey,
-                summaryKey: LayerHelpTips.layers[i].summaryKey,
-                tipKeys: LayerHelpTips.layers[i].tipKeys,
+          for (final section in _sections)
+            Padding(
+              key: ValueKey('help-section-${section.id}'),
+              padding: const EdgeInsets.only(bottom: 10),
+              child: GradusExpandCard(
+                title: 'help.${section.id}.title'.tr(lang),
+                icon: section.icon,
+                accent: section.accent,
+                open: _openSections.contains(section.id),
+                onToggle: () => setState(() {
+                  if (!_openSections.remove(section.id)) {
+                    _openSections.add(section.id);
+                  }
+                }),
+                child: GradusStepList(
+                  color: section.accent,
+                  steps: [
+                    for (var i = 1; i <= section.stepCount; i++)
+                      'help.${section.id}.$i'.tr(lang),
+                  ],
+                ),
               ),
-              accentColor: kLayerColors[i],
-              badgeLabel: _numerals[i],
             ),
-          const SizedBox(height: 12),
-          Text(
-            'help.gradus.sections.more'.tr(lang),
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.6,
-              color: palette.textOnSubpageSecondary,
+          Material(
+            color: palette.cardFill,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+              side: BorderSide(color: palette.cardBorder),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: ListTile(
+              key: const ValueKey('help-privacy'),
+              leading: const Icon(
+                Icons.privacy_tip_outlined,
+                color: Colors.teal,
+              ),
+              title: Text(
+                'プライバシーとデータ'.tr(lang),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: palette.textOnCardPrimary,
+                ),
+              ),
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: palette.textOnCardSecondary,
+              ),
+              onTap: () => PrivacyDataScreen.push(context),
             ),
           ),
-          const SizedBox(height: 10),
-          for (final section in _extraSections)
-            _HelpSectionCard(
-              lang: lang,
-              spec: section,
-              accentColor: palette.cardAccent,
-              icon: section.icon,
-            ),
         ],
       ),
     );
   }
 }
 
-class _HelpSectionSpec {
-  const _HelpSectionSpec({
-    this.layerIndex,
-    this.icon,
-    required this.titleKey,
-    required this.summaryKey,
-    required this.tipKeys,
-  });
+/// ヘルプの 1 節。文言は `help.<id>.title` と `help.<id>.1`〜。
+class _HelpSection {
+  const _HelpSection(this.id, this.icon, this.accent, this.stepCount);
 
-  final int? layerIndex;
-  final IconData? icon;
-  final String titleKey;
-  final String summaryKey;
-  final List<String> tipKeys;
+  final String id;
+  final IconData icon;
+  final Color accent;
+  final int stepCount;
 }
 
 class _HelpHero extends StatelessWidget {
@@ -323,292 +243,6 @@ class _HelpHero extends StatelessWidget {
               color: palette.textOnSubpageSecondary,
             ),
           ),
-        ],
-      ],
-    );
-  }
-}
-
-class _HelpManualLink extends StatelessWidget {
-  const _HelpManualLink({
-    required this.lang,
-    required this.accentColor,
-    required this.onTap,
-  });
-
-  final String lang;
-  final Color accentColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppColors.current;
-    final onAccent = palette.onFill(accentColor);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        key: const Key('help_user_manual'),
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: _HelpSectionCardShell(
-          accentColor: accentColor,
-          child: Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: accentColor,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.menu_book_outlined,
-                  color: onAccent,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'help.gradus.manual.title'.tr(lang),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: palette.textOnCardPrimary,
-                      ),
-                    ),
-                    Text(
-                      'help.gradus.manual.summary'.tr(lang),
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: accentColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.open_in_new_rounded,
-                size: 18,
-                color: palette.textOnCardSecondary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HelpLeadCard extends StatelessWidget {
-  const _HelpLeadCard({
-    required this.title,
-    required this.summary,
-    required this.tips,
-    required this.accentColor,
-  });
-
-  final String title;
-  final String summary;
-  final List<String> tips;
-  final Color accentColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return _HelpSectionCardShell(
-      accentColor: accentColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.bold,
-              color: AppColors.current.textOnCardPrimary,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            summary,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w600,
-              height: 1.4,
-              color: AppColors.current.textOnCardPrimary,
-            ),
-          ),
-          const SizedBox(height: 10),
-          _HelpBulletList(tips: tips, bulletColor: accentColor),
-        ],
-      ),
-    );
-  }
-}
-
-class _HelpSectionCard extends StatelessWidget {
-  const _HelpSectionCard({
-    required this.lang,
-    required this.spec,
-    required this.accentColor,
-    this.badgeLabel,
-    this.icon,
-  });
-
-  final String lang;
-  final _HelpSectionSpec spec;
-  final Color accentColor;
-  final String? badgeLabel;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppColors.current;
-    final onAccent = palette.onFill(accentColor);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: _HelpSectionCardShell(
-        accentColor: accentColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: accentColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: badgeLabel != null
-                      ? Text(
-                          badgeLabel!,
-                          style: TextStyle(
-                            color: onAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        )
-                      : Icon(icon, color: onAccent, size: 20),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        spec.titleKey.tr(lang),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: palette.textOnCardPrimary,
-                        ),
-                      ),
-                      Text(
-                        spec.summaryKey.tr(lang),
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: accentColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _HelpBulletList(tips: spec.tipKeys.map((k) => k.tr(lang)).toList()),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HelpSectionCardShell extends StatelessWidget {
-  const _HelpSectionCardShell({required this.accentColor, required this.child});
-
-  final Color accentColor;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppColors.current;
-    return Container(
-      decoration: BoxDecoration(
-        color: palette.cardFill,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.cardBorder),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(width: 5, color: accentColor),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Theme(data: SurfaceTheme.card(context), child: child),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HelpBulletList extends StatelessWidget {
-  const _HelpBulletList({required this.tips, this.bulletColor});
-
-  final List<String> tips;
-  final Color? bulletColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppColors.current;
-    final dotColor = bulletColor ?? palette.cardAccent;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final tip in tips) ...[
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 7),
-                child: Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: dotColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  tip,
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.45,
-                    color: palette.textOnCardSecondary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (tip != tips.last) const SizedBox(height: 6),
         ],
       ],
     );

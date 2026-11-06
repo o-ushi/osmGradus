@@ -1,11 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:osm_gradus/models/question_prompt.dart';
 import 'package:osm_gradus/models/question_prompt_source.dart';
 import 'package:osm_gradus/models/topic_category.dart';
 import 'package:osm_gradus/services/question_prompt_auto_tag_service.dart';
 import 'package:osm_gradus/services/question_prompt_service.dart';
 import 'package:osm_gradus/services/topic_service.dart';
+
+Future<List<QuestionPrompt>> _promptsInCategory(
+  QuestionPromptService service,
+  TopicCategory category,
+) async {
+  final all = await service.loadAll();
+  return service.filter(all, category: category);
+}
 
 void main() {
   setUp(() {
@@ -55,9 +64,7 @@ void main() {
 
       final service = QuestionPromptService();
       final all = await _promptsInCategory(service, TopicCategory.general);
-      final added = all.singleWhere(
-        (p) => p.body == 'あなたの趣味について教えてください。',
-      );
+      final added = all.singleWhere((p) => p.body == 'あなたの趣味について教えてください。');
       expect(added.category, TopicCategory.general);
       expect(added.tags, contains('趣味'));
     });
