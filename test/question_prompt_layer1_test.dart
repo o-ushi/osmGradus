@@ -141,7 +141,10 @@ void main() {
   testWidgets('行タップで詳細が開き、既存レイヤーと同じ予約席レイアウトを持つ', (tester) async {
     await _openQuestionPromptList(tester);
 
-    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
+    await tapQuestionPromptListRow(
+      tester,
+      row: find.byType(QuestionPromptListRow).first,
+    );
 
     // 上段: DiceActionRow（45/60/15+60はダミー、＋は表示）。
     expect(find.byType(DiceActionRow), findsOneWidget);
@@ -162,7 +165,10 @@ void main() {
     _mockClipboard(tester);
 
     await _openQuestionPromptList(tester);
-    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
+    await tapQuestionPromptListRow(
+      tester,
+      row: find.byType(QuestionPromptListRow).first,
+    );
 
     final iconBefore = tester.widget<Icon>(find.byIcon(Icons.quiz_outlined));
     expect(iconBefore.color, isNot(Colors.orange));
@@ -241,11 +247,13 @@ void main() {
 
     await _openQuestionPromptList(tester);
     await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     await tester.tap(find.text(_t('手入力')));
     await tester.tap(find.text(_t('完了')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Step3語彙テスト対象の問題文'));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
 
     // 抽出済みなので、タップで直接語彙テストが開く（Chrome AI往復はしない）。
@@ -348,11 +356,13 @@ void main() {
 
     await _openQuestionPromptList(tester);
     await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     await tester.tap(find.text(_t('手入力')));
     await tester.tap(find.text(_t('完了')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('ヒント確認用の問題文'));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.quiz_outlined));
@@ -371,7 +381,10 @@ void main() {
 
   testWidgets('本文の単語をタップすると単語帳へ登録され、「訳を付ける」が使えるようになる', (tester) async {
     await _openQuestionPromptList(tester);
-    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
+    await tapQuestionPromptListRow(
+      tester,
+      row: find.byType(QuestionPromptListRow).first,
+    );
 
     expect(_enrichButton(tester).visible, isFalse);
 
@@ -390,6 +403,7 @@ void main() {
     await _openQuestionPromptList(tester);
 
     await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     expect(find.byType(QuestionPromptFilterSheet), findsOneWidget);
     expect(find.text(_t('入手元')), findsOneWidget);
@@ -405,12 +419,11 @@ void main() {
     expect(find.text(_t('問題文がありません')), findsOneWidget);
   });
 
-  testWidgets('フィルタでカテゴリ「趣味」を選ぶと、趣味タグ付きのgeneral問題だけに絞れる', (
-    tester,
-  ) async {
+  testWidgets('フィルタでカテゴリ「趣味」を選ぶと、趣味タグ付きのgeneral問題だけに絞れる', (tester) async {
     await _openQuestionPromptList(tester);
 
     await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
 
     await tester.tap(
@@ -440,7 +453,10 @@ void main() {
     final firstBody = all.first.body;
 
     await _openQuestionPromptList(tester);
-    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
+    await tapQuestionPromptListRow(
+      tester,
+      row: find.byType(QuestionPromptListRow).first,
+    );
 
     await tester.tap(find.byType(LayerNumeralBadge));
     await tester.pump(_tapConfirmWait);
@@ -461,7 +477,10 @@ void main() {
     final firstRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).first,
     );
-    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).first);
+    await tapQuestionPromptListRow(
+      tester,
+      row: find.byType(QuestionPromptListRow).first,
+    );
     await tester.tap(find.byType(LayerNumeralBadge));
     await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
@@ -478,7 +497,10 @@ void main() {
     final secondRow = tester.widget<QuestionPromptListRow>(
       find.byType(QuestionPromptListRow).at(1),
     );
-    await tapQuestionPromptListRow(tester, row: find.byType(QuestionPromptListRow).at(1));
+    await tapQuestionPromptListRow(
+      tester,
+      row: find.byType(QuestionPromptListRow).at(1),
+    );
 
     // 再度「II」。Ⅱ側は既にselectFromListモードのまま（initStateは再実行され
     // ない）だが、それでも一覧ではなく新しい問題文の詳細へ直接飛ぶこと。
@@ -493,6 +515,7 @@ void main() {
     await _openQuestionPromptList(tester);
 
     await tester.tap(find.byIcon(Icons.add));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     expect(find.text(_t('自分で追加')), findsOneWidget);
     expect(find.text(_t('AIで追加')), findsOneWidget);
@@ -532,6 +555,7 @@ void main() {
     // 組み込みが多数あり一覧が長いため、フィルタで「手入力」に絞って
     // 対象の行を確実に表示範囲へ入れる。
     await tester.tap(find.byIcon(Icons.filter_list));
+    await tester.pump(_tapConfirmWait);
     await tester.pumpAndSettle();
     await tester.tap(find.text(_t('手入力')));
     await tester.tap(find.text(_t('完了')));

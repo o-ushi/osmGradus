@@ -37,6 +37,7 @@ void main() {
     await tester.pumpWidget(
       MaterialApp(
         home: TtsSettingsScreen(
+          startExpanded: true,
           settings: ttsSettings,
           speechReader: topicSpeechReader,
         ),

@@ -27,6 +27,7 @@ Future<void> _openSettings(WidgetTester tester) async {
   await tester.pumpWidget(
     MaterialApp(
       home: TtsSettingsScreen(
+        startExpanded: true,
         settings: ttsSettings,
         speechReader: topicSpeechReader,
       ),
@@ -58,7 +59,7 @@ void main() {
   testWidgets('ボタンヒントのセクションが既定値（OFF・3秒）で表示される（Step 8）', (tester) async {
     await _openSettings(tester);
 
-    expect(find.text(_t('ボタンヒント_設定セクション')), findsOneWidget);
+    expect(find.text(_t('案内とヒント')), findsOneWidget);
     expect(find.text(_t('ボタンヒント_次のアクションまで表示')), findsOneWidget);
     final switchWidget = tester.widget<Switch>(
       find.descendant(

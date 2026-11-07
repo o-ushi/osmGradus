@@ -67,9 +67,12 @@ class SettingsSectionHeader extends StatelessWidget {
 
 /// セクション見出しの下に付く補足説明文。
 class SettingsNoteText extends StatelessWidget {
-  const SettingsNoteText(this.text, {super.key});
+  const SettingsNoteText(this.text, {super.key, this.onCard = false});
 
   final String text;
+
+  /// 開閉カードの中に置くとき。文字色をカードに合わせる。
+  final bool onCard;
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +81,12 @@ class SettingsNoteText extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
       child: Text(
         text,
-        style: TextStyle(color: palette.textOnSubpageSecondary, fontSize: 13),
+        style: TextStyle(
+          color: onCard
+              ? palette.textOnCardSecondary
+              : palette.textOnSubpageSecondary,
+          fontSize: 13,
+        ),
       ),
     );
   }

@@ -7,6 +7,60 @@ abstract final class GradusL10n {
   };
 
   static const _ja = <String, String>{
+    'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
+        'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。',
+    'help.g_l1.title': '語彙とリスニングを鍛える',
+    'help.g_l1.1': '起動画面で Ⅰ を選ぶ',
+    'help.g_l1.2': '「問題文解析」「長文読解」などから選ぶ',
+    'help.g_l1.3': 'ヘッダーの Ⅰ をもう一度タップでモード切替',
+    'help.g_l2.title': '回答をイメージする',
+    'help.g_l2.1': '起動画面で Ⅱ を選ぶ',
+    'help.g_l2.2': '「ランダム」や「25マスで考える」から選ぶ',
+    'help.g_l2.3': '「解答例」で模範解答を作ってもらう',
+    'help.g_l3.title': '話の型で考える',
+    'help.g_l3.1': '起動画面で Ⅲ を選ぶ',
+    'help.g_l3.2': '結論・理由・具体例を書く。母語でもよい',
+    'help.g_l3.3': '「25マスで考える」でさらに深掘りする',
+    'help.g_l4.title': '日本語で話して採点する',
+    'help.g_l4.1': '起動画面で Ⅳ を選ぶ',
+    'help.g_l4.2': 'タイマーが終わると自動で録音して採点',
+    'help.g_l4.3': '紙飛行機で話の型と的中度の評価を依頼',
+    'help.g_l5.title': '発音を整える',
+    'help.g_l5.1': '起動画面で Ⅴ を選ぶ',
+    'help.g_l5.2': '文を声に出して読み、同意して送る',
+    'help.g_l5.3': 'Chrome から戻り、緑の貼り付けボタンで保存',
+    'help.g_vocab.title': '単語を復習する',
+    'help.g_vocab.1': '「単語帳」をタップ',
+    'help.g_vocab.2': 'タップで日本語と訳をめくる',
+    'help.g_vocab.3': '左右スワイプで次の単語',
+    'help.g_prompts.title': '問題文を探して直す',
+    'help.g_prompts.1': '「問題文一覧」をタップ',
+    'help.g_prompts.2': '本文の長押しで編集',
+    'help.g_prompts.3': '各レイヤーの一覧では、左スワイプで削除',
+    'help.g_dashboard.title': '総合判定を見る',
+    'help.g_dashboard.1': '「ダッシュボード」をタップ',
+    'help.g_dashboard.2': '行のタップで最新の結果、長押しで一覧',
+    'help.g_dashboard.3': '紙飛行機でアドバイスを依頼',
+    'help.g_certificate.title': '成績証明証を出す',
+    'help.g_certificate.1': '…（その他）の「成績証明証」をタップ',
+    'help.g_copy.title': 'Chrome の答えを貼り付けられないとき',
+    'help.g_copy.1': 'Chrome の下のほうのコピーボタン（重なった四角）をタップ',
+    'help.g_copy.2': 'アプリに戻る',
+    'help.g_hint.title': 'ボタンの機能を忘れたとき',
+    'help.g_hint.1': 'アイコンや一覧の行をダブルタップ',
+    'help.g_close.title': '画面を閉じたいとき',
+    'help.g_close.1': '右へスワイプ',
+    'help.g_export.title': '記録を書き出す',
+    'help.g_export.1': '…（その他）の「エクスポート」をタップ',
+    'help.g_export.2': '「全て」か「問題のみ」を選ぶ',
+    'help.g_import.title': '記録を取り込む',
+    'help.g_import.1': '…（その他）の「インポート」をタップ',
+    'help.g_import.2': '端末のデータを残したまま追加される',
+    'help.g_icloud.title': 'iPhone どうしで揃える',
+    'help.g_icloud.1': '設定の「iCloudで同期する」をオン',
+    '読み上げとタイマー': '読み上げとタイマー',
+    '問題文と語彙': '問題文と語彙',
+    '案内とヒント': '案内とヒント',
     'iCloud同期_完了': 'iCloudと同期しました。もう一方のiPhoneに届くまで、少しかかることがあります',
     'iCloud同期_失敗_短': 'iCloudと同期できませんでした',
     'iCloud同期': 'iCloud同期',
@@ -620,17 +674,6 @@ abstract final class GradusL10n {
     '初期化しました': '初期化しました',
     'help.gradus.title': 'osmGradus？',
     'help.gradus.subtitle': '5段階で日本語会話力を磨く',
-    'help.gradus.manual.title': '操作マニュアル',
-    'help.gradus.manual.summary': '図解で画面ごとの使い方を見る',
-    'help.gradus.overview.title': 'はじめに',
-    'help.gradus.overview.summary': '起動画面でレイヤーを選び、段階的に練習する。',
-    'help.gradus.overview.tip1': 'Ⅰ〜Ⅴはいつでもヘッダーから切り替えられる',
-    'help.gradus.overview.tip2': '各画面は右スワイプで閉じる',
-    'help.gradus.overview.tip3':
-        '起動画面下の単語帳・ダッシュボード・問題文一覧・「…」から各機能を開く。'
-        '問題文一覧は総評・Ⅰ〜Ⅴ・本文の横断一覧で、本文長押しで編集できる',
-    'help.gradus.overview.tip4':
-        '言語は「…」→設定、またはスタートアップ／使い方画面右上の国旗から、日本語・English・Tiếng Việtを選べる',
     'help.gradus.layer1.title': 'レイヤーⅠ：語彙とリスニング',
     'help.gradus.layer1.summary': '問題文解析・長文読解・語彙テストとPodcastで基礎を育てる',
     'help.gradus.layer1.tip1': 'はじめに「問題文解析」「長文読解」「語彙テスト」「日本語に耳を慣らす」から選ぶ',
@@ -703,83 +746,6 @@ abstract final class GradusL10n {
     'help.gradus.layer5.tip5': 'ランダム／問題文のみ：画面左上のボタンで断続・半連続・連続モードを切り替えられる',
     'help.gradus.layer5.tip6':
         '発音チェック結果ボタンはタップで最新1件の詳細、長押しで結果一覧を開く（ランダム・問題文・長文読み上げで共通）',
-    'help.gradus.vocabulary.title': '単語帳',
-    'help.gradus.vocabulary.summary': 'フラッシュカードで単語を復習する',
-    'help.gradus.vocabulary.tip1': '起動画面のアイコンから開く',
-    'help.gradus.vocabulary.tip2': 'タップで日本語⇄訳をめくる（読み・例文つき）',
-    'help.gradus.vocabulary.tip3': '左右スワイプで次の単語へ進む',
-    'help.gradus.vocabulary.tip4': '単語は一覧で編集・削除。追加した語は並べ替えもできる',
-    'help.gradus.dashboard.title': 'ダッシュボード',
-    'help.gradus.dashboard.summary': '直近の練習から総合判定を見る',
-    'help.gradus.dashboard.tip1': '起動画面のダッシュボードアイコンから開く',
-    'help.gradus.dashboard.tip2':
-        'テスト総合はJSST・的中度・PREP・語彙・発音の平均点でA〜Dが決まる（1つでも欠けるとE）。'
-        '総合はテスト総合と拡充度総合を組み合わせて決まる',
-    'help.gradus.dashboard.tip3':
-        '各行をタップすると最新の結果の詳細、長押しで一覧が開く。練習記録が1件でもあれば紙飛行機でアドバイスを受け取れる',
-    'help.gradus.dashboard.tip4':
-        '語彙の点数はレイヤーⅠの単語テスト結果のみ（長文読解は1秒チェックを1問目に含めた語彙テストも含む。読解中に単語帳へ登録しただけでは点数に入らない）',
-    'help.gradus.dashboard.tip5':
-        '拡充度総合は25マス（日常・ビジネス・シチュエーションの計65マス）の埋まり具合でA〜Eが決まる',
-    'help.gradus.dashboard.tip6':
-        '25マスは日常・ビジネス・シチュエーションの3シートが最初から用意されており、'
-        '1マスはキーワード→結論・理由・具体例→60秒スピーチの順に進むほど拡充度への貢献が上がる',
-    'help.gradus.transcript.title': '成績証明証',
-    'help.gradus.transcript.summary': '直近の練習結果を1枚にまとめる',
-    'help.gradus.transcript.tip1': '起動画面の「…」→成績証明証から開く',
-    'help.gradus.transcript.tip2':
-        '発行日時・総合判定・テスト総合・拡充度総合と、会話/語彙/発音/25マスの直近結果を表示する',
-    'help.gradus.transcript.tip3': 'ダッシュボードと同じ計算で総合判定が決まる',
-    'help.gradus.transcript.tip4':
-        '総合はテスト総合と拡充度総合を組み合わせて決まる。25マスは発行時点の日常・ビジネス・シチュエーションの拡充度を表示する',
-    'help.gradus.backup.title': 'バックアップと同期',
-    'help.gradus.backup.summary': 'データを書き出す・取り込む・iCloudで同期する',
-    'help.gradus.backup.tip1': '起動画面の「…」→エクスポート／インポートから開き、「問題のみ」か「全て」を選ぶ',
-    'help.gradus.backup.tip2':
-        '「全て」は単語帳・履歴・長文・問題文・設定などアプリ全体のJSON。インポートは端末のデータを残したまま追加する',
-    'help.gradus.backup.tip3':
-        '「問題のみ」は問題文（理解・要約・PREP・スコアなどの記入内容を含む）だけのJSON。手を付けていない標準問題文は含まない',
-    'help.gradus.backup.tip4':
-        'レイヤーⅡ〜Ⅳの「＋」→「ファイルをインポート」「エクスポート」は、取り込んだお題の本文だけの簡易JSON（上の2つとは別）',
-    'help.gradus.backup.tip5':
-        'iPhoneでは「…」→設定→「iCloudで同期する」をオンにすると、同じApple IDのiPhoneどうしでデータが自動で同期される（Podcastの再生位置も含む。表示言語・案内の表示・録音は端末ごと）。すぐ反映したいときは「今すぐ同期」',
-    'help.gradus.settings.title': '設定',
-    'help.gradus.settings.summary': '言語・読み上げ・iCloud同期・ボタンヒント・初期化を管理する',
-    'help.gradus.settings.tip1': '起動画面の「…」→設定から開く',
-    'help.gradus.settings.tip2':
-        '読み上げ・タイマー音・言語・語彙テストの入力方式・長文読解の単語選択方式・標準JLPT語彙の表示・スタートアップ／使い方画面の表示可否を変更できる（スタートアップをOFFにすると使い方も自動でOFFになる）',
-    'help.gradus.settings.tip3': '採点結果のリセット、または初期化ですべてのデータを削除する',
-    'help.gradus.settings.tip4': '「問題文」→「問題文タブの管理」で独自タブの追加・名前変更・削除ができる',
-    'help.gradus.settings.tip5':
-        'ボタンヒント（アイコンや一覧の要素をダブルタップするとタップ／長押しの機能が出る）の'
-        '表示期間と「次のアクションまで表示」を変えられる',
-    'help.gradus.settings.tip6':
-        'iCloud同期（iPhoneのみ）のオン／オフ・最終同期・今すぐ同期と、「プライバシーとデータ」の確認もここから',
-    'help.gradus.questionPrompts.title': '問題文の分類と一覧',
-    'help.gradus.questionPrompts.summary': 'シチュエーション／その他＋タブで整理する',
-    'help.gradus.questionPrompts.tip1':
-        'その他（一般）の問題文には趣味・健康・旅行・家族・環境・会社などのタブを複数付けられる。'
-        'シチュエーションは状況＋条件で、タブは持たない',
-    'help.gradus.questionPrompts.tip2': '一覧のフィルタで入手元・カテゴリ・タブ・実施状況を絞り込める',
-    'help.gradus.questionPrompts.tip3':
-        '起動画面の問題文一覧（横断）では総評・Ⅰ〜Ⅴ・本文の列。'
-        'Ⅰ〜Ⅴタップで各レイヤー詳細、本文長押しで編集',
-    'help.gradus.questionPrompts.tip4':
-        '各レイヤーの問題文一覧では行タップで問題を選択、行長押しで編集。'
-        '左スワイプで削除（標準問題文は不可）',
-    'help.gradus.questionPrompts.tip5': '設定の「問題文タブの管理」で独自タブを追加・改名・削除できる',
-    'help.gradus.gesture.title': '操作の基本',
-    'help.gradus.gesture.summary': '戻るボタンはない',
-    'help.gradus.gesture.tip1': '右スワイプで前の画面へ戻る',
-    'help.gradus.gesture.tip2': 'ヘッダーのⅠ〜Ⅴでレイヤーを即切り替える',
-    'help.gradus.gesture.tip3':
-        'アイコンや問題文一覧の行・Ⅰ〜Ⅴなどをダブルタップすると、'
-        'タップと長押しの機能が表示される',
-    'help.gradus.gesture.tip4':
-        'ChromeのAIモードで答えが出たら、画面下のほうのコピーボタン'
-        '（重なった2つの四角）を押してから戻る。押さずに戻ると貼り付けできない',
-    'help.gradus.sections.layers': '5つのレイヤー',
-    'help.gradus.sections.more': 'その他',
     'バージョン %@ (%@)': 'バージョン %@ (%@)',
     '問題文のカテゴリ': '問題文のカテゴリ',
     '単語（日本語）': '単語（日本語）',
@@ -914,6 +880,60 @@ abstract final class GradusL10n {
   };
 
   static const _en = <String, String>{
+    'help.g_l1.title': 'Build vocabulary and listening',
+    'help.g_l1.1': 'Choose Ⅰ on the start screen',
+    'help.g_l1.2': 'Choose "Prompt Analysis", "Long reading" or another mode',
+    'help.g_l1.3': 'Tap Ⅰ in the header again to switch modes',
+    'help.g_l2.title': 'Imagine your answer',
+    'help.g_l2.1': 'Choose Ⅱ on the start screen',
+    'help.g_l2.2': 'Choose "Random", "Think in 25 cells" or another mode',
+    'help.g_l2.3': 'Tap "Sample answer" to get a model answer',
+    'help.g_l3.title': 'Think in a speaking pattern',
+    'help.g_l3.1': 'Choose Ⅲ on the start screen',
+    'help.g_l3.2': 'Write your point, reason and example, in any language',
+    'help.g_l3.3': 'Go deeper with "Think in 25 cells"',
+    'help.g_l4.title': 'Speak Japanese and get scored',
+    'help.g_l4.1': 'Choose Ⅳ on the start screen',
+    'help.g_l4.2': 'When the timer ends, it records and scores automatically',
+    'help.g_l4.3': 'Tap the paper plane to request more evaluation',
+    'help.g_l5.title': 'Improve your pronunciation',
+    'help.g_l5.1': 'Choose Ⅴ on the start screen',
+    'help.g_l5.2': 'Read the sentences aloud, agree and send',
+    'help.g_l5.3': 'Return from Chrome and save with the green paste button',
+    'help.g_vocab.title': 'Review words',
+    'help.g_vocab.1': 'Tap "Vocabulary"',
+    'help.g_vocab.2': 'Tap to flip between Japanese and the translation',
+    'help.g_vocab.3': 'Swipe left or right for the next word',
+    'help.g_prompts.title': 'Find and edit questions',
+    'help.g_prompts.1': 'Tap "Prompt List"',
+    'help.g_prompts.2': 'Long-press the text to edit',
+    'help.g_prompts.3': 'In each layer\'s list, swipe left to delete',
+    'help.g_dashboard.title': 'See your overall grade',
+    'help.g_dashboard.1': 'Tap "Dashboard"',
+    'help.g_dashboard.2':
+        'Tap a row for the latest result, long-press for the list',
+    'help.g_dashboard.3': 'Tap the paper plane to ask for advice',
+    'help.g_certificate.title': 'Show your certificate',
+    'help.g_certificate.1': 'In … (More), tap "Certificate of Results"',
+    'help.g_copy.title': 'When you can\'t paste Chrome\'s answer',
+    'help.g_copy.1':
+        'Tap the copy button (overlapping squares) near the bottom of Chrome',
+    'help.g_copy.2': 'Return to the app',
+    'help.g_hint.title': 'When you forget what a button does',
+    'help.g_hint.1': 'Double-tap the icon or list row',
+    'help.g_close.title': 'When you want to close a screen',
+    'help.g_close.1': 'Swipe right',
+    'help.g_export.title': 'Export your records',
+    'help.g_export.1': 'In … (More), tap "Export"',
+    'help.g_export.2': 'Choose "Everything" or "Prompts only"',
+    'help.g_import.title': 'Import your records',
+    'help.g_import.1': 'In … (More), tap "Import"',
+    'help.g_import.2': 'It is added to the data on this device',
+    'help.g_icloud.title': 'Keep iPhones in sync',
+    'help.g_icloud.1': 'Turn on "Sync with iCloud" in Settings',
+    '読み上げとタイマー': 'Speech and timer',
+    '問題文と語彙': 'Questions and vocabulary',
+    '案内とヒント': 'Guides and hints',
     'iCloud同期_完了':
         'Synced with iCloud. It may take a little while to reach your other iPhone',
     'iCloud同期_失敗_短': 'Could not sync with iCloud',
@@ -1604,18 +1624,6 @@ abstract final class GradusL10n {
     '初期化しました': 'Reset complete',
     'help.gradus.title': 'osmGradus?',
     'help.gradus.subtitle': 'Polish your Japanese in five layers',
-    'help.gradus.manual.title': 'User manual',
-    'help.gradus.manual.summary': 'Illustrated guide for each screen',
-    'help.gradus.overview.title': 'Getting started',
-    'help.gradus.overview.summary':
-        'Pick a layer on the launch screen and practice step by step.',
-    'help.gradus.overview.tip1': 'Switch layers anytime from the I–V header',
-    'help.gradus.overview.tip2': 'Swipe right to close any screen',
-    'help.gradus.overview.tip3':
-        'Open Vocabulary, Dashboard, Prompt List, or “…” from the bottom of the launch screen. '
-        'The prompt list shows Summary · I–V · Body; long-press body text to edit',
-    'help.gradus.overview.tip4':
-        'Choose Japanese, English, or Vietnamese in “… → Settings”, or with the flag at the top right of the startup/how-to screens',
     'help.gradus.layer1.title': 'Layer I: Vocabulary & listening',
     'help.gradus.layer1.summary':
         'Grow basics with prompt analysis, long reading, vocabulary tests, and podcasts',
@@ -1720,99 +1728,6 @@ abstract final class GradusL10n {
         'Tap the pronunciation check results button to open the latest result, '
         'or long-press it to open the result list (same in Random, prompt, and '
         'long read-aloud)',
-    'help.gradus.vocabulary.title': 'Vocabulary',
-    'help.gradus.vocabulary.summary': 'Review words with flashcards',
-    'help.gradus.vocabulary.tip1': 'Open from the launch screen icon',
-    'help.gradus.vocabulary.tip2':
-        'Tap a card to flip Japanese ⇄ translation (reading and example included)',
-    'help.gradus.vocabulary.tip3': 'Swipe left or right for the next word',
-    'help.gradus.vocabulary.tip4':
-        'Edit or delete any word. You can also reorder words you added',
-    'help.gradus.dashboard.title': 'Dashboard',
-    'help.gradus.dashboard.summary':
-        'See an overall judgment from recent practice',
-    'help.gradus.dashboard.tip1':
-        'Open from the dashboard icon on the launch screen',
-    'help.gradus.dashboard.tip2':
-        'Test overall A–D is decided by the average of your JSST, relevance, PREP, vocabulary, and pronunciation scores (E if any is missing). Overall combines Test overall and Expansion overall',
-    'help.gradus.dashboard.tip3':
-        'Tap each row for the latest result details; long-press for the list. '
-        'If you have any practice record, use the paper plane for advice',
-    'help.gradus.dashboard.tip4':
-        'Vocabulary score uses Layer I vocabulary-test results only (this includes long-article tests, with the Quick Check as question 1; merely registering words while reading does not count)',
-    'help.gradus.dashboard.tip5':
-        'Expansion overall (A–E) is decided by how filled the 25-cell sheets are (65 cells total across Daily, Business, and Situational)',
-    'help.gradus.dashboard.tip6':
-        'The Daily, Business, and Situational 25-cell sheets are ready from the start; each cell contributes more as it progresses from keyword → Point/Reason/Example → 60-second speech',
-    'help.gradus.transcript.title': 'Certificate of Results',
-    'help.gradus.transcript.summary':
-        'Summarize recent practice on one certificate',
-    'help.gradus.transcript.tip1':
-        'Open from “… → Certificate of Results” on the launch screen',
-    'help.gradus.transcript.tip2':
-        'Shows issue date/time, overall / test / expansion grades, and recent conversation / vocab / pronunciation / 25-cell results',
-    'help.gradus.transcript.tip3':
-        'Overall grade uses the same calculation as the Dashboard',
-    'help.gradus.transcript.tip4':
-        'Overall combines Test overall and Expansion overall. The 25-cell block shows Daily / Business / Situations expansion at issue time',
-    'help.gradus.backup.title': 'Backup & sync',
-    'help.gradus.backup.summary':
-        'Export, import, and sync your data with iCloud',
-    'help.gradus.backup.tip1':
-        'Open “…” → Export / Import on the launch screen, then choose “Prompts only” or “Everything”',
-    'help.gradus.backup.tip2':
-        '“Everything” is a JSON of the whole app (vocabulary, history, articles, prompts, settings, …). Importing adds to the data already on the device',
-    'help.gradus.backup.tip3':
-        '“Prompts only” is a JSON of question prompts with what you wrote for them (comprehension, summary, PREP, scores, …). Untouched built-in prompts are not included',
-    'help.gradus.backup.tip4':
-        'Layer II–IV “+” → “Import from file” / “Export” is a simple JSON of imported topic texts only (separate from the two above)',
-    'help.gradus.backup.tip5':
-        'On iPhone, turn on “… → Settings → Sync with iCloud” to sync your data automatically across iPhones with the same Apple ID (including podcast playback positions; display language, onboarding screens, and recordings stay on each device). Tap “Sync now” to sync right away',
-    'help.gradus.settings.title': 'Settings',
-    'help.gradus.settings.summary':
-        'Manage language, speech, iCloud sync, button hints, and reset',
-    'help.gradus.settings.tip1':
-        'Open from “… → Settings” on the launch screen',
-    'help.gradus.settings.tip2':
-        'Change speech, timer sound, language, vocab input mode, long-reading word selection, whether built-in JLPT vocabulary is included, and whether the startup/how-to screens are shown (turning off the startup screen also turns off the how-to screen)',
-    'help.gradus.settings.tip3': 'Reset scoring results, or reset all data',
-    'help.gradus.settings.tip4':
-        'Under “Prompts” → “Manage prompt tags” to add, rename, or delete custom tags',
-    'help.gradus.settings.tip5':
-        'Change button-hint duration and “show until next action” (double-tap icons '
-        'or list elements to see tap / long-press actions)',
-    'help.gradus.settings.tip6':
-        'Also here: iCloud sync (iPhone only) on/off, last sync, Sync now, and “Privacy & Data”',
-    'help.gradus.questionPrompts.title': 'Prompt categories & lists',
-    'help.gradus.questionPrompts.summary':
-        'Organize with Situations vs General + tags',
-    'help.gradus.questionPrompts.tip1':
-        'General prompts can have multiple tags (Hobbies, Health, Travel, Family, '
-        'Environment, Work, …). Situations use situation + condition and have no tags',
-    'help.gradus.questionPrompts.tip2':
-        'Filter lists by source, category, tag, and completion status',
-    'help.gradus.questionPrompts.tip3':
-        'Launch-screen prompt list: Summary · I–V · Body. Tap I–V for layer details; '
-        'long-press body to edit',
-    'help.gradus.questionPrompts.tip4':
-        'Layer prompt lists: tap a row to select; long-press a row to edit. Swipe left to delete '
-        '(built-in prompts cannot be deleted)',
-    'help.gradus.questionPrompts.tip5':
-        'Add, rename, or delete custom tags in Settings → Manage prompt tags',
-    'help.gradus.gesture.title': 'Basic controls',
-    'help.gradus.gesture.summary': 'There is no back button',
-    'help.gradus.gesture.tip1': 'Swipe right to go back',
-    'help.gradus.gesture.tip2':
-        'Tap I–V in the header to switch layers instantly',
-    'help.gradus.gesture.tip3':
-        'Double-tap icons or list elements (rows, I–V, …) to see tap and '
-        'long-press actions',
-    'help.gradus.gesture.tip4':
-        'When Chrome’s AI Mode shows an answer, tap the Copy button near the bottom '
-        '(two overlapping squares) before returning — skip it and you won’t be able '
-        'to paste',
-    'help.gradus.sections.layers': 'Five layers',
-    'help.gradus.sections.more': 'More',
     'バージョン %@ (%@)': 'Version %@ (%@)',
     '問題文のカテゴリ': 'Prompt category',
     '単語（日本語）': 'Word (Japanese)',
@@ -1960,6 +1875,61 @@ abstract final class GradusL10n {
   };
 
   static const _vi = <String, String>{
+    'help.g_l1.title': 'Luyện từ vựng và nghe',
+    'help.g_l1.1': 'Chọn Ⅰ ở màn hình khởi động',
+    'help.g_l1.2':
+        'Chọn "Phân tích đề bài", "Đọc đoạn văn dài" hoặc chế độ khác',
+    'help.g_l1.3': 'Chạm lại Ⅰ ở đầu màn hình để đổi chế độ',
+    'help.g_l2.title': 'Hình dung câu trả lời',
+    'help.g_l2.1': 'Chọn Ⅱ ở màn hình khởi động',
+    'help.g_l2.2': 'Chọn "Ngẫu nhiên", "Suy nghĩ 25 ô" hoặc chế độ khác',
+    'help.g_l2.3': 'Chạm "Câu trả lời mẫu" để có câu trả lời mẫu',
+    'help.g_l3.title': 'Suy nghĩ theo khung nói',
+    'help.g_l3.1': 'Chọn Ⅲ ở màn hình khởi động',
+    'help.g_l3.2': 'Viết kết luận, lý do, ví dụ. Dùng tiếng mẹ đẻ cũng được',
+    'help.g_l3.3': 'Đào sâu hơn với "Suy nghĩ 25 ô"',
+    'help.g_l4.title': 'Nói tiếng Nhật và chấm điểm',
+    'help.g_l4.1': 'Chọn Ⅳ ở màn hình khởi động',
+    'help.g_l4.2': 'Hết giờ, ứng dụng tự ghi âm và chấm điểm',
+    'help.g_l4.3': 'Chạm máy bay giấy để yêu cầu đánh giá thêm',
+    'help.g_l5.title': 'Luyện phát âm',
+    'help.g_l5.1': 'Chọn Ⅴ ở màn hình khởi động',
+    'help.g_l5.2': 'Đọc to các câu, đồng ý rồi gửi',
+    'help.g_l5.3': 'Quay lại từ Chrome rồi lưu bằng nút dán màu xanh lá',
+    'help.g_vocab.title': 'Ôn từ vựng',
+    'help.g_vocab.1': 'Chạm "Sổ từ vựng"',
+    'help.g_vocab.2': 'Chạm để lật giữa tiếng Nhật và bản dịch',
+    'help.g_vocab.3': 'Vuốt trái hoặc phải để sang từ tiếp',
+    'help.g_prompts.title': 'Tìm và sửa câu hỏi',
+    'help.g_prompts.1': 'Chạm "Danh sách đề bài"',
+    'help.g_prompts.2': 'Nhấn giữ nội dung để sửa',
+    'help.g_prompts.3': 'Trong danh sách của từng lớp, vuốt sang trái để xóa',
+    'help.g_dashboard.title': 'Xem đánh giá tổng',
+    'help.g_dashboard.1': 'Chạm "Bảng điều khiển"',
+    'help.g_dashboard.2':
+        'Chạm dòng để xem kết quả mới nhất, nhấn giữ để xem danh sách',
+    'help.g_dashboard.3': 'Chạm máy bay giấy để xin lời khuyên',
+    'help.g_certificate.title': 'Xem giấy chứng nhận',
+    'help.g_certificate.1': 'Trong … (Khác), chạm "Giấy chứng nhận kết quả"',
+    'help.g_copy.title': 'Khi không dán được câu trả lời của Chrome',
+    'help.g_copy.1':
+        'Chạm nút sao chép (hai ô vuông chồng nhau) ở phía dưới Chrome',
+    'help.g_copy.2': 'Quay lại ứng dụng',
+    'help.g_hint.title': 'Khi quên chức năng của nút',
+    'help.g_hint.1': 'Chạm hai lần vào biểu tượng hoặc dòng trong danh sách',
+    'help.g_close.title': 'Khi muốn đóng màn hình',
+    'help.g_close.1': 'Vuốt sang phải',
+    'help.g_export.title': 'Xuất ghi chép',
+    'help.g_export.1': 'Trong … (Khác), chạm "Xuất dữ liệu"',
+    'help.g_export.2': 'Chọn "Tất cả" hoặc "Chỉ đề bài"',
+    'help.g_import.title': 'Nhập ghi chép',
+    'help.g_import.1': 'Trong … (Khác), chạm "Nhập dữ liệu"',
+    'help.g_import.2': 'Dữ liệu được thêm vào, giữ nguyên dữ liệu trên máy',
+    'help.g_icloud.title': 'Đồng bộ giữa các iPhone',
+    'help.g_icloud.1': 'Bật "Đồng bộ bằng iCloud" trong Cài đặt',
+    '読み上げとタイマー': 'Đọc và hẹn giờ',
+    '問題文と語彙': 'Câu hỏi và từ vựng',
+    '案内とヒント': 'Hướng dẫn và gợi ý',
     'iCloud同期_完了':
         'Đã đồng bộ với iCloud. Có thể mất một lúc để dữ liệu đến iPhone còn lại',
     'iCloud同期_失敗_短': 'Không thể đồng bộ với iCloud',
@@ -2642,18 +2612,6 @@ abstract final class GradusL10n {
     '初期化しました': 'Đã đặt lại',
     'help.gradus.title': 'osmGradus?',
     'help.gradus.subtitle': 'Rèn tiếng Nhật qua 5 tầng',
-    'help.gradus.manual.title': 'Hướng dẫn sử dụng',
-    'help.gradus.manual.summary': 'Xem cách dùng từng màn hình bằng hình',
-    'help.gradus.overview.title': 'Bắt đầu',
-    'help.gradus.overview.summary':
-        'Chọn tầng trên màn hình khởi động và luyện từng bước.',
-    'help.gradus.overview.tip1': 'Chuyển tầng I–V bất cứ lúc nào từ thanh đầu',
-    'help.gradus.overview.tip2': 'Vuốt sang phải để đóng màn hình',
-    'help.gradus.overview.tip3':
-        'Mở Sổ từ, Bảng điều khiển, Danh sách đề bài hoặc “…” ở cuối màn hình khởi động. '
-        'Danh sách đề bài hiện Tổng kết · I–V · Nội dung; nhấn giữ nội dung để chỉnh sửa',
-    'help.gradus.overview.tip4':
-        'Chọn tiếng Nhật, English hoặc Tiếng Việt trong “… → Cài đặt”, hoặc bằng lá cờ ở góc trên bên phải màn hình khởi động/hướng dẫn',
     'help.gradus.layer1.title': 'Tầng I: Từ vựng & nghe',
     'help.gradus.layer1.summary':
         'Rèn nền tảng bằng phân tích đề bài, đọc đoạn văn dài, kiểm tra từ vựng và podcast',
@@ -2755,97 +2713,6 @@ abstract final class GradusL10n {
         'Chạm nút kết quả kiểm tra phát âm để xem chi tiết mới nhất, nhấn giữ '
         'để xem danh sách kết quả (dùng chung cho Ngẫu nhiên, đề bài và đọc '
         'đoạn dài)',
-    'help.gradus.vocabulary.title': 'Sổ từ vựng',
-    'help.gradus.vocabulary.summary': 'Ôn từ bằng thẻ flashcard',
-    'help.gradus.vocabulary.tip1': 'Mở từ biểu tượng màn hình khởi động',
-    'help.gradus.vocabulary.tip2':
-        'Chạm thẻ để lật Nhật ⇄ bản dịch (kèm cách đọc và câu ví dụ)',
-    'help.gradus.vocabulary.tip3': 'Vuốt trái phải để xem từ tiếp theo',
-    'help.gradus.vocabulary.tip4':
-        'Sửa hoặc xóa bất kỳ từ nào. Bạn cũng có thể sắp xếp lại từ đã thêm',
-    'help.gradus.dashboard.title': 'Bảng điều khiển',
-    'help.gradus.dashboard.summary':
-        'Xem đánh giá tổng hợp từ luyện tập gần đây',
-    'help.gradus.dashboard.tip1':
-        'Mở từ biểu tượng bảng điều khiển trên màn hình khởi động',
-    'help.gradus.dashboard.tip2':
-        'Tổng hợp bài kiểm tra (A–D) được quyết định bằng điểm trung bình JSST / độ trúng đích / PREP / từ vựng / phát âm (thiếu 1 chỉ số cũng thành E). Đánh giá tổng hợp kết hợp Tổng hợp bài kiểm tra và Tổng hợp mở rộng',
-    'help.gradus.dashboard.tip3':
-        'Chạm từng dòng để xem chi tiết kết quả mới nhất; nhấn giữ để xem danh sách. '
-        'Nếu đã có ít nhất 1 bản ghi luyện tập, dùng máy bay giấy để nhận lời khuyên',
-    'help.gradus.dashboard.tip4':
-        'Điểm từ vựng chỉ lấy từ kết quả kiểm tra từ vựng Tầng I (bao gồm bài đọc dài, với Kiểm tra nhanh là câu 1; chỉ đăng ký từ khi đọc thì không tính điểm)',
-    'help.gradus.dashboard.tip5':
-        'Tổng hợp mở rộng (A–E) được quyết định bởi mức độ lấp đầy của các tờ 25 ô (tổng 65 ô gồm Hàng ngày, Công việc, Tình huống)',
-    'help.gradus.dashboard.tip6':
-        'Các tờ 25 ô Hàng ngày, Công việc, Tình huống đã có sẵn từ đầu; mỗi ô đóng góp nhiều hơn khi tiến từ từ khóa → Kết luận/Lý do/Ví dụ → nói 60 giây',
-    'help.gradus.transcript.title': 'Giấy chứng nhận kết quả',
-    'help.gradus.transcript.summary':
-        'Tóm tắt kết quả luyện tập gần đây trên một tờ',
-    'help.gradus.transcript.tip1':
-        'Mở từ “… → Giấy chứng nhận kết quả” trên màn hình khởi động',
-    'help.gradus.transcript.tip2':
-        'Hiện ngày/giờ phát hành, đánh giá tổng hợp / bài kiểm tra / mở rộng, và kết quả hội thoại / từ vựng / phát âm / 25 ô gần đây',
-    'help.gradus.transcript.tip3':
-        'Đánh giá tổng hợp dùng cùng cách tính với Bảng điều khiển',
-    'help.gradus.transcript.tip4':
-        'Đánh giá tổng hợp kết hợp Tổng hợp bài kiểm tra và Tổng hợp mở rộng. Khối 25 ô hiện mức mở rộng Hàng ngày / Công việc / Tình huống tại thời điểm cấp',
-    'help.gradus.backup.title': 'Sao lưu & đồng bộ',
-    'help.gradus.backup.summary': 'Xuất, nhập và đồng bộ dữ liệu bằng iCloud',
-    'help.gradus.backup.tip1':
-        'Mở “…” → Xuất / Nhập trên màn hình khởi động, rồi chọn “Chỉ đề bài” hoặc “Tất cả”',
-    'help.gradus.backup.tip2':
-        '“Tất cả” là JSON của toàn bộ ứng dụng (từ vựng, lịch sử, bài dài, đề bài, cài đặt, …). Khi nhập, dữ liệu sẵn có trên máy vẫn được giữ và phần mới được thêm vào',
-    'help.gradus.backup.tip3':
-        '“Chỉ đề bài” là JSON chỉ gồm đề bài và nội dung bạn đã ghi (hiểu, tóm tắt, PREP, điểm, …). Đề bài mặc định chưa dùng không được đưa vào',
-    'help.gradus.backup.tip4':
-        'Tầng II–IV “+” → “Nhập từ tệp” / “Xuất dữ liệu” là JSON đơn giản chỉ gồm nội dung chủ đề đã nhập (khác với hai mục trên)',
-    'help.gradus.backup.tip5':
-        'Trên iPhone, bật “… → Cài đặt → Đồng bộ bằng iCloud” để dữ liệu tự động đồng bộ giữa các iPhone dùng cùng Apple ID (kể cả vị trí phát podcast; ngôn ngữ hiển thị, màn hình hướng dẫn và bản ghi âm được giữ riêng trên từng máy). Nhấn “Đồng bộ ngay” để đồng bộ ngay lập tức',
-    'help.gradus.settings.title': 'Cài đặt',
-    'help.gradus.settings.summary':
-        'Quản lý ngôn ngữ, giọng đọc, đồng bộ iCloud, gợi ý nút bấm và đặt lại',
-    'help.gradus.settings.tip1': 'Mở từ “… → Cài đặt” trên màn hình khởi động',
-    'help.gradus.settings.tip2':
-        'Đổi giọng đọc, âm hẹn giờ, ngôn ngữ, chế độ nhập từ vựng, cách chọn từ khi đọc dài, có hiển thị từ JLPT chuẩn hay không, và có hiện màn hình khởi động/hướng dẫn hay không (tắt màn hình khởi động sẽ tự tắt luôn màn hình hướng dẫn)',
-    'help.gradus.settings.tip3':
-        'Đặt lại kết quả chấm điểm, hoặc đặt lại toàn bộ dữ liệu',
-    'help.gradus.settings.tip4':
-        '“Đề bài” → “Quản lý thẻ đề bài” để thêm, đổi tên hoặc xóa thẻ tự tạo',
-    'help.gradus.settings.tip5':
-        'Đổi thời gian gợi ý nút và “hiện đến khi có thao tác tiếp theo” '
-        '(chạm đúp biểu tượng hoặc phần tử danh sách để xem chạm / chạm giữ)',
-    'help.gradus.settings.tip6':
-        'Cũng tại đây: bật/tắt đồng bộ iCloud (chỉ iPhone), lần đồng bộ gần nhất, Đồng bộ ngay và “Quyền riêng tư & Dữ liệu”',
-    'help.gradus.questionPrompts.title': 'Phân loại & danh sách đề bài',
-    'help.gradus.questionPrompts.summary':
-        'Sắp xếp bằng Tình huống / Chung + thẻ',
-    'help.gradus.questionPrompts.tip1':
-        'Đề bài Chung có thể gắn nhiều thẻ (Sở thích, Sức khỏe, Du lịch, Gia đình, '
-        'Môi trường, Công ty, …). Tình huống dùng tình huống + điều kiện, không có thẻ',
-    'help.gradus.questionPrompts.tip2':
-        'Lọc danh sách theo nguồn, danh mục, thẻ và tình trạng hoàn thành',
-    'help.gradus.questionPrompts.tip3':
-        'Danh sách trên màn khởi động: Tổng kết · I–V · Nội dung. '
-        'Chạm I–V để mở chi tiết tầng; nhấn giữ nội dung để chỉnh sửa',
-    'help.gradus.questionPrompts.tip4':
-        'Danh sách từng tầng: chạm một dòng để chọn; nhấn giữ dòng để chỉnh sửa. '
-        'Vuốt trái để xóa (không xóa được đề bài mặc định)',
-    'help.gradus.questionPrompts.tip5':
-        'Thêm, đổi tên hoặc xóa thẻ tự tạo trong Cài đặt → Quản lý thẻ đề bài',
-    'help.gradus.gesture.title': 'Thao tác cơ bản',
-    'help.gradus.gesture.summary': 'Không có nút quay lại',
-    'help.gradus.gesture.tip1': 'Vuốt sang phải để quay lại',
-    'help.gradus.gesture.tip2': 'Chạm I–V trên thanh đầu để chuyển tầng ngay',
-    'help.gradus.gesture.tip3':
-        'Chạm đúp biểu tượng hoặc phần tử danh sách (dòng, I–V, …) '
-        'để xem chức năng chạm và chạm giữ',
-    'help.gradus.gesture.tip4':
-        'Khi AI Mode của Chrome hiện câu trả lời, hãy chạm nút Sao chép ở phía dưới '
-        '(hai hình vuông chồng nhau) trước khi quay lại — nếu bỏ qua bạn sẽ không '
-        'dán được',
-    'help.gradus.sections.layers': 'Năm tầng',
-    'help.gradus.sections.more': 'Khác',
     'バージョン %@ (%@)': 'Phiên bản %@ (%@)',
     '問題文のカテゴリ': 'Danh mục đề bài',
     '単語（日本語）': 'Từ (tiếng Nhật)',

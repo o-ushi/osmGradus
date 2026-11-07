@@ -48,54 +48,21 @@ void main() {
     const referenced = <String>[
       'help.gradus.title',
       'help.gradus.subtitle',
-      'help.gradus.manual.title',
-      'help.gradus.manual.summary',
-      'help.gradus.sections.layers',
-      'help.gradus.sections.more',
-      'help.gradus.overview.title',
-      'help.gradus.overview.summary',
-      'help.gradus.overview.tip1',
-      'help.gradus.overview.tip2',
-      'help.gradus.overview.tip3',
-      'help.gradus.overview.tip4',
-      // _extraSections（dashboard / vocabulary / transcript / backup / settings / gesture）
-      'help.gradus.dashboard.title',
-      'help.gradus.dashboard.summary',
-      'help.gradus.dashboard.tip1',
-      'help.gradus.dashboard.tip2',
-      'help.gradus.dashboard.tip3',
-      'help.gradus.dashboard.tip4',
-      'help.gradus.dashboard.tip5',
-      'help.gradus.dashboard.tip6',
-      'help.gradus.vocabulary.title',
-      'help.gradus.vocabulary.summary',
-      'help.gradus.vocabulary.tip1',
-      'help.gradus.vocabulary.tip2',
-      'help.gradus.vocabulary.tip3',
-      'help.gradus.vocabulary.tip4',
-      'help.gradus.transcript.title',
-      'help.gradus.transcript.summary',
-      'help.gradus.transcript.tip1',
-      'help.gradus.transcript.tip2',
-      'help.gradus.transcript.tip3',
-      'help.gradus.transcript.tip4',
-      'help.gradus.backup.title',
-      'help.gradus.backup.summary',
-      'help.gradus.backup.tip1',
-      'help.gradus.backup.tip2',
-      'help.gradus.backup.tip3',
-      'help.gradus.backup.tip4',
-      'help.gradus.settings.title',
-      'help.gradus.settings.summary',
-      'help.gradus.settings.tip1',
-      'help.gradus.settings.tip2',
-      'help.gradus.settings.tip3',
-      'help.gradus.settings.tip4',
-      'help.gradus.gesture.title',
-      'help.gradus.gesture.summary',
-      'help.gradus.gesture.tip1',
-      'help.gradus.gesture.tip2',
-      'help.gradus.gesture.tip3',
+      'help.g_l1.title',
+      'help.g_l2.title',
+      'help.g_l3.title',
+      'help.g_l4.title',
+      'help.g_l5.title',
+      'help.g_vocab.title',
+      'help.g_prompts.title',
+      'help.g_dashboard.title',
+      'help.g_certificate.title',
+      'help.g_copy.title',
+      'help.g_hint.title',
+      'help.g_close.title',
+      'help.g_export.title',
+      'help.g_import.title',
+      'help.g_icloud.title',
     ];
 
     // レイヤーⅠ〜Ⅴのヒント（＋使い方シートと共有）も同じ辞書から引く。
@@ -123,13 +90,13 @@ void main() {
     expect(missing, isEmpty, reason: '参照キーが未定義または空: $missing');
   });
 
-  test('help.gradus.dashboard.tip3 はタップと長押しの動線を説明している', () {
-    final ja = mapFor('ja')['help.gradus.dashboard.tip3']!;
-    final en = mapFor('en')['help.gradus.dashboard.tip3']!;
-    final vi = mapFor('vi')['help.gradus.dashboard.tip3']!;
+  test('help.g_dashboard.2 はタップと長押しの動線を説明している', () {
+    final ja = mapFor('ja')['help.g_dashboard.2']!;
+    final en = mapFor('en')['help.g_dashboard.2']!;
+    final vi = mapFor('vi')['help.g_dashboard.2']!;
 
     expect(ja, contains('長押し'));
-    expect(ja, contains('詳細'));
+    expect(ja, contains('最新'));
     expect(en.toLowerCase(), contains('long-press'));
     expect(en.toLowerCase(), contains('latest'));
     expect(vi.toLowerCase(), contains('nhấn giữ'));

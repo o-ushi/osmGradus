@@ -61,6 +61,8 @@ void main() {
 
     expect(find.text('設定'.tr(lang)), findsOneWidget);
     expect(find.text('言語'.tr(lang)), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('settings-group-読み上げとタイマー')));
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.text('声質'.tr(lang)),
       120,
@@ -68,6 +70,13 @@ void main() {
     );
     expect(find.text('声質'.tr(lang)), findsOneWidget);
     expect(find.text('読み上げ速度'.tr(lang)), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('settings-group-データ')),
+      120,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(find.byKey(const ValueKey('settings-group-データ')));
+    await tester.pumpAndSettle();
     await tester.scrollUntilVisible(
       find.text('すべてのデータを初期化'.tr(lang)),
       120,
