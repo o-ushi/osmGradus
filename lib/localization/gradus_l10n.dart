@@ -7,6 +7,7 @@ abstract final class GradusL10n {
   };
 
   static const _ja = <String, String>{
+    '長文読解_単語帳から削除_確認': '「%@」を単語帳から削除します。',
     'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
         'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。',
     'help.g_l1.title': '語彙とリスニングを鍛える',
@@ -49,7 +50,7 @@ abstract final class GradusL10n {
     'help.g_hint.title': 'ボタンの機能を忘れたとき',
     'help.g_hint.1': 'アイコンや一覧の行をダブルタップ',
     'help.g_close.title': '画面を閉じたいとき',
-    'help.g_close.1': '右へスワイプ',
+    'help.g_close.1': '右か下へスワイプ',
     'help.g_export.title': '記録を書き出す',
     'help.g_export.1': '…（その他）の「エクスポート」をタップ',
     'help.g_export.2': '「全て」か「問題のみ」を選ぶ',
@@ -880,6 +881,7 @@ abstract final class GradusL10n {
   };
 
   static const _en = <String, String>{
+    '長文読解_単語帳から削除_確認': 'Delete "%@" from your word list.',
     'help.g_l1.title': 'Build vocabulary and listening',
     'help.g_l1.1': 'Choose Ⅰ on the start screen',
     'help.g_l1.2': 'Choose "Prompt Analysis", "Long reading" or another mode',
@@ -922,7 +924,7 @@ abstract final class GradusL10n {
     'help.g_hint.title': 'When you forget what a button does',
     'help.g_hint.1': 'Double-tap the icon or list row',
     'help.g_close.title': 'When you want to close a screen',
-    'help.g_close.1': 'Swipe right',
+    'help.g_close.1': 'Swipe right or down',
     'help.g_export.title': 'Export your records',
     'help.g_export.1': 'In … (More), tap "Export"',
     'help.g_export.2': 'Choose "Everything" or "Prompts only"',
@@ -1875,6 +1877,7 @@ abstract final class GradusL10n {
   };
 
   static const _vi = <String, String>{
+    '長文読解_単語帳から削除_確認': 'Xóa "%@" khỏi sổ từ.',
     'help.g_l1.title': 'Luyện từ vựng và nghe',
     'help.g_l1.1': 'Chọn Ⅰ ở màn hình khởi động',
     'help.g_l1.2':
@@ -1918,7 +1921,7 @@ abstract final class GradusL10n {
     'help.g_hint.title': 'Khi quên chức năng của nút',
     'help.g_hint.1': 'Chạm hai lần vào biểu tượng hoặc dòng trong danh sách',
     'help.g_close.title': 'Khi muốn đóng màn hình',
-    'help.g_close.1': 'Vuốt sang phải',
+    'help.g_close.1': 'Vuốt sang phải hoặc xuống dưới',
     'help.g_export.title': 'Xuất ghi chép',
     'help.g_export.1': 'Trong … (Khác), chạm "Xuất dữ liệu"',
     'help.g_export.2': 'Chọn "Tất cả" hoặc "Chỉ đề bài"',

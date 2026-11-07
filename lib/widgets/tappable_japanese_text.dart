@@ -3,6 +3,8 @@ import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 
+import '../localization/app_strings.dart';
+
 import '../main.dart' show appSettings;
 import '../models/long_article_word_selection_mode.dart';
 import '../models/vocabulary_level.dart';
@@ -29,14 +31,15 @@ import '../utils/japanese_text_chunks.dart';
 ///   連続をまとめた単語単位（旧方式）で長押しした瞬間にまとめて選ばれる。
 /// - **登録済みの範囲を長押し**: このウィジェット表示中に登録した語の上で
 ///   長押しすると（ドラッグ不要）、その場で登録を取り消す。表示前から
-///   単語帳にあった語（既存エントリ）は対象外——誤って既存データを
-///   削除しないため、このウィジェットが登録したエントリだけを対象にする。
+///   単語帳にあった語は、誤って消さないよう確認ダイアログを出してから削除する
+///   （前回の表示で登録した語が、登録候補として残り続けないように）。
 class TappableJapaneseText extends StatefulWidget {
   const TappableJapaneseText({
     super.key,
     required this.text,
     required this.onWordRegistered,
     this.onWordUnregistered,
+    this.trackedEntryIds = const [],
     this.bodyKey = const ValueKey('tappableJapaneseText'),
   });
 
@@ -47,6 +50,10 @@ class TappableJapaneseText extends StatefulWidget {
 
   /// 長押しで登録を取り消した[VocabularyEntry.id]を通知する。
   final ValueChanged<String>? onWordUnregistered;
+
+  /// 呼び出し元が登録候補として覚えている語のID。単語帳から消えていれば、
+  /// 読み込み時に[onWordUnregistered]で知らせて候補から外してもらう。
+  final List<String> trackedEntryIds;
 
   /// 本文[Text.rich]に付けるキー。
   final Key bodyKey;
@@ -92,6 +99,10 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
   /// 離した時点でこの語をそのままキャンセルする）。
   String? _cancelTargetWord;
 
+  /// 長押し開始位置が、表示前から単語帳にある語だった場合の対象語。
+  /// 離した時点で、確認してから削除する。
+  String? _confirmTargetWord;
+
   /// 長押しを開始したグローバル座標。ドラッグ中の縦方向の微小なブレによる
   /// 意図しない複数行選択を抑制するため、[chunkIndexAtGlobal]の判定基準
   /// として使う。
@@ -116,10 +127,13 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
     final entries = await _vocabularyService.loadEntries();
     if (!mounted) return;
     final words = {for (final entry in entries) entry.word};
-    final removedSessionIds = <String>[
+    final existingIds = {for (final entry in entries) entry.id};
+    final removedSessionIds = <String>{
       for (final entry in _sessionRegisteredIds.entries)
         if (!words.contains(entry.key)) entry.value,
-    ];
+      for (final id in widget.trackedEntryIds)
+        if (!existingIds.contains(id)) id,
+    };
     setState(() {
       _registeredWords = words;
       _sessionRegisteredIds.removeWhere((word, _) => !words.contains(word));
@@ -153,6 +167,15 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
       // 既登録範囲の長押し＝キャンセル操作。ドラッグでは範囲を変えない。
       setState(() {
         _cancelTargetWord = existingWord;
+        _anchorIndex = null;
+        _hoverIndex = null;
+      });
+      return;
+    }
+    final savedWord = _wordAtHitUnitIndex(hitIndex, _registeredWords);
+    if (savedWord != null) {
+      setState(() {
+        _confirmTargetWord = savedWord;
         _anchorIndex = null;
         _hoverIndex = null;
       });
@@ -193,7 +216,11 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
   }
 
   void _onLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
-    if (!_longPressActive || _cancelTargetWord != null) return;
+    if (!_longPressActive ||
+        _cancelTargetWord != null ||
+        _confirmTargetWord != null) {
+      return;
+    }
     if (_anchorIndex == null) return;
     final index = _resolveDraggedIndex(details.globalPosition);
     if (index != null && index != _hoverIndex) {
@@ -210,6 +237,12 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
       unawaited(_unregisterWord(cancelWord));
       return;
     }
+    final confirmWord = _confirmTargetWord;
+    if (confirmWord != null) {
+      setState(() => _confirmTargetWord = null);
+      unawaited(_confirmDeleteSavedWord(confirmWord));
+      return;
+    }
     final index = _resolveDraggedIndex(details.globalPosition);
     if (index != null) {
       setState(() => _hoverIndex = index);
@@ -224,6 +257,7 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
     _anchorGlobalPosition = null;
     setState(() {
       _cancelTargetWord = null;
+      _confirmTargetWord = null;
       _anchorIndex = null;
       _hoverIndex = null;
     });
@@ -276,6 +310,44 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
       _sessionRegisteredIds.remove(word);
     });
     widget.onWordUnregistered?.call(id);
+  }
+
+  /// 表示前から単語帳にある語を、確認してから削除する。
+  Future<void> _confirmDeleteSavedWord(String word) async {
+    final lang = appSettings.language;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('削除しますか？'.tr(lang)),
+        content: Text('長文読解_単語帳から削除_確認'.trFmt(lang, [word])),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('キャンセル'.tr(lang)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('削除'.tr(lang)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final entries = await _vocabularyService.loadEntries();
+    final removedIds = <String>[
+      for (final entry in entries)
+        if (entry.word == word) entry.id,
+    ];
+    for (final id in removedIds) {
+      await _vocabularyService.deleteEntry(id);
+    }
+    if (!mounted) return;
+    setState(() {
+      _registeredWords = {..._registeredWords}..remove(word);
+    });
+    for (final id in removedIds) {
+      widget.onWordUnregistered?.call(id);
+    }
   }
 
   /// [index]（[_hitUnits]へのインデックス）が、このウィジェット表示中に

@@ -50,6 +50,8 @@ class PodcastToolbar extends StatelessWidget {
         Expanded(
           child: GhostPill(
             icon: Icons.skip_next,
+            showBorder: false,
+            iconSize: 26,
             tooltip: '次のエピソードへ'.tr(lang),
             visible: showPlaybackControls,
             onTap: onSkipNext,
@@ -59,6 +61,8 @@ class PodcastToolbar extends StatelessWidget {
         Expanded(
           child: GhostPill(
             icon: Icons.shuffle,
+            showBorder: false,
+            iconSize: 26,
             tooltip: 'ランダム再生'.tr(lang),
             visible: showPlaybackControls,
             active: isRandomEnabled,
@@ -72,6 +76,8 @@ class PodcastToolbar extends StatelessWidget {
         Expanded(
           child: GhostPill(
             icon: Icons.swap_vert,
+            showBorder: false,
+            iconSize: 26,
             tooltip: '並べ替え'.tr(lang),
             visible: showPlaybackControls,
             onTap: onOpenSort,
@@ -87,7 +93,7 @@ class PodcastToolbar extends StatelessWidget {
             onTap: onAddShow,
             onLongPress: onAddShowLongPress,
             showBorder: false,
-            horizontalPadding: 0,
+            iconSize: 26,
             hintTapText: enableActionHints ? '番組を追加'.tr(lang) : null,
           ),
         ),

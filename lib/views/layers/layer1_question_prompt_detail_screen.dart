@@ -464,6 +464,7 @@ class _Layer1PromptDetailBodyState extends State<_Layer1PromptDetailBody>
                           text: _displayText(prompt),
                           onWordRegistered: _onWordRegistered,
                           onWordUnregistered: _onWordUnregistered,
+                          trackedEntryIds: _registeredWordIds,
                         ),
                       ),
                     ),
