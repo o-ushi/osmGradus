@@ -36,7 +36,6 @@ CloudSyncService? cloudSync;
 Future<void> _lockPortraitOrientation() async {
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
   ]);
 }
 

@@ -17,6 +17,7 @@ import '../../models/vocabulary_evaluation.dart';
 import '../../models/vocabulary_level.dart';
 import '../../navigation/app_routes.dart';
 import '../../services/chrome_ai_submit_mixin.dart';
+import '../../widgets/google_ai_send_consent_dialog.dart';
 import '../../services/jlpt_vocab_bank_service.dart';
 import '../../services/learner_answer_language.dart';
 import '../../services/long_article_service.dart';
@@ -408,6 +409,18 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
 
   @override
   void showChromeAiMessage(String message) => _showMessage(message);
+
+  /// 既定（[ChromeAiSubmitMixin]）はレイヤーⅤの発音チェック向け文言なので、
+  /// 単語テスト専用の同意文言に差し替える。
+  @override
+  Future<bool> confirmChromeAiSend(String lang) {
+    return GoogleAiSendConsentDialog.confirm(
+      context,
+      languageCode: lang,
+      titleKey: 'レイヤーⅠ_語彙_Google送信確認_タイトル',
+      bodyKey: 'レイヤーⅠ_語彙_Google送信確認_本文',
+    );
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) =>

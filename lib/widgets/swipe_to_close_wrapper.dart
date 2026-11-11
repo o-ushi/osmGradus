@@ -3,32 +3,43 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-/// 戻るボタン「<」を使わず、下スワイプ or 右スワイプで画面を閉じるための共通ラッパー。
-/// 各詳細画面のbodyをこれで包むことで、osmファミリー共通の操作感を実現する。
+/// スワイプで前の画面に戻るための共通ラッパー（osm日日是好日と同じ）。
 ///
-/// [Listener]で生のポインタイベントだけを観測して速度を計算する（[GestureDetector]は
-/// 使わない）。[GestureDetector]のドラッグ系recognizerを使うと、このラッパーの
-/// 内側にある長押しボタン（レイヤーⅤのマイクボタン等）と同じジェスチャーアリーナで
-/// 常に競合してしまい、指を握り込む・わずかに動かすといった微小な動きだけで
-/// ドラッグ側が「勝ち」を宣言し、長押しが`onLongPressCancel`で強制終了させられる
-/// （さらに、その解放速度が閾値を超えていると[Navigator.pop]まで呼ばれてしまい、
-/// レイヤーⅤであれば録音中に画面ごと閉じてセッションが消える）。[Listener]は
-/// アリーナに参加しないため、内側のどんなジェスチャー（タップ・長押し・スクロール等）
-/// も一切妨げない。
+/// 下スワイプと左端からの右スワイプの両方で閉じる（osm日日是好日と同じ）。
+///
+/// [Listener] で生のポインタイベントだけを観測して速度を計算する（[GestureDetector] は
+/// 使わない）。ドラッグ系の recognizer を使うと、内側の長押し・タップ・スクロールと
+/// 同じジェスチャーアリーナで常に競合し、指のわずかな動きだけでドラッグ側が「勝ち」を
+/// 宣言して内側の操作を強制終了させてしまう。[Listener] はアリーナに参加しないため、
+/// 内側のどんなジェスチャー（タップ・長押し・スクロール・[Dismissible] など）も妨げない。
 ///
 /// 閉じる判定の要点:
-/// - 内側の[Scrollable]に触れた指の動き（実スクロール・端のオーバースクロール）では
-///   閉じない。スクロールと「下スワイプで閉じる」の取り違えを防ぐ。
-/// - 右スワイプは画面左端付近から始めたときだけ有効（親指弧の誤検出防止）。
-///   スクロール中に閉じたいときは左端からの右スワイプを使う（スクロール拒否の対象外）。
-/// - Androidのジェスチャーナビ / iPadOSの端ジェスチャは左端ポインタを
-///   [PointerCancel]することがある。明確な右スワイプならキャンセル時も閉じる。
+/// - 右スワイプは画面左端付近から始めたときだけ有効（親指の弧による誤検出を防ぐ）。
+///   縦スクロールの途中でも、左端からの右スワイプなら戻れる。
+/// - Android のジェスチャーナビ / iPadOS の端ジェスチャーは左端のポインタを
+///   [PointerCancel] することがある。明確な右スワイプならキャンセル時も閉じる。
+/// - [onClose] が無いときは [Navigator.maybePop] で戻る（[PopScope] の確認を尊重する）。
+/// - [closeOnSwipeDown] のときは下スワイプでも閉じる。縦の一覧が先頭にあるときに始めた
+///   下スワイプだけを数える。左右のスワイプを日送りに使う画面は [closeOnEdgeSwipe] を
+///   false にして、右スワイプでは閉じない。
 class SwipeToCloseWrapper extends StatefulWidget {
-  const SwipeToCloseWrapper({super.key, required this.child, this.onClose});
+  const SwipeToCloseWrapper({
+    super.key,
+    required this.child,
+    this.onClose,
+    this.closeOnEdgeSwipe = true,
+    this.closeOnSwipeDown = true,
+  });
 
   final Widget child;
 
-  /// 未指定の場合は [Navigator.pop] を実行する。
+  /// 左端からの右スワイプで閉じるか。
+  final bool closeOnEdgeSwipe;
+
+  /// 下スワイプで閉じるか。
+  final bool closeOnSwipeDown;
+
+  /// 未指定の場合は [Navigator.maybePop] を実行する。
   final VoidCallback? onClose;
 
   @override
@@ -39,8 +50,8 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
   static const double _velocityThreshold = 250;
 
   /// 右スワイプを受け付ける左端ゾーン幅（論理ピクセル）。
-  /// [MediaQuery.systemGestureInsets] / SafeArea 左余白の外側に足す。
-  /// 32pxだとAndroid端バックやiPadの太い指で間欠的に外れるため広めに取る。
+  /// [MediaQueryData.systemGestureInsets] / SafeArea 左余白の外側に足す。
+  /// 32px だと Android の端バックや iPad の太い指で間欠的に外れるため広めに取る。
   static const double _rightSwipeEdgeWidth = 56;
 
   /// 経路上でこの量を超えて縦に動いていたら、右スワイプとしては扱わない。
@@ -49,8 +60,17 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
   /// 速度が間欠的に低く出る端末向けの、右スワイプ距離フォールバック。
   static const double _rightSwipeMinDistance = 72;
 
-  /// 始点→終点の変位で、閉じる向きがもう一方の軸よりどれだけ優勢であるべきか。
+  /// 始点→終点の変位で、右向きが縦向きよりどれだけ優勢であるべきか。
   static const double _netDominanceRatio = 1.25;
+
+  /// 下スワイプの距離フォールバック（速度が低く出ても、これだけ下へ動けば閉じる）。
+  static const double _downSwipeMinDistance = 96;
+
+  /// 縦の一覧が先頭にあるか（下スワイプで閉じてよいか）。一覧がまだ動いていなければ先頭。
+  bool _listAtTop = true;
+
+  /// 指を置いた時点で一覧が先頭だったポインタ。
+  final Set<int> _downFromTop = {};
 
   final Map<int, VelocityTracker> _trackers = {};
   final Map<int, Offset> _downPositions = {};
@@ -58,22 +78,16 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
   final Map<int, double> _horizontalTravel = {};
   final Map<int, double> _verticalTravel = {};
 
-  /// 現在の指の動きのあいだに、内側のScrollableが反応したか
-  /// （中身のスクロール、または端でのオーバースクロール）。
-  /// 下スワイプの誤検出防止にのみ使う（右スワイプは対象外）。
-  bool _scrollInteracted = false;
-
   void _handleClose() {
     if (widget.onClose != null) {
       widget.onClose!();
       return;
     }
-    if (Navigator.of(context).canPop()) {
-      Navigator.of(context).pop();
-    }
+    // 戻る先が無ければ何もしない。PopScope(canPop: false) なら確認側に任せる。
+    Navigator.maybeOf(context)?.maybePop();
   }
 
-  /// システム端ジェスチャ領域を含めた「左端スタート」判定上限。
+  /// システム端ジェスチャー領域を含めた「左端スタート」判定の上限。
   double _leftEdgeLimit(BuildContext context) {
     final mq = MediaQuery.of(context);
     final contestedLeft = math.max(
@@ -137,15 +151,26 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
     required double verticalTravel,
     required Offset velocity,
   }) {
-    if (_scrollInteracted) return false;
     final totalDelta = upPosition - downPosition;
-    return totalDelta.dy > totalDelta.dx.abs() * _netDominanceRatio &&
-        verticalTravel >= horizontalTravel &&
-        velocity.dy > _velocityThreshold;
+    if (totalDelta.dy <= totalDelta.dx.abs() * _netDominanceRatio) return false;
+    if (verticalTravel <= horizontalTravel) return false;
+    return velocity.dy > _velocityThreshold * 2 ||
+        (totalDelta.dy >= _downSwipeMinDistance && velocity.dy > 0);
+  }
+
+  bool _onScroll(ScrollNotification notification) {
+    final metrics = notification.metrics;
+    if (metrics.axis == Axis.vertical) {
+      _listAtTop = metrics.pixels <= metrics.minScrollExtent;
+    } else if (notification is ScrollEndNotification) {
+      // 日送りなどで横に送ると、新しいページの一覧は先頭から始まる。
+      _listAtTop = true;
+    }
+    return false;
   }
 
   void _onPointerDown(PointerDownEvent event) {
-    _scrollInteracted = false;
+    if (_listAtTop) _downFromTop.add(event.pointer);
     (_trackers[event.pointer] = VelocityTracker.withKind(
       event.kind,
     )).addPosition(event.timeStamp, event.position);
@@ -168,68 +193,65 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
     _lastPositions[event.pointer] = event.position;
   }
 
-  void _finishPointer({
-    required int pointer,
-    required Duration timeStamp,
-    required Offset position,
-  }) {
-    final tracker = _trackers.remove(pointer);
-    final downPosition = _downPositions.remove(pointer);
-    final horizontalTravel = _horizontalTravel.remove(pointer) ?? 0;
-    final verticalTravel = _verticalTravel.remove(pointer) ?? 0;
-    _lastPositions.remove(pointer);
+  void _onPointerUp(PointerUpEvent event) {
+    final tracker = _trackers.remove(event.pointer);
+    final downPosition = _downPositions.remove(event.pointer);
+    final horizontalTravel = _horizontalTravel.remove(event.pointer) ?? 0;
+    final verticalTravel = _verticalTravel.remove(event.pointer) ?? 0;
+    _lastPositions.remove(event.pointer);
+    final fromTop = _downFromTop.remove(event.pointer);
     if (tracker == null || downPosition == null) return;
 
-    // 最終位置を速度計算に含め、Android等の疎な move ストリームでも速度が
+    // 最終位置を速度計算に含め、Android 等の疎な move ストリームでも速度が
     // 落ちにくくする。
-    tracker.addPosition(timeStamp, position);
+    tracker.addPosition(event.timeStamp, event.position);
     final velocity = tracker.getVelocity().pixelsPerSecond;
 
-    final isRight = _isRightSwipe(
-      downPosition: downPosition,
-      upPosition: position,
-      horizontalTravel: horizontalTravel,
-      verticalTravel: verticalTravel,
-      velocity: velocity,
-    );
-    final isDown = _isDownSwipe(
-      downPosition: downPosition,
-      upPosition: position,
-      horizontalTravel: horizontalTravel,
-      verticalTravel: verticalTravel,
-      velocity: velocity,
-    );
+    if (widget.closeOnSwipeDown &&
+        fromTop &&
+        _isDownSwipe(
+          downPosition: downPosition,
+          upPosition: event.position,
+          horizontalTravel: horizontalTravel,
+          verticalTravel: verticalTravel,
+          velocity: velocity,
+        )) {
+      _handleClose();
+      return;
+    }
 
-    if (isRight || isDown) {
+    if (widget.closeOnEdgeSwipe &&
+        _isRightSwipe(
+          downPosition: downPosition,
+          upPosition: event.position,
+          horizontalTravel: horizontalTravel,
+          verticalTravel: verticalTravel,
+          velocity: velocity,
+        )) {
       _handleClose();
     }
   }
 
-  void _onPointerUp(PointerUpEvent event) {
-    _finishPointer(
-      pointer: event.pointer,
-      timeStamp: event.timeStamp,
-      position: event.position,
-    );
-  }
-
   void _onPointerCancel(PointerCancelEvent event) {
-    // システムが左端ジェスチャを奪うと up の代わりに cancel が来る。
-    // すでに明確な右スワイプなら閉じる（下スワイプは誤爆しやすいので cancel では閉じない）。
+    // システムが左端ジェスチャーを奪うと up の代わりに cancel が来る。
+    // すでに明確な右スワイプなら閉じる。
     //
-    // Navigator.pop 経路では、システム戻るが既に pop している可能性があるため
-    // カスタム [onClose] があるときだけ即閉じる（MainShell 等）。
-    // それ以外は次フレームでまだ pop 可能なら閉じる。
+    // Navigator 経路では、システムの戻るが既に pop している可能性があるため、
+    // カスタム [onClose] があるときだけ即閉じる。
+    // それ以外は次フレームでまだ pop できる場合だけ閉じる（二重に戻らない）。
     final tracker = _trackers.remove(event.pointer);
     final downPosition = _downPositions.remove(event.pointer);
     final lastPosition = _lastPositions.remove(event.pointer) ?? event.position;
     final horizontalTravel = _horizontalTravel.remove(event.pointer) ?? 0;
     final verticalTravel = _verticalTravel.remove(event.pointer) ?? 0;
+    _downFromTop.remove(event.pointer);
 
+    // 右スワイプで閉じない画面では、システムが奪ったポインタでも閉じない。
+    if (!widget.closeOnEdgeSwipe) return;
     if (tracker == null || downPosition == null) return;
 
     // cancel の timeStamp が move より古い／同一だと VelocityTracker が
-    // 壊れることがあるので、既存サンプルの速度を使い、足りなければ距離で判定。
+    // 壊れることがあるので、既存サンプルの速度を使い、足りなければ距離で判定する。
     final velocity = tracker.getVelocity().pixelsPerSecond;
     final shouldCloseOnCancel = _isRightSwipe(
       downPosition: downPosition,
@@ -247,53 +269,27 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
       return;
     }
 
-    // システム戻ると二重 pop しないよう、フレーム後にまだ残っていれば閉じる。
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
-      }
+      final navigator = Navigator.maybeOf(context);
+      if (navigator != null && navigator.canPop()) navigator.maybePop();
     });
-  }
-
-  bool _onScrollNotification(ScrollNotification notification) {
-    // 実スクロール、または端でのオーバースクロール（先頭での下フリックなど）の
-    // どちらも「スクロール操作」とみなして下スワイプでは閉じない。
-    // 右スワイプ（左端スタート）はスクロール中の「戻る」手段なので対象外。
-    //
-    // ただし、中身が画面に収まっていてスクロール可能範囲が無い
-    // （maxScrollExtent <= minScrollExtent）Scrollableは対象外にする。
-    // BouncingScrollPhysics等では、スクロール範囲が無くても指を動かすと
-    // ラバーバンド分のOverscrollNotificationが飛んでしまい、実際には
-    // 何もスクロールしていないのに「スクロール操作」とみなされて下スワイプ
-    // での閉じる判定が誤って無効化される（本文が短く、SingleChildScrollView
-    // が実質スクロール不要なケースで頻発する）。
-    final metrics = notification.metrics;
-    if (metrics.maxScrollExtent <= metrics.minScrollExtent) return false;
-
-    if (notification is ScrollUpdateNotification &&
-        notification.dragDetails != null &&
-        (notification.scrollDelta?.abs() ?? 0) > 0) {
-      _scrollInteracted = true;
-    } else if (notification is OverscrollNotification &&
-        notification.dragDetails != null) {
-      _scrollInteracted = true;
-    }
-    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: _onScrollNotification,
-      child: Listener(
-        behavior: HitTestBehavior.translucent,
-        onPointerDown: _onPointerDown,
-        onPointerMove: _onPointerMove,
-        onPointerUp: _onPointerUp,
-        onPointerCancel: _onPointerCancel,
-        child: widget.child,
-      ),
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: _onPointerDown,
+      onPointerMove: _onPointerMove,
+      onPointerUp: _onPointerUp,
+      onPointerCancel: _onPointerCancel,
+      child: widget.closeOnSwipeDown
+          ? NotificationListener<ScrollNotification>(
+              onNotification: _onScroll,
+              child: widget.child,
+            )
+          : widget.child,
     );
   }
 }

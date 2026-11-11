@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:osm_gradus/localization/app_strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:osm_gradus/main.dart';
@@ -207,6 +208,53 @@ void main() {
     // それは既存の'友達'エントリとは別物であり保護の対象外。
     final words = (await VocabularyService().loadEntries()).map((e) => e.word);
     expect(words, contains('友達'));
+  });
+
+  testWidgets('前回登録した語も、長押しして確認すると削除でき、候補からも外れる', (WidgetTester tester) async {
+    await VocabularyService().addEntry('友達', '');
+    final unregistered = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TappableJapaneseText(
+            text: _text,
+            onWordRegistered: (_) {},
+            onWordUnregistered: unregistered.add,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final topLeft = tester.getTopLeft(find.byType(TappableJapaneseText));
+    await tester.longPressAt(topLeft + const Offset(6, 10));
+    await tester.pumpAndSettle();
+    expect(await VocabularyService().loadEntries(), hasLength(1));
+
+    await tester.tap(
+      find.widgetWithText(TextButton, '削除'.tr(appSettings.language)),
+    );
+    await tester.pumpAndSettle();
+    expect(await VocabularyService().loadEntries(), isEmpty);
+    expect(unregistered, hasLength(1));
+  });
+
+  testWidgets('単語帳に無くなった語のIDは、読み込み時に候補から外れる', (WidgetTester tester) async {
+    final unregistered = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TappableJapaneseText(
+            text: _text,
+            onWordRegistered: (_) {},
+            onWordUnregistered: unregistered.add,
+            trackedEntryIds: const ['gone'],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(unregistered, ['gone']);
   });
 
   testWidgets('実ジェスチャー：長押し開始→ドラッグ→離すで範囲登録できる', (WidgetTester tester) async {

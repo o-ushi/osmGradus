@@ -203,7 +203,7 @@ void main() {
     expect(closed, isFalse);
   });
 
-  testWidgets('スクロール可能なリストを実際にスクロールした指の動きでは閉じない', (WidgetTester tester) async {
+  testWidgets('一覧の途中から下へスクロールした指の動きでは閉じない', (WidgetTester tester) async {
     var closed = false;
     await tester.pumpWidget(
       MaterialApp(
@@ -219,8 +219,10 @@ void main() {
       ),
     );
 
-    // 下方向へ強くフリック＝リストをスクロール。閉じてはいけない。
-    await tester.fling(find.byType(ListView), const Offset(0, 400), 1200);
+    // 一覧を先に下へ送る。先頭でなければ、下方向のフリックはスクロールで閉じない。
+    await tester.drag(find.byType(ListView), const Offset(0, -800));
+    await tester.pumpAndSettle();
+    await tester.fling(find.byType(ListView), const Offset(0, 300), 1200);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
@@ -424,6 +426,28 @@ void main() {
 
     await tester.fling(find.byType(Text), const Offset(0, 300), 1000);
     await tester.pump();
+    expect(closed, isTrue);
+  });
+
+  testWidgets('一覧がいちばん上のときの下スワイプで閉じる（osm日日是好日と同じ）', (WidgetTester tester) async {
+    var closed = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SwipeToCloseWrapper(
+          onClose: () => closed = true,
+          child: ListView(
+            children: List.generate(
+              50,
+              (i) => SizedBox(height: 60, child: Text('item $i')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.byType(ListView), const Offset(0, 400), 1200);
+    await tester.pump();
+
     expect(closed, isTrue);
   });
 }

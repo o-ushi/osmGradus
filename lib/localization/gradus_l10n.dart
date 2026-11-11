@@ -7,6 +7,7 @@ abstract final class GradusL10n {
   };
 
   static const _ja = <String, String>{
+    '長文読解_単語帳から削除_確認': '「%@」を単語帳から削除します。',
     'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。':
         'その他・シチュエーションすべての取り込み済みお題を削除します。この操作は取り消せません。',
     'help.g_l1.title': '語彙とリスニングを鍛える',
@@ -49,7 +50,7 @@ abstract final class GradusL10n {
     'help.g_hint.title': 'ボタンの機能を忘れたとき',
     'help.g_hint.1': 'アイコンや一覧の行をダブルタップ',
     'help.g_close.title': '画面を閉じたいとき',
-    'help.g_close.1': '右へスワイプ',
+    'help.g_close.1': '右か下へスワイプ',
     'help.g_export.title': '記録を書き出す',
     'help.g_export.1': '…（その他）の「エクスポート」をタップ',
     'help.g_export.2': '「全て」か「問題のみ」を選ぶ',
@@ -490,6 +491,18 @@ abstract final class GradusL10n {
         '文脈理解でつまずきやすい単語を抽出するため、この問題文をGoogle LLCのGoogle検索'
         '（AIモード）へ送信します。検索内容はブラウザやGoogleアカウントの履歴に残る場合が'
         'あります。',
+    'レイヤーⅠ_語彙_Google送信確認_タイトル': '単語テストの結果をGoogleに送信しますか？',
+    'レイヤーⅠ_語彙_Google送信確認_本文':
+        '語彙力の参考評価を得るため、出題した単語・読みと、あなたの回答（発話の文字起こし'
+        'またはキーボード入力）をGoogle LLCのGoogle検索（AIモード）へ送信します。'
+        '文字起こしには、話した氏名などの個人情報が含まれる場合があります。録音音声自体は'
+        'Googleへ送信しません。検索内容はブラウザやGoogleアカウントの履歴に残る場合があります。',
+    'レイヤーⅣ_PREP_Google送信確認_タイトル': '回答をGoogleで評価しますか？',
+    'レイヤーⅣ_PREP_Google送信確認_本文':
+        'PREP構成と的中度の参考評価を得るため、問題文と、あなたの回答の文字起こしを'
+        'Google LLCのGoogle検索（AIモード）へ送信します。文字起こしには、話した氏名などの'
+        '個人情報が含まれる場合があります。録音音声自体はGoogleへ送信しません。'
+        '検索内容はブラウザやGoogleアカウントの履歴に残る場合があります。',
     'レイヤーⅠ_問題作成_抽出件数': '%1語を抽出しました',
 
     // Step 3: レイヤーⅡ「問題文一覧から選ぶ」
@@ -794,8 +807,8 @@ abstract final class GradusL10n {
     'プライバシー': 'プライバシー',
     'プライバシーとデータ': 'プライバシーとデータ',
     '音声認識': '音声認識',
-    'Google AIによる発音評価': 'Google AIによる発音評価',
-    'お題・練習課題の生成': '問題文・練習課題の生成',
+    'Google AIによる発音評価': 'Google AIによる評価・作成',
+    'お題・練習課題の生成': '問題文・発音課題・語彙の追加',
     'Podcast検索・再生': 'Podcast検索・再生',
     'プライバシーポリシー': 'プライバシーポリシー',
     'Google プライバシーポリシー': 'Google プライバシーポリシー',
@@ -816,13 +829,22 @@ abstract final class GradusL10n {
     'プライバシー_音声認識説明_Android':
         '録音した音声を、OSに搭載された音声認識サービス、もしくはVosk（端末内のオフラインモデル）へ送信します。目的は、発話の文字起こしです。初めて利用する前に同意を確認し、同意しない場合も音声認識を使わない機能は利用できます。',
     'プライバシー_Google説明':
-        'レイヤーⅤの発音チェックで参考評価を希望した場合、Google LLCが提供するGoogle検索（AIモード）へ送信します。'
-        '短文では10問の問題文・読み・対象表現と文字起こしを、長文音読では本文の冒頭抜粋と文字起こしを送ります。'
-        'ダッシュボードでは、直近のレイヤーⅣ・Ⅴ・Ⅰの履歴をもとに総合アドバイスを依頼する場合にも同様に送信します。'
-        '目的は発音・発話の傾向に関する参考評価やアドバイスを得ることです。録音音声自体は送信しません。'
-        '送信のたびに同意を確認します。Googleの規約・プライバシーポリシーが適用されます。',
+        '次の機能で希望した場合に限り、Google LLCが提供するGoogle検索（AIモード）へ送信します。\n'
+        '\n'
+        '【練習結果の評価・アドバイス】\n'
+        '・レイヤーⅤ 発音チェック：問題文・読み・対象表現と、発話の文字起こし（長文音読では本文の冒頭抜粋と文字起こし）\n'
+        '・レイヤーⅠ 単語テスト：出題した単語・読みと、あなたの回答（文字起こしまたはキーボード入力）\n'
+        '・レイヤーⅣ PREP・的中度：問題文と、回答の文字起こし\n'
+        '・総評：問題文と、その問題文で記入・記録した内容（単語・要約・PREP・スコア等）\n'
+        '・ダッシュボード：直近のレイヤーⅣ・Ⅴ・Ⅰの結果\n'
+        '\n'
+        '【教材の作成】\n'
+        '・単語抽出（Ⅰ）・解答例（Ⅱ・Ⅳ）・発音練習文（Ⅴ）：問題文\n'
+        '・長文読解：キーワード・レベル・文体・文字数。訳付けでは選んだ単語\n'
+        '\n'
+        '録音音声自体は送信しません。文字起こしや入力内容には、個人情報が含まれる場合があります。送信のたびに内容を説明し、同意を確認します。検索内容はブラウザやGoogleアカウントの履歴に残る場合があります。Googleの規約・プライバシーポリシーが適用されます。',
     'プライバシー_お題生成説明':
-        '問題文や発音課題の生成では、あらかじめ用意した固定プロンプトのみをGoogle検索（AIモード）へ送信します。録音・文字起こしなどのユーザーデータは含まれません。Googleの規約・プライバシーポリシーが適用されます。',
+        '問題文・発音課題・語彙の追加では、あらかじめ用意した固定プロンプト（語彙は選んだJLPTレベルの指定のみ）だけをGoogle検索（AIモード）へ送信します。録音・文字起こしなどのユーザーデータは含まれません。Googleの規約・プライバシーポリシーが適用されます。',
     'プライバシー_Podcast説明':
         'Podcast検索では、検索語をApple Inc.のiTunes Search APIへ送信します。登録したPodcastの更新・再生時は番組の配信元へ直接接続し、IPアドレスやアクセス日時などが通信ログとして処理される場合があります。検索についてはAppleの規約・プライバシーポリシーが、配信元への接続については各配信元のポリシーが適用されます。',
     'プライバシー_ポリシー本文_詳細': '外部送信、保存期間、削除方法などの詳細を記載しています。',
@@ -837,6 +859,9 @@ abstract final class GradusL10n {
         '同意を撤回または保留すると、発音練習・採点など音声認識を使う機能は利用できません。Podcastや問題文など音声認識を使わない機能は引き続き利用できます。次回音声認識を使う際に再度確認します。すでに第三者へ送信済みのデータは、各事業者のプライバシーポリシーに従って取り扱われます。',
     'うまく聞き取れませんでした。もう一度録音してみましょう。': 'うまく聞き取れませんでした。もう一度録音してみましょう。',
     '評価結果プレビュー': '評価結果プレビュー',
+    '発音総合_見出し': '全体の話し方',
+    '発音総合_リズム': 'リズム（一音ずつ区切れて促音気味）',
+    '発音総合_脱落': '音の脱落（例：お願いします→お願います）',
     'STT結果に基づく参考評価です（音声そのものは判定していません）。':
         '文字起こし結果に基づく参考評価です（Googleは録音音声そのものを判定していません）。',
     'Chrome AIを開けませんでした': 'Chrome AIを開けませんでした',
@@ -880,6 +905,7 @@ abstract final class GradusL10n {
   };
 
   static const _en = <String, String>{
+    '長文読解_単語帳から削除_確認': 'Delete "%@" from your word list.',
     'help.g_l1.title': 'Build vocabulary and listening',
     'help.g_l1.1': 'Choose Ⅰ on the start screen',
     'help.g_l1.2': 'Choose "Prompt Analysis", "Long reading" or another mode',
@@ -922,7 +948,7 @@ abstract final class GradusL10n {
     'help.g_hint.title': 'When you forget what a button does',
     'help.g_hint.1': 'Double-tap the icon or list row',
     'help.g_close.title': 'When you want to close a screen',
-    'help.g_close.1': 'Swipe right',
+    'help.g_close.1': 'Swipe right or down',
     'help.g_export.title': 'Export your records',
     'help.g_export.1': 'In … (More), tap "Export"',
     'help.g_export.2': 'Choose "Everything" or "Prompts only"',
@@ -1421,6 +1447,20 @@ abstract final class GradusL10n {
         'To extract vocabulary that may be hard to understand in context, '
         'this prompt will be sent to Google LLC\'s Google Search (AI mode). '
         'The content may remain in your browser or Google account history.',
+    'レイヤーⅠ_語彙_Google送信確認_タイトル': 'Send vocabulary-test results to Google?',
+    'レイヤーⅠ_語彙_Google送信確認_本文':
+        'To provide a reference vocabulary evaluation, the test words, their readings, '
+        'and your answers (speech transcripts or keyboard input) will be sent to Google '
+        'Search (AI Mode), provided by Google LLC. A transcript may contain personal '
+        'information you spoke, such as a name. Recorded audio itself is not sent to '
+        'Google. The search may remain in your browser or Google Account history.',
+    'レイヤーⅣ_PREP_Google送信確認_タイトル': 'Evaluate your answer using Google?',
+    'レイヤーⅣ_PREP_Google送信確認_本文':
+        'To provide a reference evaluation of PREP structure and relevance, the prompt '
+        'and the transcript of your answer will be sent to Google Search (AI Mode), '
+        'provided by Google LLC. A transcript may contain personal information you '
+        'spoke, such as a name. Recorded audio itself is not sent to Google. The search '
+        'may remain in your browser or Google Account history.',
     'レイヤーⅠ_問題作成_抽出件数': 'Extracted %1 word(s)',
 
     // Step 3: Layer II "Choose from prompt list"
@@ -1780,8 +1820,8 @@ abstract final class GradusL10n {
     'プライバシー': 'Privacy',
     'プライバシーとデータ': 'Privacy & Data',
     '音声認識': 'Speech recognition',
-    'Google AIによる発音評価': 'Pronunciation evaluation by Google AI',
-    'お題・練習課題の生成': 'Generating prompts and practice tasks',
+    'Google AIによる発音評価': 'Evaluation and content creation by Google AI',
+    'お題・練習課題の生成': 'Adding prompts, pronunciation tasks, and vocabulary',
     'Podcast検索・再生': 'Podcast search and playback',
     'プライバシーポリシー': 'Privacy Policy',
     'Google プライバシーポリシー': 'Google Privacy Policy',
@@ -1802,12 +1842,22 @@ abstract final class GradusL10n {
     'プライバシー_音声認識説明_Android':
         'Recorded audio is sent to the speech-recognition service built into the OS, or to Vosk (an on-device offline model). The purpose is to create a transcript. Consent is requested before first use; features that do not use speech recognition remain available even if you decline.',
     'プライバシー_Google説明':
-        'If you request a reference evaluation in Layer V pronunciation, data is sent to Google Search (AI Mode), provided by Google LLC. '
-        'Short form sends the 10 question texts, readings, target expressions, and transcript; long reading sends an article excerpt and transcript. '
-        'The dashboard also sends recent Layer IV, V, and I history when you request overall advice. '
-        'The goal is a reference evaluation of speaking and pronunciation tendencies, or advice based on them. Recorded audio itself is not sent. Consent is requested for every submission. Google’s terms and privacy policy apply.',
+        'Data is sent to Google Search (AI Mode), provided by Google LLC, only when you choose to use one of the following features.\n'
+        '\n'
+        '[Evaluation and advice on your practice]\n'
+        '- Layer V pronunciation check: prompt texts, readings, target expressions, and the transcript of your speech (for long reading, the opening excerpt and the transcript)\n'
+        '- Layer I vocabulary test: the test words and readings, and your answers (transcript or keyboard input)\n'
+        '- Layer IV PREP and relevance: the prompt and the transcript of your answer\n'
+        '- Summary: the prompt and what you entered or recorded for it (words, summary, PREP, scores, etc.)\n'
+        '- Dashboard: your recent Layer IV, V, and I results\n'
+        '\n'
+        '[Creating learning content]\n'
+        '- Word extraction (I), sample answers (II, IV), pronunciation sentences (V): the prompt\n'
+        '- Long reading: keyword, level, style, and length; for translations, the words you selected\n'
+        '\n'
+        'Recorded audio itself is never sent. Transcripts and your input may contain personal information. Before each send, the app explains what will be sent and asks for your consent. The search may remain in your browser or Google Account history. Google terms and privacy policy apply.',
     'プライバシー_お題生成説明':
-        'Generating prompts and pronunciation tasks sends only a fixed, pre-written prompt to Google Search (AI Mode). No recordings, transcripts, or other user data are included. Google’s terms and privacy policy apply.',
+        'When adding prompts, pronunciation tasks, or vocabulary, only a fixed prompt prepared by the app (for vocabulary, just the JLPT levels you selected) is sent to Google Search (AI Mode). It contains no recordings, transcripts, or other user data. Google terms and privacy policy apply.',
     'プライバシー_Podcast説明':
         'Podcast search sends your search term to Apple Inc.’s iTunes Search API. Updating or playing a subscribed podcast connects directly to that show’s host, which may process your IP address, access time, and requested content in its logs. Apple’s terms and privacy policy apply to search; each host’s own policy applies to the direct connection.',
     'プライバシー_ポリシー本文_詳細':
@@ -1824,6 +1874,9 @@ abstract final class GradusL10n {
     'うまく聞き取れませんでした。もう一度録音してみましょう。':
         "Couldn't recognize your speech clearly. Please try recording again.",
     '評価結果プレビュー': 'Evaluation preview',
+    '発音総合_見出し': 'Overall delivery',
+    '発音総合_リズム': 'Rhythm (choppy, each sound clipped like っ)',
+    '発音総合_脱落': 'Dropped sounds (e.g. お願いします→お願います)',
     'STT結果に基づく参考評価です（音声そのものは判定していません）。':
         'This is a reference evaluation based on the transcript; Google does '
         'not directly evaluate the recorded audio.',
@@ -1875,6 +1928,7 @@ abstract final class GradusL10n {
   };
 
   static const _vi = <String, String>{
+    '長文読解_単語帳から削除_確認': 'Xóa "%@" khỏi sổ từ.',
     'help.g_l1.title': 'Luyện từ vựng và nghe',
     'help.g_l1.1': 'Chọn Ⅰ ở màn hình khởi động',
     'help.g_l1.2':
@@ -1918,7 +1972,7 @@ abstract final class GradusL10n {
     'help.g_hint.title': 'Khi quên chức năng của nút',
     'help.g_hint.1': 'Chạm hai lần vào biểu tượng hoặc dòng trong danh sách',
     'help.g_close.title': 'Khi muốn đóng màn hình',
-    'help.g_close.1': 'Vuốt sang phải',
+    'help.g_close.1': 'Vuốt sang phải hoặc xuống dưới',
     'help.g_export.title': 'Xuất ghi chép',
     'help.g_export.1': 'Trong … (Khác), chạm "Xuất dữ liệu"',
     'help.g_export.2': 'Chọn "Tất cả" hoặc "Chỉ đề bài"',
@@ -2411,6 +2465,20 @@ abstract final class GradusL10n {
         'sẽ được gửi đến Google Search (chế độ AI) của Google LLC. Nội dung '
         'có thể được lưu lại trong lịch sử trình duyệt hoặc tài khoản '
         'Google của bạn.',
+    'レイヤーⅠ_語彙_Google送信確認_タイトル': 'Gửi kết quả kiểm tra từ vựng đến Google?',
+    'レイヤーⅠ_語彙_Google送信確認_本文':
+        'Để nhận đánh giá từ vựng tham khảo, các từ được hỏi, cách đọc và câu trả lời '
+        'của bạn (bản ghi lời nói hoặc nhập bằng bàn phím) sẽ được gửi đến Google Search '
+        '(chế độ AI) do Google LLC cung cấp. Bản ghi có thể chứa thông tin cá nhân mà bạn '
+        'đã nói, chẳng hạn như tên. Âm thanh ghi âm không được gửi đến Google. Nội dung '
+        'tìm kiếm có thể lưu trong lịch sử trình duyệt hoặc Tài khoản Google.',
+    'レイヤーⅣ_PREP_Google送信確認_タイトル': 'Đánh giá câu trả lời bằng Google?',
+    'レイヤーⅣ_PREP_Google送信確認_本文':
+        'Để nhận đánh giá tham khảo về cấu trúc PREP và mức độ đúng trọng tâm, đề bài và '
+        'bản ghi câu trả lời của bạn sẽ được gửi đến Google Search (chế độ AI) do Google '
+        'LLC cung cấp. Bản ghi có thể chứa thông tin cá nhân mà bạn đã nói, chẳng hạn như '
+        'tên. Âm thanh ghi âm không được gửi đến Google. Nội dung tìm kiếm có thể lưu trong '
+        'lịch sử trình duyệt hoặc Tài khoản Google.',
     'レイヤーⅠ_問題作成_抽出件数': 'Đã trích xuất %1 từ',
 
     // Step 3: Tầng II "Chọn từ danh sách đề bài"
@@ -2766,8 +2834,8 @@ abstract final class GradusL10n {
     'プライバシー': 'Quyền riêng tư',
     'プライバシーとデータ': 'Quyền riêng tư & Dữ liệu',
     '音声認識': 'Nhận dạng giọng nói',
-    'Google AIによる発音評価': 'Đánh giá phát âm bằng Google AI',
-    'お題・練習課題の生成': 'Tạo đề bài và bài luyện tập',
+    'Google AIによる発音評価': 'Đánh giá và tạo nội dung bằng Google AI',
+    'お題・練習課題の生成': 'Thêm đề bài, bài luyện phát âm và từ vựng',
     'Podcast検索・再生': 'Tìm kiếm và phát Podcast',
     'プライバシーポリシー': 'Chính sách quyền riêng tư',
     'Google プライバシーポリシー': 'Chính sách quyền riêng tư của Google',
@@ -2788,12 +2856,22 @@ abstract final class GradusL10n {
     'プライバシー_音声認識説明_Android':
         'Âm thanh ghi âm được gửi đến dịch vụ nhận dạng giọng nói tích hợp trên hệ điều hành, hoặc đến Vosk (mô hình ngoại tuyến trên thiết bị). Mục đích là tạo bản ghi lời nói. Ứng dụng hỏi sự đồng ý trước lần đầu sử dụng; các tính năng không cần nhận dạng giọng nói vẫn dùng được nếu bạn từ chối.',
     'プライバシー_Google説明':
-        'Nếu bạn muốn nhận đánh giá tham khảo ở Tầng V phát âm, dữ liệu được gửi đến Google Search (chế độ AI) do Google LLC cung cấp. '
-        'Câu ngắn gửi 10 câu hỏi, cách đọc, biểu thức mục tiêu và bản ghi; đoạn dài gửi đoạn trích bài và bản ghi. '
-        'Bảng điều khiển cũng gửi lịch sử Lớp IV, V và I gần đây khi bạn yêu cầu lời khuyên tổng hợp. '
-        'Mục đích là nhận đánh giá tham khảo về xu hướng nói/phát âm hoặc lời khuyên dựa trên đó. Âm thanh ghi âm không được gửi đi. Ứng dụng hỏi sự đồng ý cho mỗi lần gửi. Áp dụng điều khoản và chính sách quyền riêng tư của Google.',
+        'Dữ liệu chỉ được gửi đến Google Search (chế độ AI) do Google LLC cung cấp khi bạn chọn dùng một trong các chức năng sau.\n'
+        '\n'
+        '[Đánh giá và lời khuyên về kết quả luyện tập]\n'
+        '・Kiểm tra phát âm Tầng V: đề bài, cách đọc, biểu thức mục tiêu và bản ghi lời nói (khi đọc to bài dài: đoạn đầu bài và bản ghi)\n'
+        '・Kiểm tra từ vựng Tầng I: từ được hỏi, cách đọc và câu trả lời của bạn (bản ghi lời nói hoặc nhập bằng bàn phím)\n'
+        '・PREP và độ trúng đích Tầng IV: đề bài và bản ghi câu trả lời\n'
+        '・Tổng kết: đề bài và nội dung bạn đã nhập, ghi lại cho đề bài đó (từ vựng, tóm tắt, PREP, điểm, v.v.)\n'
+        '・Bảng điều khiển: kết quả gần đây của Tầng IV, V và I\n'
+        '\n'
+        '[Tạo nội dung học]\n'
+        '・Trích xuất từ (I), câu trả lời mẫu (II, IV), câu luyện phát âm (V): đề bài\n'
+        '・Đọc đoạn văn dài: từ khóa, cấp độ, văn phong và độ dài; khi thêm bản dịch: các từ bạn đã chọn\n'
+        '\n'
+        'Âm thanh ghi âm không được gửi đi. Bản ghi lời nói và nội dung bạn nhập có thể chứa thông tin cá nhân. Trước mỗi lần gửi, ứng dụng giải thích nội dung và xin sự đồng ý của bạn. Nội dung tìm kiếm có thể lưu trong lịch sử trình duyệt hoặc Tài khoản Google. Áp dụng điều khoản và chính sách quyền riêng tư của Google.',
     'プライバシー_お題生成説明':
-        'Việc tạo đề bài và bài luyện phát âm chỉ gửi một prompt cố định, đã soạn sẵn đến Google Search (chế độ AI). Không bao gồm bản ghi âm, bản ghi lời nói hay dữ liệu người dùng khác. Áp dụng điều khoản và chính sách quyền riêng tư của Google.',
+        'Khi thêm đề bài, bài luyện phát âm hoặc từ vựng, ứng dụng chỉ gửi lời nhắc cố định đã chuẩn bị sẵn (với từ vựng, chỉ gồm các cấp độ JLPT bạn chọn) đến Google Search (chế độ AI). Không bao gồm bản ghi âm, bản ghi lời nói hay dữ liệu người dùng khác. Áp dụng điều khoản và chính sách quyền riêng tư của Google.',
     'プライバシー_Podcast説明':
         'Tìm kiếm Podcast gửi từ khóa tìm kiếm của bạn đến iTunes Search API của Apple Inc. Khi cập nhật hoặc phát một podcast đã đăng ký, ứng dụng kết nối trực tiếp đến nhà cung cấp của chương trình đó, nơi có thể xử lý địa chỉ IP, thời gian truy cập và nội dung yêu cầu trong nhật ký của họ. Điều khoản và chính sách quyền riêng tư của Apple áp dụng cho tìm kiếm; chính sách riêng của từng nhà cung cấp áp dụng cho kết nối trực tiếp.',
     'プライバシー_ポリシー本文_詳細':
@@ -2810,6 +2888,9 @@ abstract final class GradusL10n {
     'うまく聞き取れませんでした。もう一度録音してみましょう。':
         'Không nhận dạng rõ giọng nói. Hãy thử ghi âm lại.',
     '評価結果プレビュー': 'Xem trước kết quả đánh giá',
+    '発音総合_見出し': 'Cách nói tổng thể',
+    '発音総合_リズム': 'Nhịp điệu (ngắt từng âm, giống âm っ)',
+    '発音総合_脱落': 'Rơi âm (vd. お願いします→お願います)',
     'STT結果に基づく参考評価です（音声そのものは判定していません）。':
         'Đây là đánh giá tham khảo dựa trên bản ghi; Google không đánh giá '
         'trực tiếp âm thanh đã ghi.',

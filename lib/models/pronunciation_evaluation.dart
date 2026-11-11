@@ -21,6 +21,40 @@ extension PronunciationConfidenceLabel on PronunciationConfidence {
       );
 }
 
+/// 出題カテゴリ（[PronunciationCategory]）とは別枠の、文全体にかかる発音の癖。
+///
+/// 5カテゴリは出題の分類（各2問）と1対1だが、こちらは特定の音ではなく
+/// 発話全体を通して見る観点なので、出題には影響させず評価だけを追加する。
+/// 旧データ（この項目導入前）には存在しないため、常に省略可能として扱う。
+enum PronunciationOverallAspect {
+  /// 一音一音が区切れて促音気味になる（「わったし」のようなぶつ切れ）。
+  rhythm,
+
+  /// 音の欠落（「お願いします」→「お願います」など）。
+  omission,
+}
+
+extension PronunciationOverallAspectLabel on PronunciationOverallAspect {
+  String get storageKey => switch (this) {
+    PronunciationOverallAspect.rhythm => 'rhythm',
+    PronunciationOverallAspect.omission => 'omission',
+  };
+
+  /// 表示ラベルの翻訳キー。
+  String get labelKey => switch (this) {
+    PronunciationOverallAspect.rhythm => '発音総合_リズム',
+    PronunciationOverallAspect.omission => '発音総合_脱落',
+  };
+
+  /// 未知のキーはnull（AIが余計なキーを返しても評価全体を失敗させない）。
+  static PronunciationOverallAspect? tryFromStorageKey(String key) {
+    for (final aspect in PronunciationOverallAspect.values) {
+      if (aspect.storageKey == key) return aspect;
+    }
+    return null;
+  }
+}
+
 /// 1カテゴリ分のChrome AI参考評価。
 class PronunciationCategoryEvaluation {
   PronunciationCategoryEvaluation({
@@ -86,6 +120,7 @@ class PronunciationCategoryEvaluation {
 class PronunciationEvaluation {
   PronunciationEvaluation({
     required this.categoryEvaluations,
+    this.overallEvaluations = const {},
     this.summary,
     this.summaryJa,
     this.summaryVi,
@@ -96,6 +131,11 @@ class PronunciationEvaluation {
 
   final Map<PronunciationCategory, PronunciationCategoryEvaluation>
   categoryEvaluations;
+
+  /// 5カテゴリとは別枠の総合観点（リズム・音の脱落）。旧データやAIが
+  /// 返さなかった場合は空。平均点などの集計には含めない。
+  final Map<PronunciationOverallAspect, PronunciationCategoryEvaluation>
+  overallEvaluations;
 
   /// 評価取得時のアプリ表示言語で書かれた単一言語の全体講評
   /// （evaluationVersion `v2`以降のスキーマ）。
@@ -132,11 +172,13 @@ class PronunciationEvaluation {
     return PronunciationEvaluation(
       categoryEvaluations: {
         for (final entry in rawCategories.entries)
-          PronunciationCategoryLabel.fromStorageKey(entry.key):
-              PronunciationCategoryEvaluation.fromJson(
-                entry.value as Map<String, dynamic>,
-              ),
+          PronunciationCategoryLabel.fromStorageKey(
+            entry.key,
+          ): PronunciationCategoryEvaluation.fromJson(
+            entry.value as Map<String, dynamic>,
+          ),
       },
+      overallEvaluations: _parseOverall(json['overallEvaluations']),
       summary: json['summary'] as String?,
       summaryJa: json['summaryJa'] as String?,
       summaryVi: json['summaryVi'] as String?,
@@ -146,11 +188,40 @@ class PronunciationEvaluation {
     );
   }
 
+  /// `overallEvaluations`は任意項目。形式が崩れた要素は捨て、5カテゴリの
+  /// 評価まで巻き込んで解析失敗にしない。
+  static Map<PronunciationOverallAspect, PronunciationCategoryEvaluation>
+  _parseOverall(Object? raw) {
+    if (raw is! Map) return const {};
+    final result =
+        <PronunciationOverallAspect, PronunciationCategoryEvaluation>{};
+    for (final entry in raw.entries) {
+      final aspect = PronunciationOverallAspectLabel.tryFromStorageKey(
+        '${entry.key}',
+      );
+      final value = entry.value;
+      if (aspect == null || value is! Map) continue;
+      try {
+        result[aspect] = PronunciationCategoryEvaluation.fromJson(
+          Map<String, dynamic>.from(value),
+        );
+      } catch (_) {
+        continue;
+      }
+    }
+    return result;
+  }
+
   Map<String, dynamic> toJson() => {
     'categoryEvaluations': {
       for (final entry in categoryEvaluations.entries)
         entry.key.storageKey: entry.value.toJson(),
     },
+    if (overallEvaluations.isNotEmpty)
+      'overallEvaluations': {
+        for (final entry in overallEvaluations.entries)
+          entry.key.storageKey: entry.value.toJson(),
+      },
     if (summary != null) 'summary': summary,
     if (summaryJa != null) 'summaryJa': summaryJa,
     if (summaryVi != null) 'summaryVi': summaryVi,

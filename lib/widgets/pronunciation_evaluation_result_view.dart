@@ -6,7 +6,8 @@ import '../models/pronunciation_exercise.dart';
 import '../services/pronunciation_advice_service.dart';
 import '../theme/app_colors.dart';
 
-/// レイヤーⅤ：Chrome AIの5カテゴリ参考評価（[PronunciationEvaluation]）を表示する。
+/// レイヤーⅤ：Chrome AIの5カテゴリ参考評価（[PronunciationEvaluation]）と、
+/// 別枠の総合観点（リズム・音の脱落）を表示する。
 ///
 /// 貼り付け直後の保存前プレビュー（[Layer5ScreenState]）で使う。
 /// 録音音声そのものはChrome AIへ送っておらず、期待文と端末STT結果の
@@ -51,10 +52,33 @@ class PronunciationEvaluationResultView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: _CategoryRow(
-              category: category,
+              label: category.label,
               categoryEvaluation: evaluation.categoryEvaluations[category],
             ),
           ),
+        // 5カテゴリとは別枠の総合観点。旧データ（項目導入前）には無いため、
+        // AIが返した分だけ表示する。
+        if (evaluation.overallEvaluations.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            '発音総合_見出し'.tr(lang),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: palette.textOnCardSecondary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          for (final aspect in PronunciationOverallAspect.values)
+            if (evaluation.overallEvaluations[aspect] case final aspectEval?)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: _CategoryRow(
+                  label: aspect.labelKey.tr(lang),
+                  categoryEvaluation: aspectEval,
+                ),
+              ),
+        ],
         if (summary.trim().isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
@@ -78,9 +102,9 @@ class PronunciationEvaluationResultView extends StatelessWidget {
 }
 
 class _CategoryRow extends StatelessWidget {
-  const _CategoryRow({required this.category, required this.categoryEvaluation});
+  const _CategoryRow({required this.label, required this.categoryEvaluation});
 
-  final PronunciationCategory category;
+  final String label;
   final PronunciationCategoryEvaluation? categoryEvaluation;
 
   @override
@@ -94,7 +118,7 @@ class _CategoryRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          category.label,
+          label,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
