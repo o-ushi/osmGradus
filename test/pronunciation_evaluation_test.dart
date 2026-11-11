@@ -286,4 +286,56 @@ void main() {
       );
     });
   });
+
+  group('PronunciationEvaluation.overallEvaluations', () {
+    test('総合観点（rhythm/omission）はJSON往復で保持される', () {
+      final original = PronunciationEvaluation(
+        categoryEvaluations: {PronunciationCategory.tsu: _category()},
+        overallEvaluations: {
+          PronunciationOverallAspect.rhythm: _category(score: 2),
+          PronunciationOverallAspect.omission: _category(score: 4),
+        },
+        rawResponse: '{}',
+        evaluationVersion: 'v2',
+      );
+      final restored = PronunciationEvaluation.fromJson(original.toJson());
+      expect(
+        restored.overallEvaluations[PronunciationOverallAspect.rhythm]?.score,
+        2,
+      );
+      expect(
+        restored.overallEvaluations[PronunciationOverallAspect.omission]?.score,
+        4,
+      );
+    });
+
+    test('旧データ（overallEvaluationsなし）は空として読み込む', () {
+      final json = _evaluation({
+        PronunciationCategory.tsu: _category(),
+      }).toJson();
+      expect(json.containsKey('overallEvaluations'), isFalse);
+      final restored = PronunciationEvaluation.fromJson(json);
+      expect(restored.overallEvaluations, isEmpty);
+      expect(restored.categoryEvaluations, hasLength(1));
+    });
+
+    test('未知のキーや崩れた要素は捨て、評価全体は失敗させない', () {
+      final restored = PronunciationEvaluation.fromJson({
+        'categoryEvaluations': {
+          'tsu': _category().toJson(),
+        },
+        'overallEvaluations': {
+          'rhythm': {'score': 3, 'confidence': 'low', 'evidence': '区切れ'},
+          'omission': {'score': 'bad'},
+          'unknown': {'score': 5, 'confidence': 'high', 'evidence': 'x'},
+        },
+        'rawResponse': '{}',
+        'evaluationVersion': 'v2',
+      });
+      expect(restored.overallEvaluations.keys, [
+        PronunciationOverallAspect.rhythm,
+      ]);
+      expect(restored.categoryEvaluations, hasLength(1));
+    });
+  });
 }

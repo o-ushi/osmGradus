@@ -54,7 +54,8 @@ abstract final class QuestionPromptPronunciationAiPromptTemplate {
       ..writeln(copy.formatHeading)
       ..writeln(_jsonSchema)
       ..writeln()
-      ..writeln(copy.jsonInstructionNote);
+      ..writeln(copy.jsonInstructionNote)
+      ..writeln(PronunciationAiJsonSchema.overallNote(lang));
     return buffer.toString();
   }
 

@@ -291,15 +291,20 @@ class Layer4ScreenState extends PracticeLayerScreenState<Layer4Screen>
 
   /// [_chromeAiPendingKind]がsampleAnswerのときだけⅡと同じ解答例専用の
   /// 同意ダイアログを出す。それ以外（PREP・的中度）は
-  /// [ChromeAiSubmitMixin]の既定（汎用文言）のまま
+  /// PREP・的中度専用の文言を出す
   /// （`super.confirmChromeAiSend`は[Layer2SampleAnswerMixin]の実装に
-  /// なるため、ここで明示的に汎用ダイアログへフォールバックする）。
+  /// なるため、ここで明示的に専用ダイアログを指定する）。
   @override
   Future<bool> confirmChromeAiSend(String lang) {
     if (_chromeAiPendingKind == _ChromeAiPendingKind.sampleAnswer) {
       return super.confirmChromeAiSend(lang);
     }
-    return GoogleAiSendConsentDialog.confirm(context, languageCode: lang);
+    return GoogleAiSendConsentDialog.confirm(
+      context,
+      languageCode: lang,
+      titleKey: 'レイヤーⅣ_PREP_Google送信確認_タイトル',
+      bodyKey: 'レイヤーⅣ_PREP_Google送信確認_本文',
+    );
   }
 
   /// 用途分岐（[_chromeAiPendingKind]）も一緒に解除する。PREP・解答例
