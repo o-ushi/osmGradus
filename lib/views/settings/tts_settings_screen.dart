@@ -624,7 +624,8 @@ class _CloudSyncSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: sync,
+      // 表示言語を変えたら、文言もその場で替える。
+      listenable: Listenable.merge([sync, appSettings]),
       builder: (context, _) {
         final lang = appSettings.language;
         final enabled = sync.isEnabled;
