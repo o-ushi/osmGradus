@@ -39,7 +39,7 @@ Settings > Privacy & Data also links to this policy and to Google's and Apple's 
 
 **Guideline 2**
 
-Regarding Guideline 2, I have removed the references to Android from this build. The app's compiled strings no longer name a specific third-party platform; the on-device speech-recognition disclosure text now refers generically to "the device's built-in speech-recognition service" instead.
+Regarding Guideline 2, I have removed the references to a specific third-party platform from this build. The app's compiled strings no longer name a specific third-party platform; the on-device speech-recognition disclosure text now refers generically to "the device's built-in speech-recognition service" instead.
 
 ---
 
