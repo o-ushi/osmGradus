@@ -88,4 +88,23 @@ void main() {
     expect(tester.getTopRight(toolbar).dx, lessThanOrEqualTo(683));
     expect(find.byIcon(Icons.headphones_rounded), findsOneWidget);
   });
+
+  testWidgets('iPad横：右ペイン上端のステータスバー帯に高さがあり、濃い色で塗られる', (tester) async {
+    tester.view.physicalSize = const Size(1376, 1032);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(top: 32);
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.pumpAndSettle();
+
+    final band = find.byWidgetPredicate(
+      (w) => w is Positioned && w.top == 0 && w.height == 32,
+    );
+    expect(band, findsOneWidget);
+    final fill = find.descendant(of: band, matching: find.byType(ColoredBox));
+    final size = tester.getSize(fill);
+    expect(size.height, 32);
+    expect(tester.getTopLeft(fill).dx, greaterThan(680));
+  });
 }

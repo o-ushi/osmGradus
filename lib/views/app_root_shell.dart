@@ -288,10 +288,17 @@ class _AppRootShellState extends State<AppRootShell> {
         child: AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle.light,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Expanded(child: SizedBox.expand()),
               const SizedBox(width: 1),
-              Expanded(child: ColoredBox(color: palette.scene)),
+              // 子なしの ColoredBox は高さ0で何も塗らないため、帯の高さいっぱいに広げる。
+              Expanded(
+                child: ColoredBox(
+                  color: palette.scene,
+                  child: const SizedBox.expand(),
+                ),
+              ),
             ],
           ),
         ),
