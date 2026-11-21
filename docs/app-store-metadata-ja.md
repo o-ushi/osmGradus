@@ -1,9 +1,9 @@
-# osmGradus App Store Connect 申請用文案（ベトナム語・v2.5.3）
+# osmGradus App Store Connect 申請用文案（ベトナム語・v2.5.4）
 
-最終更新：2026年11月15日
+最終更新：2026年11月21日
 
 App Store Connect の各フィールドにそのまま貼り付けて使えます。文字数は提出前に再確認してください。
-前回公開版は v2.5.2 です。
+前回公開版は v2.5.3 です。
 ストアの各欄（サブタイトル・プロモーション・概要・キーワード・最新情報）はベトナム語、審査員へのメモは日本語です。
 
 ---
@@ -75,16 +75,17 @@ osmGradus là ứng dụng luyện hội thoại dành cho người học tiến
 ■ Quyền riêng tư
 ・Không cần đăng ký tài khoản. Không quảng cáo, không phân tích truy cập, không theo dõi
 ・Dữ liệu luyện tập được lưu trên máy, không gửi về máy chủ của nhà phát triển
-・Đồng bộ giữa các iPhone cùng Apple ID qua iCloud (tùy chọn)
+・Đồng bộ giữa các iPhone, iPad cùng Apple ID qua iCloud (tùy chọn)
 ・Hỗ trợ xuất (JSON) và nhập dữ liệu
 
 ■ Thiết bị hỗ trợ
-・iPhone (chỉ màn hình dọc)
+・iPhone (màn hình dọc)
+・iPad (dọc và ngang; khi xoay ngang, màn hình chính ở bên trái, phần luyện tập ở bên phải)
 
 Dù hôm nay chưa nói được trọn vẹn, chỉ cần đi lên từng tầng một, chắc chắn bạn sẽ nói được bằng tiếng Nhật.
 ```
 
-（2320文字）
+（2459文字）
 
 ---
 
@@ -100,25 +101,27 @@ tiếng Nhật,hội thoại,phát âm,JLPT,N1,N2,N3,từ vựng,đọc hiểu,l
 
 ---
 
-## このバージョンの最新情報（v2.5.3）
+## このバージョンの最新情報（v2.5.4）
 
 ```
-・Khi đổi ngôn ngữ hiển thị, phần Đồng bộ iCloud trong Cài đặt nay cũng đổi theo ngay lập tức
-・Sắp xếp lại bên trong ứng dụng (xuất/nhập JSON, các bảng chọn) để hoạt động ổn định hơn
+・Hỗ trợ iPad: dùng được cả màn hình dọc lẫn ngang
+・Khi xoay ngang iPad, màn hình chia đôi: bên trái là màn hình chính, danh sách đề bài, danh sách bài đọc dài, danh sách Podcast; bên phải là phần luyện tập, Cài đặt và Trợ giúp
+・Chọn một đề bài ở danh sách bên trái, nội dung sẽ mở ngay ở bên phải
 ```
 
-（180文字）
+（296文字）
 
 ---
 
 ## 審査員へのメモ（App Review Information > Notes）
 
 ```
-2026/11/15
+2026/11/21
 いつもアプリを審査頂きましてありがとうございます。
-先に公開したVersion 2.5.2に対して、下記修正を行なっています。
-・表示言語の切り替え時に、設定のiCloud同期欄の文言がすぐに更新されない不具合を修正
-・内部の共通化（JSONの書き出し・取り込み、選択シート。動作の変更はありません）
+先に公開したVersion 2.5.3に対して、下記修正を行なっています。
+・iPadに対応しました（これまではiPhone専用で、iPadではiPhone互換表示でした）
+・iPadは縦・横の両方に対応し、横向きでは画面を左右に分けて表示します（左：ホーム・各種一覧・編集など、右：学習画面・設定・ヘルプなど）
+・iPhoneの動作・画面は変更ありません（縦向きのみ）
 新たな権限の要求、データの収集・送信先の変更はございません。
 先に一度承認をいただいた内容から、上記修正以外の機能変更やビジネスモデルの変更はございません。
 お手数をおかけして恐縮ですが、ご確認のほどよろしくお願いいたします。
@@ -128,7 +131,8 @@ tiếng Nhật,hội thoại,phát âm,JLPT,N1,N2,N3,từ vựng,đọc hiểu,l
 
 ## 提出前チェックリスト
 
-- [ ] `pubspec.yaml` のバージョン（2.5.3+1）と App Store Connect のバージョン番号が一致している（公開済みの 2.5.2 より大きいこと）
+- [ ] `pubspec.yaml` のバージョン（2.5.4+1）と App Store Connect のバージョン番号が一致している（公開済みの 2.5.3 より大きいこと）
 - [ ] App Privacy の回答は前バージョンから変更なし
 - [ ] サブタイトル（ベトナム語）を App Store Connect に入力した
-- [ ] 実機で試した（設定で言語を切り替えたとき iCloud 同期欄の文言が変わる／全データ・お題・問題文の書き出しと取り込み／お題の追加・長文の始め方・バックアップ範囲の選択シート）
+- [ ] iPad 用のスクリーンショット（13インチ）を App Store Connect に追加した（iPad 対応にしたため必須）
+- [ ] 実機で試した（iPad 縦・横の回転／横向きで左に一覧・右に学習画面／問題文一覧から選んだ問題が右に開く／設定・ヘルプが右に開く／iPhone は縦のまま変わらない）
