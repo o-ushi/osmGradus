@@ -72,7 +72,7 @@ class _Layer1LevelSelectSheet extends StatefulWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet<void>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       // N1/N2/N3/その他のチェックボックス分、既定の高さ制限に収まらない
       // 端末があるため、[LayerHelpSheet]と同じくisScrollControlled+内側の

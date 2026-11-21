@@ -89,9 +89,7 @@ class PronunciationExerciseService {
     for (final s in raw) {
       try {
         result.add(
-          PronunciationExercise.fromJson(
-            jsonDecode(s) as Map<String, dynamic>,
-          ),
+          PronunciationExercise.fromJson(jsonDecode(s) as Map<String, dynamic>),
         );
       } catch (_) {
         continue;
@@ -117,9 +115,7 @@ class PronunciationExerciseService {
     for (final entry in byCategory.entries) {
       final category = entry.key;
       final existingImported = await loadImported(category);
-      final existingBuiltIn = VietnamesePronunciationBank.byCategory(
-        category,
-      );
+      final existingBuiltIn = VietnamesePronunciationBank.byCategory(category);
       final existing = [...existingBuiltIn, ...existingImported];
 
       final existingIds = {for (final e in existing) e.id};

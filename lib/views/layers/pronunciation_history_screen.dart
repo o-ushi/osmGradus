@@ -13,6 +13,7 @@ import '../../widgets/history_format_badge.dart';
 import '../../widgets/history_list_card.dart';
 import '../../widgets/history_list_scaffold.dart';
 import 'pronunciation_check_detail_screen.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// 履歴一覧のカテゴリ星表示用の短い1文字グリフ（[PronunciationCategoryLabel.label]
 /// は一覧の1行に収めるには長すぎるため、この画面専用の短縮表記を使う）。
@@ -31,7 +32,7 @@ class PronunciationHistoryScreen extends StatelessWidget {
   const PronunciationHistoryScreen({super.key});
 
   static Future<void> push(BuildContext context) {
-    return Navigator.of(context).push(
+    return Navigator.of(sidePaneContext(context)).push(
       MaterialPageRoute<void>(
         builder: (_) => const PronunciationHistoryScreen(),
       ),

@@ -22,7 +22,8 @@ extension PronunciationCategoryLabel on PronunciationCategory {
   static PronunciationCategory fromStorageKey(String key) =>
       PronunciationCategory.values.firstWhere(
         (category) => category.storageKey == key,
-        orElse: () => throw ArgumentError('Unknown PronunciationCategory: $key'),
+        orElse: () =>
+            throw ArgumentError('Unknown PronunciationCategory: $key'),
       );
 }
 

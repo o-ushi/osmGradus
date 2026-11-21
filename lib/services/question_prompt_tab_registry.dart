@@ -56,10 +56,9 @@ class QuestionPromptTabRegistry {
     if (!custom.contains(oldName)) return false;
     if (custom.contains(trimmed)) return false;
 
-    await prefs.setStringList(
-      _customTabsKey,
-      [for (final tab in custom) tab == oldName ? trimmed : tab],
-    );
+    await prefs.setStringList(_customTabsKey, [
+      for (final tab in custom) tab == oldName ? trimmed : tab,
+    ]);
     return true;
   }
 

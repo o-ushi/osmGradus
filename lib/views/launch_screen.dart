@@ -12,6 +12,7 @@ import '../services/question_prompt_backup_actions.dart';
 import '../theme/app_colors.dart';
 import '../widgets/backup_scope_sheet.dart';
 import '../widgets/gradus_more_actions_menu.dart';
+import '../widgets/ipad_phone_scale.dart';
 import '../widgets/layer_list_tile.dart';
 import '../widgets/swipe_to_close_wrapper.dart';
 import '../widgets/vocabulary_sheet.dart';
@@ -203,11 +204,19 @@ class _LaunchActionRow extends StatefulWidget {
 class _LaunchActionRowState extends State<_LaunchActionRow> {
   final _moreButtonKey = GlobalKey();
 
+  /// iPad横では、ホームから開く画面はすべて右ペインに出す。
+  BuildContext _pane(BuildContext context) =>
+      IpadSplitScope.takeRightPane(context) ?? context;
+
   void _showMoreMenu(BuildContext context) {
     final box = _moreButtonKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null || !box.hasSize) return;
 
-    final offset = box.localToGlobal(Offset.zero);
+    final overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox?;
+    final offset = overlay == null
+        ? box.localToGlobal(Offset.zero)
+        : box.localToGlobal(Offset.zero, ancestor: overlay);
     final screen = MediaQuery.sizeOf(context);
     final lang = widget.lang;
 
@@ -238,7 +247,7 @@ class _LaunchActionRowState extends State<_LaunchActionRow> {
               maxWidth: menuWidth,
               onTranscript: () {
                 Navigator.pop(dialogContext);
-                AppRoutes.openTranscript(context);
+                AppRoutes.openTranscript(_pane(context));
               },
               onExport: () {
                 Navigator.pop(dialogContext);
@@ -251,14 +260,14 @@ class _LaunchActionRowState extends State<_LaunchActionRow> {
               onSettings: () {
                 Navigator.pop(dialogContext);
                 AppRoutes.openSettings(
-                  context,
+                  _pane(context),
                   settings: ttsSettings,
                   speechReader: topicSpeechReader,
                 );
               },
               onHelp: () {
                 Navigator.pop(dialogContext);
-                AppRoutes.openHelp(context);
+                AppRoutes.openHelp(_pane(context));
               },
             ),
           ),
@@ -313,12 +322,12 @@ class _LaunchActionRowState extends State<_LaunchActionRow> {
         _LaunchIconButton(
           icon: Icons.style_rounded,
           tooltip: '単語帳'.tr(lang),
-          onTap: () => VocabularySheet.show(context),
+          onTap: () => VocabularySheet.show(_pane(context)),
         ),
         _LaunchIconButton(
           icon: Icons.space_dashboard_outlined,
           tooltip: 'ダッシュボード'.tr(lang),
-          onTap: () => AppRoutes.openDashboard(context),
+          onTap: () => AppRoutes.openDashboard(_pane(context)),
         ),
         _LaunchIconButton(
           icon: Icons.list_alt_rounded,

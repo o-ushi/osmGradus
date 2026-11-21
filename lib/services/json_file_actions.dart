@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
+import '../widgets/ipad_phone_scale.dart';
 
 // 全データ・お題・問題文の JSON の書き出しと取り込み（3 つで同じ手順・同じ知らせ方）。
 
@@ -32,7 +33,10 @@ Future<void> shareJsonExport(
     final box = context.findRenderObject() as RenderBox?;
     final origin = box == null
         ? null
-        : box.localToGlobal(Offset.zero) & box.size;
+        : Rect.fromPoints(
+            box.localToGlobal(Offset.zero),
+            box.localToGlobal(Offset(box.size.width, box.size.height)),
+          );
     await SharePlus.instance.share(
       ShareParams(
         files: [
@@ -83,7 +87,8 @@ Future<void> pickAndImportJson(
         : 'インポート_すべてスキップ'.trFmt(lang, ['${result.skipped}']);
 
     await showDialog<void>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (dialogContext) => AlertDialog(
         title: Text('インポート完了'.tr(lang)),
         content: Text(message),
@@ -98,7 +103,8 @@ Future<void> pickAndImportJson(
   } catch (_) {
     if (!context.mounted) return;
     await showDialog<void>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (dialogContext) => AlertDialog(
         title: Text('インポートエラー'.tr(lang)),
         content: Text('インポートに失敗しました'.tr(lang)),

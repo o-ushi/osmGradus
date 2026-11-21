@@ -24,10 +24,7 @@ class HistoryDetailHeader extends StatelessWidget {
       children: [
         Text(
           formatHistoryDetailTimestamp(createdAt, languageCode: languageCode),
-          style: TextStyle(
-            fontSize: 12,
-            color: palette.textOnSubpageSecondary,
-          ),
+          style: TextStyle(fontSize: 12, color: palette.textOnSubpageSecondary),
         ),
         for (final label in badgeLabels) ...[
           const SizedBox(width: 8),

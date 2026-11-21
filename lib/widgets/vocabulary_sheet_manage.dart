@@ -171,6 +171,7 @@ class _SwipeActionsState extends State<_SwipeActions> {
     if (widget.onDelete != null) count++;
     return _actionWidth * count;
   }
+
   double _dragExtent = 0;
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -312,4 +313,3 @@ class _ManageBadge extends StatelessWidget {
     );
   }
 }
-

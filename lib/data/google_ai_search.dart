@@ -46,11 +46,7 @@ abstract final class GoogleAiSearch {
     final query = withLangPrefix(prompt, lang);
     final url = buildUrl(query);
     if (url.toString().length <= maxPrefillUrlLength) {
-      return (
-        url: url,
-        prompt: prompt,
-        requiresClipboardPaste: false,
-      );
+      return (url: url, prompt: prompt, requiresClipboardPaste: false);
     }
     return (
       url: aiModeEntryUrl(lang: lang),

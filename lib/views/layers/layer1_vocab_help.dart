@@ -22,10 +22,7 @@ void showLayer1VocabUsageHelp(
           icon: Icons.casino,
         ),
         LayerHelpLine(text: 'レイヤーⅠ_語彙_キーボード使い方_回答'.tr(lang)),
-        LayerHelpLine(
-          text: 'レイヤーⅠ_語彙_キーボード使い方_ENTER中断'.tr(lang),
-          indent: true,
-        ),
+        LayerHelpLine(text: 'レイヤーⅠ_語彙_キーボード使い方_ENTER中断'.tr(lang), indent: true),
         LayerHelpLine(
           text: 'レイヤーⅠ_語彙_キーボード使い方_再開'.tr(lang),
           icon: Icons.casino,
@@ -55,14 +52,8 @@ void showLayer1VocabUsageHelp(
       LayerHelpLine(text: 'レイヤーⅠ_語彙_使い方_回答言語'.tr(lang)),
       LayerHelpLine(text: 'レイヤーⅠ_語彙_使い方_レベル'.tr(lang)),
       LayerHelpLine(text: 'レイヤーⅠ_語彙_使い方_サイコロ'.tr(lang), icon: Icons.casino),
-      LayerHelpLine(
-        text: 'レイヤーⅠ_語彙_使い方_マイク'.tr(lang),
-        icon: Icons.mic_rounded,
-      ),
-      LayerHelpLine(
-        text: 'レイヤーⅠ_語彙_使い方_評価'.tr(lang),
-        icon: Icons.send_rounded,
-      ),
+      LayerHelpLine(text: 'レイヤーⅠ_語彙_使い方_マイク'.tr(lang), icon: Icons.mic_rounded),
+      LayerHelpLine(text: 'レイヤーⅠ_語彙_使い方_評価'.tr(lang), icon: Icons.send_rounded),
       LayerHelpLine(text: 'レイヤーⅠ_語彙_使い方_保存'.tr(lang)),
     ],
   );

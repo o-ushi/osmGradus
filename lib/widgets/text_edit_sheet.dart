@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// 1つのテキスト項目（要約・結論・理由・具体例など）をタップで入力する
 /// 共通の下部シート。既存値を[TextField]に読み込み、「保存」で編集後の
@@ -27,7 +28,7 @@ class TextEditSheet extends StatefulWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet<String>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

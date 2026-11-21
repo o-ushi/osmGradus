@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../localization/app_strings.dart';
 import '../views/settings/privacy_data_screen.dart';
+import 'ipad_phone_scale.dart';
 
 /// Google検索（AIモード）へプロンプトを送る直前の同意ダイアログ。
 /// レイヤーⅤ・ダッシュボードなど、送信元は分かれたまま、確認UIだけ共通化する。
@@ -16,7 +17,8 @@ abstract final class GoogleAiSendConsentDialog {
     String bodyKey = 'Google送信確認_本文',
   }) async {
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (dialogContext) => AlertDialog(
         title: Text(titleKey.tr(languageCode)),
         content: SingleChildScrollView(

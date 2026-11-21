@@ -16,6 +16,7 @@ import '../views/settings/tts_settings_screen.dart';
 import '../views/topics/question_prompt_overview_screen.dart';
 import '../services/topic_speech_reader.dart';
 import '../services/tts_settings_service.dart';
+import '../widgets/ipad_phone_scale.dart';
 
 /// 画面遷移の共通エントリポイント。各画面の `push` をここへ集約する。
 abstract final class AppRoutes {
@@ -62,7 +63,7 @@ abstract final class AppRoutes {
   static Future<void> openLatestScoringResult(BuildContext context) async {
     final results = await ScoringResultStorage().loadAll();
     if (results.isEmpty || !context.mounted) return;
-    await Navigator.of(context).push(
+    await Navigator.of(sidePaneContext(context)).push(
       MaterialPageRoute<void>(
         builder: (_) => ScoringResultScreen(result: results.first),
       ),
@@ -73,7 +74,7 @@ abstract final class AppRoutes {
   static Future<void> openLatestPronunciationCheck(BuildContext context) async {
     final results = await PronunciationCheckStorage().loadAll();
     if (results.isEmpty || !context.mounted) return;
-    await Navigator.of(context).push(
+    await Navigator.of(sidePaneContext(context)).push(
       MaterialPageRoute<void>(
         builder: (_) => PronunciationCheckDetailScreen(check: results.first),
       ),
@@ -84,7 +85,7 @@ abstract final class AppRoutes {
   static Future<void> openLatestVocabularyCheck(BuildContext context) async {
     final results = await VocabularyCheckStorage().loadAll();
     if (results.isEmpty || !context.mounted) return;
-    await Navigator.of(context).push(
+    await Navigator.of(sidePaneContext(context)).push(
       MaterialPageRoute<void>(
         builder: (_) => VocabularyCheckDetailScreen(check: results.first),
       ),

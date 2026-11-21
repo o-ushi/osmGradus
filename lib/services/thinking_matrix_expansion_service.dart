@@ -22,9 +22,7 @@ abstract final class ThinkingMatrixExpansionService {
   /// （オリジナル・追加の同カテゴリセット）は無視する。欠けているカテゴリ
   /// （[ThinkingMatrixService.ensureSystemPresets]未実施等）は％0とし、
   /// 母数にはそのカテゴリの規定マス数（[ThinkingMatrixPresets]由来）を使う。
-  static ThinkingMatrixExpansionSummary build(
-    List<ThinkingMatrixSet> allSets,
-  ) {
+  static ThinkingMatrixExpansionSummary build(List<ThinkingMatrixSet> allSets) {
     final byId = {for (final set in allSets) set.id: set};
 
     double weightSumFor(TopicCategory category) {

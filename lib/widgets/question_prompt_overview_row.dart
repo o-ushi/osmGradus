@@ -19,6 +19,7 @@ class QuestionPromptOverviewRow extends StatelessWidget {
     required this.onSummaryTap,
     this.onLayerTap,
     this.onBodyLongPress,
+    this.onBodyTap,
   });
 
   final QuestionPrompt prompt;
@@ -27,6 +28,9 @@ class QuestionPromptOverviewRow extends StatelessWidget {
   /// 0=Ⅰ〜4=Ⅴ。nullならレイヤーアイコンは非インタラクティブ。
   final ValueChanged<int>? onLayerTap;
   final VoidCallback? onBodyLongPress;
+
+  /// 本文タップ。iPad横で、選んだ問題を右ペインに開くときだけ渡す。
+  final VoidCallback? onBodyTap;
 
   /// 各レイヤー列の幅（ヘッダーと揃える）。
   static const double layerColumnWidth = 30;
@@ -122,6 +126,7 @@ class QuestionPromptOverviewRow extends StatelessWidget {
                     ),
                   )
                 : GestureDetector(
+                    onTap: onBodyTap,
                     onLongPress: onBodyLongPress,
                     onDoubleTap: () =>
                         QuestionPromptListHints.showOverviewBody(context),

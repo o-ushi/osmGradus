@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// レイヤーⅡ解答例の手動貼り付けシート。
 ///
@@ -12,10 +13,7 @@ import '../theme/app_colors.dart';
 /// 「クリップボードから読み込む」はユーザー操作起点の読み取り（iOSの
 /// ペースト許可ダイアログが出やすい）用。
 class SampleAnswerPasteSheet extends StatefulWidget {
-  const SampleAnswerPasteSheet({
-    super.key,
-    required this.initialValue,
-  });
+  const SampleAnswerPasteSheet({super.key, required this.initialValue});
 
   final String initialValue;
 
@@ -26,7 +24,7 @@ class SampleAnswerPasteSheet extends StatefulWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet<String>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -60,9 +58,7 @@ class _SampleAnswerPasteSheetState extends State<SampleAnswerPasteSheet> {
       if (text.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'レイヤーⅡ_解答例_クリップボード空'.tr(appSettings.language),
-            ),
+            content: Text('レイヤーⅡ_解答例_クリップボード空'.tr(appSettings.language)),
           ),
         );
         return;

@@ -49,8 +49,7 @@ abstract final class VietnamesePronunciationBank {
       sentence: '次に会いましょう。',
       reading: 'つぎにあいましょう。',
       targetExpressions: ['つぎ'],
-      vietnameseHint:
-          '「つぎ」の「つ」は舌先を上の歯茎につけてから息を出す音。"すぎ"にならないように注意する。',
+      vietnameseHint: '「つぎ」の「つ」は舌先を上の歯茎につけてから息を出す音。"すぎ"にならないように注意する。',
       evaluationPoint: '「つ」の子音部分がはっきり聞こえるか',
       source: PronunciationExerciseSource.builtIn,
     ),
@@ -83,8 +82,7 @@ abstract final class VietnamesePronunciationBank {
       sentence: '座布団に座ります。',
       reading: 'ざぶとんにすわります。',
       targetExpressions: ['ざぶとん'],
-      vietnameseHint:
-          '「ざ」は喉を震わせる有声音。無声音の「さ」にならないよう、のどの振動を意識する。',
+      vietnameseHint: '「ざ」は喉を震わせる有声音。無声音の「さ」にならないよう、のどの振動を意識する。',
       evaluationPoint: '「ざ」が有声音になっているか(「さ」にならないか)',
       source: PronunciationExerciseSource.builtIn,
     ),
@@ -137,8 +135,7 @@ abstract final class VietnamesePronunciationBank {
       sentence: 'りんごを買いました。',
       reading: 'りんごをかいました。',
       targetExpressions: ['りんご'],
-      vietnameseHint:
-          '日本語のラ行は舌を巻く"r"でも英語の"l"でもなく、舌先で上あごを軽く一回はじく音。',
+      vietnameseHint: '日本語のラ行は舌を巻く"r"でも英語の"l"でもなく、舌先で上あごを軽く一回はじく音。',
       evaluationPoint: '「り」が巻き舌の"r"や"l"になっていないか',
       source: PronunciationExerciseSource.builtIn,
     ),
@@ -233,8 +230,7 @@ abstract final class VietnamesePronunciationBank {
       sentence: '氷が溶けました。',
       reading: 'こおりがとけました。',
       targetExpressions: ['こおり'],
-      vietnameseHint:
-          '「お」を伸ばさないと短くなりすぎる。「こおり」(氷)は「お」を2拍分伸ばす代表的な単語。',
+      vietnameseHint: '「お」を伸ばさないと短くなりすぎる。「こおり」(氷)は「お」を2拍分伸ばす代表的な単語。',
       evaluationPoint: '「お」を十分な長さで伸ばせているか',
       source: PronunciationExerciseSource.builtIn,
     ),

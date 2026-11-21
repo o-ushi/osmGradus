@@ -48,8 +48,9 @@ class QuestionPromptListRow extends StatelessWidget {
                 children: [
                   Icon(
                     done ? Icons.check_box : Icons.check_box_outline_blank,
-                    color:
-                        done ? palette.accentColor : palette.textOnSceneSecondary,
+                    color: done
+                        ? palette.accentColor
+                        : palette.textOnSceneSecondary,
                     size: 22,
                   ),
                   const SizedBox(width: 12),

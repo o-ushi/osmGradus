@@ -112,12 +112,7 @@ class _TranscriptScreenState extends State<TranscriptScreen> {
       for (var i = 0; i < _rowsPerCategory; i++)
         i < rows.length
             ? rows[i]
-            : const _ConversationRow(
-                date: 'ー',
-                jsst: 'ー',
-                hit: 'ー',
-                prep: 'ー',
-              ),
+            : const _ConversationRow(date: 'ー', jsst: 'ー', hit: 'ー', prep: 'ー'),
     ];
   }
 
@@ -578,11 +573,7 @@ class _ExpansionBlock extends StatelessWidget {
       color: kLayerColors[1],
       title: '25マス'.tr(lang),
       squareMarker: true,
-      headers: [
-        '日常'.tr(lang),
-        'ビジネス'.tr(lang),
-        'シチュエーション'.tr(lang),
-      ],
+      headers: ['日常'.tr(lang), 'ビジネス'.tr(lang), 'シチュエーション'.tr(lang)],
       rows: [
         (
           date: _certificateTimestamp(issuedAt, lang),

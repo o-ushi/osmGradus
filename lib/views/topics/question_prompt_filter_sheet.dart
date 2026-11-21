@@ -8,6 +8,7 @@ import '../../models/question_prompt_source.dart';
 import '../../models/topic_category.dart';
 import '../../services/question_prompt_tab_registry.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// 問題文一覧のフィルタシート（入手元／カテゴリ／実施状況の3軸）。
 /// カテゴリ軸は[QuestionPromptDrawSelectSheet]と同じ選択肢（組み込みタブ・
@@ -32,7 +33,7 @@ class QuestionPromptFilterSheet extends StatefulWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet<QuestionPromptFilter>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       // 3軸分のチップで既定の高さ制限に収まらないことがあるため、
       // LayerHelpSheetと同じくisScrollControlled+内側スクロールで広げる。

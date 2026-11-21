@@ -43,6 +43,7 @@ import '../../widgets/vocab_countdown_button.dart';
 import '../../widgets/vocabulary_sheet.dart';
 import 'vocabulary_check_history_screen.dart';
 import 'vocabulary_import_screen.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 part 'layer1_vocab_widgets.dart';
 part 'layer1_vocab_chrome_ai.dart';
@@ -741,7 +742,7 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
   Future<void> _showInputModePicker() async {
     final lang = appSettings.language;
     final picked = await showModalBottomSheet<VocabAnswerMode>(
-      context: context,
+      context: sidePaneContext(context),
       builder: (context) {
         final palette = AppColors.current;
         return SafeArea(
@@ -1320,7 +1321,8 @@ class Layer1VocabScreenState extends State<Layer1VocabScreen>
     if (!mounted) return;
     final lang = appSettings.language;
     await showDialog<void>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (dialogContext) => _VocabResultDialog(
         evaluation: evaluation,
         session: _session,

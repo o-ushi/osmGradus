@@ -167,9 +167,11 @@ class _QuestionPromptTabSettingsScreenState
                 ),
                 SettingsSectionCard(
                   children: [
-                    for (var i = 0;
-                        i < QuestionPromptTabRegistry.builtInTabKeys.length;
-                        i++) ...[
+                    for (
+                      var i = 0;
+                      i < QuestionPromptTabRegistry.builtInTabKeys.length;
+                      i++
+                    ) ...[
                       if (i > 0) const SettingsItemDivider(),
                       _BuiltInTabRow(
                         label: QuestionPromptTabRegistry.builtInTabKeys[i].tr(

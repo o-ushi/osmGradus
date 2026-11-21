@@ -36,7 +36,17 @@ abstract final class ButtonActionHint {
   }) {
     final box = anchorContext.findRenderObject();
     if (box is! RenderBox || !box.attached) return;
-    final anchorRect = box.localToGlobal(Offset.zero) & box.size;
+    final overlayBox = _overlayState?.context.findRenderObject() as RenderBox?;
+    final topLeft = overlayBox == null
+        ? box.localToGlobal(Offset.zero)
+        : box.localToGlobal(Offset.zero, ancestor: overlayBox);
+    final bottomRight = overlayBox == null
+        ? box.localToGlobal(Offset(box.size.width, box.size.height))
+        : box.localToGlobal(
+            Offset(box.size.width, box.size.height),
+            ancestor: overlayBox,
+          );
+    final anchorRect = Rect.fromPoints(topLeft, bottomRight);
     _overlayState?.showHint(
       anchorRect: anchorRect,
       tapText: tapText,

@@ -12,6 +12,8 @@ import 'package:osm_gradus/services/jsst_calibration_preferences.dart';
 import 'package:osm_gradus/services/podcast_library_service.dart';
 import 'package:osm_gradus/services/topic_speech_reader.dart';
 import 'package:osm_gradus/services/tts_settings_service.dart';
+import 'package:osm_gradus/views/launch_screen.dart';
+import 'package:osm_gradus/views/main_shell.dart';
 import 'package:osm_gradus/views/settings/privacy_data_screen.dart';
 
 void main() {
@@ -121,5 +123,27 @@ void main() {
     }
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
+  });
+
+  testWidgets('横向きの iPad ではホームを残したまま、レイヤーを右に出す', (tester) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const OsmGradusApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LaunchScreen), findsOneWidget);
+    final firstTitle = LaunchLayers.items.first.titleKey.tr('vi');
+    await tester.tap(find.text(firstTitle));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(LaunchScreen), findsOneWidget);
+    expect(find.byType(MainShell), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byType(MainShell)).dx,
+      greaterThan(tester.getTopRight(find.byType(LaunchScreen)).dx - 2),
+    );
   });
 }

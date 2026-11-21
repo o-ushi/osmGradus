@@ -87,6 +87,16 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
     Navigator.maybeOf(context)?.maybePop();
   }
 
+  /// この画面の左端から始まったか。横分割の右ペインでも、そのペインの左端で閉じる。
+  bool _fromOwnLeftEdge(Offset globalPosition) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) {
+      return globalPosition.dx <= _leftEdgeLimit(context);
+    }
+    final localDx = box.globalToLocal(globalPosition).dx;
+    return localDx >= 0 && localDx <= _leftEdgeLimit(context);
+  }
+
   /// システム端ジェスチャー領域を含めた「左端スタート」判定の上限。
   double _leftEdgeLimit(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -103,7 +113,7 @@ class _SwipeToCloseWrapperState extends State<SwipeToCloseWrapper> {
     required double horizontalTravel,
     required double verticalTravel,
   }) {
-    final startedFromLeftEdge = downPosition.dx <= _leftEdgeLimit(context);
+    final startedFromLeftEdge = _fromOwnLeftEdge(downPosition);
     if (!startedFromLeftEdge) return false;
     if (verticalTravel > _maxVerticalTravelForRightSwipe) return false;
 

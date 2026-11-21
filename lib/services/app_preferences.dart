@@ -25,8 +25,7 @@ class AppPreferences {
       'osmGradus.buttonHint.persistUntilNextAction';
   static const buttonHintDisplaySecondsKey =
       'osmGradus.buttonHint.displaySeconds';
-  static const layer4PromptRevealModeKey =
-      'osmGradus.layer4.promptRevealMode';
+  static const layer4PromptRevealModeKey = 'osmGradus.layer4.promptRevealMode';
   static const defaultLanguage = 'vi';
 
   /// ダブルタップの機能ヒント（Step 7）の既定表示期間・選択肢（秒）。

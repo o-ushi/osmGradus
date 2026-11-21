@@ -6,6 +6,7 @@ import '../../models/question_prompt_draw_selection.dart';
 import '../../services/question_prompt_tab_registry.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/category_select_row.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// レイヤーⅣランダム等で使う、タブ＋ランダム＋シチュエーションの
 /// フラットなカテゴリ選択シート。
@@ -39,7 +40,7 @@ class QuestionPromptDrawSelectSheet extends StatelessWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet<QuestionPromptDrawSelection>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -53,8 +54,7 @@ class QuestionPromptDrawSelectSheet extends StatelessWidget {
     );
   }
 
-  bool _isSelected(QuestionPromptDrawSelection option) =>
-      selected == option;
+  bool _isSelected(QuestionPromptDrawSelection option) => selected == option;
 
   @override
   Widget build(BuildContext context) {
@@ -73,62 +73,61 @@ class QuestionPromptDrawSelectSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-            Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: palette.cardBorder,
-                  borderRadius: BorderRadius.circular(2),
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: palette.cardBorder,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '問題文のカテゴリ'.tr(lang),
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: palette.textOnCardPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            for (final tabKey in QuestionPromptTabRegistry.builtInTabKeys)
-              CategorySelectRow(
-                label: tabKey.tr(lang),
-                selected: _isSelected(QuestionPromptDrawSelection.tag(tabKey)),
-                onTap: () => Navigator.of(
-                  context,
-                ).pop(QuestionPromptDrawSelection.tag(tabKey)),
-              ),
-            if (showRandom)
-              CategorySelectRow(
-                label: 'ランダム'.tr(lang),
-                selected: _isSelected(
-                  const QuestionPromptDrawSelection.generalRandom(),
+                const SizedBox(height: 16),
+                Text(
+                  '問題文のカテゴリ'.tr(lang),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: palette.textOnCardPrimary,
+                  ),
                 ),
-                onTap: () => Navigator.of(context).pop(
-                  const QuestionPromptDrawSelection.generalRandom(),
-                ),
-              ),
-            if (showSituational) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Divider(
-                  height: 1,
-                  color: palette.cardBorder,
-                ),
-              ),
-              CategorySelectRow(
-                label: 'シチュエーション'.tr(lang),
-                selected: _isSelected(
-                  const QuestionPromptDrawSelection.situational(),
-                ),
-                onTap: () => Navigator.of(context).pop(
-                  const QuestionPromptDrawSelection.situational(),
-                ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                for (final tabKey in QuestionPromptTabRegistry.builtInTabKeys)
+                  CategorySelectRow(
+                    label: tabKey.tr(lang),
+                    selected: _isSelected(
+                      QuestionPromptDrawSelection.tag(tabKey),
+                    ),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pop(QuestionPromptDrawSelection.tag(tabKey)),
+                  ),
+                if (showRandom)
+                  CategorySelectRow(
+                    label: 'ランダム'.tr(lang),
+                    selected: _isSelected(
+                      const QuestionPromptDrawSelection.generalRandom(),
+                    ),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pop(const QuestionPromptDrawSelection.generalRandom()),
+                  ),
+                if (showSituational) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(height: 1, color: palette.cardBorder),
+                  ),
+                  CategorySelectRow(
+                    label: 'シチュエーション'.tr(lang),
+                    selected: _isSelected(
+                      const QuestionPromptDrawSelection.situational(),
+                    ),
+                    onTap: () => Navigator.of(
+                      context,
+                    ).pop(const QuestionPromptDrawSelection.situational()),
+                  ),
+                ],
               ],
             ),
           ),

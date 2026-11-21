@@ -10,6 +10,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/curated_show_card.dart';
 import '../../widgets/podcast_show_tile.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// osmPodの「番組追加」画面の移植。上から順に
 /// 「RSS URLで追加」→「検索（iTunes Search API）」→「おすすめ」の3セクション。
@@ -33,7 +34,7 @@ class AddShowScreen extends StatefulWidget {
     required ValueChanged<PodcastShow> onSelect,
     required ValueChanged<PodcastShow> onDelete,
   }) {
-    return Navigator.of(context).push(
+    return Navigator.of(sidePaneContext(context)).push(
       PageRouteBuilder(
         pageBuilder: (_, _, _) => AddShowScreen(
           registeredShowIds: registeredShowIds,
@@ -91,7 +92,8 @@ class _AddShowScreenState extends State<AddShowScreen> {
 
     final lang = appSettings.language;
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (context) => AlertDialog(
         title: Text('番組を削除'.tr(lang)),
         content: Text(
@@ -201,7 +203,8 @@ class _AddShowScreenState extends State<AddShowScreen> {
 
     final lang = appSettings.language;
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (context) {
         final palette = AppColors.current;
         return AlertDialog(
@@ -325,7 +328,11 @@ class _AddShowScreenState extends State<AddShowScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (var gi = 0; gi < curatedPodcastGroups.length; gi++) ...[
+                    for (
+                      var gi = 0;
+                      gi < curatedPodcastGroups.length;
+                      gi++
+                    ) ...[
                       if (gi > 0) ...[
                         const SizedBox(height: 8),
                         Divider(color: palette.cardBorder, height: 1),

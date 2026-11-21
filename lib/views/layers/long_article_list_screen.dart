@@ -12,6 +12,7 @@ import '../../services/vocabulary_check_storage.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/history_timestamp.dart';
 import '../../widgets/confirm_history_delete_dialog.dart';
+import '../../widgets/ipad_phone_scale.dart';
 import '../../widgets/osm_subpage_scaffold.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
 import 'long_article_flow_screen.dart';
@@ -39,7 +40,8 @@ class LongArticleListScreen extends StatefulWidget {
     BuildContext context, {
     bool selectionMode = false,
   }) {
-    return Navigator.of(context).push<LongArticle?>(
+    // iPad横：長文一覧は左ペインに出す。
+    return Navigator.of(sidePaneContext(context)).push<LongArticle?>(
       MaterialPageRoute<LongArticle?>(
         builder: (_) => LongArticleListScreen(selectionMode: selectionMode),
       ),
@@ -104,12 +106,14 @@ class _LongArticleListScreenState extends State<LongArticleListScreen> {
   /// （[Layer1LongReadingScreen]を`initialArticle`付きで再利用。保存済み
   /// なので終了時に複製・再保存はされない）。
   Future<void> _openArticle(LongArticle article) async {
-    await Navigator.of(context).push(
+    // 読解は学習そのものなので、iPad横では右ペインで開く。
+    final pane = IpadSplitScope.takeRightPane(context) ?? context;
+    await Navigator.of(pane).push(
       MaterialPageRoute<void>(
         builder: (_) => SwipeToCloseWrapper(
           child: Layer1LongReadingScreen(
             initialArticle: article,
-            onBackToModeSelect: () => Navigator.of(context).pop(),
+            onBackToModeSelect: () => Navigator.of(pane).pop(),
           ),
         ),
       ),
@@ -140,9 +144,7 @@ class _LongArticleListScreenState extends State<LongArticleListScreen> {
     if (!mounted) return;
     if (check == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('長文読解_語彙_結果詳細なし'.tr(appSettings.language)),
-        ),
+        SnackBar(content: Text('長文読解_語彙_結果詳細なし'.tr(appSettings.language))),
       );
       return;
     }

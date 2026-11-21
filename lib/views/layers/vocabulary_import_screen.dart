@@ -120,10 +120,7 @@ class _VocabularyImportScreenState extends State<VocabularyImportScreen>
     if (!mounted) return;
 
     if (totalAdded == 0) {
-      setImportResult(
-        message: '新しい語彙はありませんでした（すべて重複しています）。',
-        isError: true,
-      );
+      setImportResult(message: '新しい語彙はありませんでした（すべて重複しています）。', isError: true);
       return;
     }
 

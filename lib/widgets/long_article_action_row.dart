@@ -76,7 +76,8 @@ class LongArticleActionRow extends StatelessWidget {
             onLongPress: onVocabularyLongPress,
             borderless: true,
             hintTapText: enableActionHints ? '単語帳'.tr(lang) : null,
-            hintLongPressText: enableActionHints && onVocabularyLongPress != null
+            hintLongPressText:
+                enableActionHints && onVocabularyLongPress != null
                 ? 'ボタンヒント_単語帳_長押し'.tr(lang)
                 : null,
           ),

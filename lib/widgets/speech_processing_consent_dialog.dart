@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../localization/app_strings.dart';
 import '../services/privacy_consent_service.dart';
+import 'ipad_phone_scale.dart';
 
 /// 録音音声をOSの音声認識機能へ渡す前に、初回だけ明示同意を得る。
 abstract final class SpeechProcessingConsentDialog {
@@ -22,20 +23,16 @@ abstract final class SpeechProcessingConsentDialog {
     if (!context.mounted) return false;
 
     final agreed = await showDialog<bool>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
         title: Text('音声認識同意_タイトル'.tr(languageCode)),
-        content: SingleChildScrollView(
-          child: Text(_bodyKey.tr(languageCode)),
-        ),
+        content: SingleChildScrollView(child: Text(_bodyKey.tr(languageCode))),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text(
-              '同意しない'.tr(languageCode),
-              textAlign: TextAlign.center,
-            ),
+            child: Text('同意しない'.tr(languageCode), textAlign: TextAlign.center),
           ),
           FilledButton(
             onPressed: () => Navigator.of(dialogContext).pop(true),

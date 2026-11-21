@@ -390,4 +390,3 @@ class _LevelSegment extends StatelessWidget {
     );
   }
 }
-

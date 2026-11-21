@@ -67,7 +67,9 @@ class ThinkingMatrixSet {
     assert(columns.isNotEmpty, 'ThinkingMatrixSet.create()のcolumnsは空にできない');
     final now = DateTime.now();
     return ThinkingMatrixSet(
-      id: id ?? 'tm_${now.microsecondsSinceEpoch}_${_idRandom.nextInt(1 << 32)}',
+      id:
+          id ??
+          'tm_${now.microsecondsSinceEpoch}_${_idRandom.nextInt(1 << 32)}',
       title: title,
       category: category,
       columns: columns,
@@ -154,9 +156,7 @@ class ThinkingMatrixSet {
   /// 行・列に属する全マスの中で最も低い[cellStage]。
   int _rowMinStage(int themeIndex) {
     final themeId = themes[themeIndex].id;
-    return columns
-        .map((c) => cellStage(cellFor(themeId, c.id)))
-        .reduce(min);
+    return columns.map((c) => cellStage(cellFor(themeId, c.id))).reduce(min);
   }
 
   int _columnMinStage(String columnId) =>

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// 1つのテキスト項目を読み取り専用で表示する共通の下部シート
 /// （[TextEditSheet]の閲覧専用版。編集は不可、選択・コピーのみできる）。
@@ -19,7 +20,7 @@ class TextViewSheet extends StatelessWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet<void>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

@@ -14,6 +14,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/question_prompt_editor_form.dart';
 import '../../widgets/question_prompt_editor_helpers.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// 問題文一覧で本文を長押しすると開く編集画面（`question-prompt-tabs.md` Step 5）。
 class QuestionPromptEditScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class QuestionPromptEditScreen extends StatefulWidget {
     BuildContext context, {
     required QuestionPrompt prompt,
   }) {
-    return Navigator.of(context).push(
+    return Navigator.of(sidePaneContext(context)).push(
       PageRouteBuilder<void>(
         pageBuilder: (_, _, _) => QuestionPromptEditScreen(prompt: prompt),
         transitionDuration: const Duration(milliseconds: 180),
@@ -168,10 +169,7 @@ class _QuestionPromptEditScreenState extends State<QuestionPromptEditScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              QuestionPromptEditorHeader(
-                titleKey: '問題文を編集',
-                lang: lang,
-              ),
+              QuestionPromptEditorHeader(titleKey: '問題文を編集', lang: lang),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),

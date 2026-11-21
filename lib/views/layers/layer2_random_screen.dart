@@ -134,10 +134,8 @@ class Layer2RandomScreenState extends State<Layer2RandomScreen>
     setState(() => _drawnPrompt = null);
   }
 
-  Future<void> _showAddChoice() => showTopicAddChoiceFlow(
-    context,
-    initialCategory: _drawSelection.category,
-  );
+  Future<void> _showAddChoice() =>
+      showTopicAddChoiceFlow(context, initialCategory: _drawSelection.category);
 
   /// 「＋」長押し：カテゴリ選択・サイコロ・イメージの3ステップを表示する。
   void _showUsageHelp() {

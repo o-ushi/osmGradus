@@ -720,8 +720,7 @@ class _FlashcardFace extends StatelessWidget {
                             child: ConstrainedBox(
                               constraints: BoxConstraints(
                                 maxWidth:
-                                    constraints.maxWidth -
-                                    (compact ? 32 : 48),
+                                    constraints.maxWidth - (compact ? 32 : 48),
                               ),
                               child: Text(
                                 text,

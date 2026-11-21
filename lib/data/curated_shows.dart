@@ -18,10 +18,7 @@ class CuratedPodcastQuery {
 }
 
 class CuratedPodcastGroup {
-  const CuratedPodcastGroup({
-    required this.titleKey,
-    required this.queries,
-  });
+  const CuratedPodcastGroup({required this.titleKey, required this.queries});
 
   final String titleKey;
   final List<CuratedPodcastQuery> queries;

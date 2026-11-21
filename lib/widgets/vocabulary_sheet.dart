@@ -10,6 +10,7 @@ import '../models/vocabulary_level.dart';
 import '../services/jlpt_vocab_bank_service.dart';
 import '../services/vocabulary_service.dart';
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 import 'level_checkbox_row.dart';
 
 part 'vocabulary_sheet_deck.dart';
@@ -32,6 +33,8 @@ class VocabularySheet extends StatefulWidget {
     try {
       await showGeneralDialog<void>(
         context: context,
+        // iPad横は右ペインの中に出す（ホームを覆わない）。
+        useRootNavigator: !IpadSplitScope.isActive(context),
         barrierDismissible: true,
         barrierColor: Colors.black54,
         barrierLabel: '単語帳',

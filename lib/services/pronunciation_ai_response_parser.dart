@@ -2,7 +2,8 @@ import '../models/pronunciation_evaluation.dart';
 import 'ai_evaluation_parse_result.dart';
 import 'ai_evaluation_response_parser.dart';
 
-typedef PronunciationAiParseResult = AiEvaluationParseResult<PronunciationEvaluation>;
+typedef PronunciationAiParseResult =
+    AiEvaluationParseResult<PronunciationEvaluation>;
 
 /// Chrome AIの回答（[PronunciationAiPromptTemplate.evaluationPrompt]への回答）
 /// からJSON部分を抽出し、[PronunciationEvaluation]へ変換する。

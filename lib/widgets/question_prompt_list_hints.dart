@@ -14,10 +14,8 @@ abstract final class QuestionPromptListHints {
     longPressText: '問題文一覧_ヒント_追加_長押し'.tr(_lang),
   );
 
-  static void showFilter(BuildContext context) => ButtonActionHint.show(
-    context,
-    tapText: '問題文一覧_ヒント_フィルタ_タップ'.tr(_lang),
-  );
+  static void showFilter(BuildContext context) =>
+      ButtonActionHint.show(context, tapText: '問題文一覧_ヒント_フィルタ_タップ'.tr(_lang));
 
   static void showRow(BuildContext context) => ButtonActionHint.show(
     context,
@@ -32,13 +30,8 @@ abstract final class QuestionPromptListHints {
   );
 
   static void showOverviewSummary(BuildContext context) =>
-      ButtonActionHint.show(
-        context,
-        tapText: '問題文横断一覧_ヒント_総評_タップ'.tr(_lang),
-      );
+      ButtonActionHint.show(context, tapText: '問題文横断一覧_ヒント_総評_タップ'.tr(_lang));
 
-  static void showOverviewLayer(BuildContext context) => ButtonActionHint.show(
-    context,
-    tapText: '問題文横断一覧_ヒント_レイヤー_タップ'.tr(_lang),
-  );
+  static void showOverviewLayer(BuildContext context) =>
+      ButtonActionHint.show(context, tapText: '問題文横断一覧_ヒント_レイヤー_タップ'.tr(_lang));
 }

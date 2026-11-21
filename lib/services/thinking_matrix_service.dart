@@ -141,7 +141,10 @@ class ThinkingMatrixService {
 
   Future<ThinkingMatrixSet> renameSet(String id, String title) async {
     final set = await _require(id);
-    final updated = set.copyWith(title: title.trim(), updatedAt: DateTime.now());
+    final updated = set.copyWith(
+      title: title.trim(),
+      updatedAt: DateTime.now(),
+    );
     await save(updated);
     return updated;
   }

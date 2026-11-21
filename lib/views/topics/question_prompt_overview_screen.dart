@@ -12,6 +12,7 @@ import '../../services/question_prompt_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/confirm_history_delete_dialog.dart';
 import '../../widgets/history_delete_background.dart';
+import '../../widgets/ipad_phone_scale.dart';
 import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/layer_numeral_badge.dart';
 import '../../widgets/question_prompt_list_hints.dart';
@@ -134,8 +135,12 @@ class _QuestionPromptOverviewScreenState
     return confirmHistoryDelete(context, languageCode: lang);
   }
 
+  /// iPad横では一覧を左に残し、選んだ問題は右ペインに開く。
+  BuildContext get _detailContext =>
+      IpadSplitScope.takeRightPane(context) ?? context;
+
   Future<void> _openSummary(QuestionPrompt prompt) async {
-    await QuestionPromptSummaryScreen.push(context, promptId: prompt.id);
+    await QuestionPromptSummaryScreen.push(_detailContext, promptId: prompt.id);
     await _reload();
   }
 
@@ -159,7 +164,9 @@ class _QuestionPromptOverviewScreenState
   }
 
   void _onGoToSummary(String promptId) {
-    unawaited(QuestionPromptSummaryScreen.push(context, promptId: promptId));
+    unawaited(
+      QuestionPromptSummaryScreen.push(_detailContext, promptId: promptId),
+    );
   }
 
   /// 詳細画面の常設[AppHeader]のいずれかのボタン長押しから。詳細は既に
@@ -180,6 +187,7 @@ class _QuestionPromptOverviewScreenState
 
   Future<void> _pushLayerDetail(int layerIndex, String promptId) async {
     if (!mounted) return;
+    final context = _detailContext;
     switch (layerIndex) {
       case 0:
         await Layer1QuestionPromptDetailScreen.push(
@@ -368,6 +376,10 @@ class _QuestionPromptOverviewScreenState
                                 onLayerTap: (layerIndex) =>
                                     _openLayerDetail(layerIndex, prompt),
                                 onBodyLongPress: () => _editPrompt(prompt),
+                                // iPad横：本文タップで問題を右ペインに開く。
+                                onBodyTap: IpadSplitScope.isActive(context)
+                                    ? () => _openLayerDetail(0, prompt)
+                                    : null,
                               ),
                             );
                           },

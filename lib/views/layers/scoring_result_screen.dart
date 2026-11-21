@@ -12,6 +12,7 @@ import '../../services/jsst_calibration_service.dart';
 import '../../services/jsst_scoring_service.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
 import 'scoring_indicator_glossary_screen.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// レイヤーⅣの採点結果画面。osmWashabeの`ScoringResultView`の忠実な移植
 /// （配色・レイアウトともにosmGradus独自の配色に寄せず、osmWashabeの
@@ -170,7 +171,7 @@ class ScoringResultScreen extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => Navigator.of(context).push(
+                  onPressed: () => Navigator.of(sidePaneContext(context)).push(
                     MaterialPageRoute<void>(
                       builder: (_) => const ScoringIndicatorGlossaryScreen(),
                     ),

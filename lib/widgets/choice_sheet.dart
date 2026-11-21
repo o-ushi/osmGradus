@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// [ChoiceSheet] の 1 行。
 class ChoiceItem<T> {
@@ -22,7 +23,7 @@ class ChoiceItem<T> {
 /// 角の丸い、選ぶためのシートを出す（お題の追加・長文の始め方・バックアップの範囲）。
 Future<T?> showChoiceSheet<T>(BuildContext context, WidgetBuilder builder) =>
     showModalBottomSheet<T>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: AppColors.current.cardFill,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(

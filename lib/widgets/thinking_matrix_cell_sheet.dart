@@ -11,6 +11,7 @@ import '../models/thinking_matrix_set.dart';
 import '../models/thinking_theme.dart';
 import '../services/thinking_matrix_service.dart';
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// 表示用のテーマ名。プリセット（[ThinkingMatrixSet.category]が非null）は
 /// [ThinkingMatrixPresets]のテーマ名がそのままl10nキー（日本語ソース）のため
@@ -61,7 +62,7 @@ class ThinkingMatrixCellSheet extends StatefulWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet<ThinkingMatrixSet>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
@@ -239,10 +240,7 @@ class _ThinkingMatrixCellSheetState extends State<ThinkingMatrixCellSheet> {
             ),
           ),
           const Spacer(),
-          TextButton(
-            onPressed: _completeSpeech60,
-            child: Text('完了'.tr(lang)),
-          ),
+          TextButton(onPressed: _completeSpeech60, child: Text('完了'.tr(lang))),
         ],
       );
     }
