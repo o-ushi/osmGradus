@@ -47,17 +47,11 @@ class VocabularyCheckDetailScreen extends StatelessWidget {
           ],
           if (check.longArticleId != null) ...[
             const SizedBox(height: 12),
-            _LongArticleCard(
-              title: check.longArticleTitle ?? '',
-              lang: lang,
-            ),
+            _LongArticleCard(title: check.longArticleTitle ?? '', lang: lang),
           ],
           if (check.comprehensionQuiz != null) ...[
             const SizedBox(height: 12),
-            _ComprehensionQuizCard(
-              quiz: check.comprehensionQuiz!,
-              lang: lang,
-            ),
+            _ComprehensionQuizCard(quiz: check.comprehensionQuiz!, lang: lang),
           ],
           const SizedBox(height: 12),
           ..._buildBody(palette, lang),
@@ -274,10 +268,9 @@ class _ComprehensionQuizCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                (quiz.isCorrect
-                        ? '長文読解_1秒チェック_正解'
-                        : '長文読解_1秒チェック_不正解')
-                    .tr(lang),
+                (quiz.isCorrect ? '長文読解_1秒チェック_正解' : '長文読解_1秒チェック_不正解').tr(
+                  lang,
+                ),
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,

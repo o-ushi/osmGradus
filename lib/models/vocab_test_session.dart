@@ -76,10 +76,7 @@ class VocabTestSession {
   }
 
   /// STT結果を記録し、状態をcompletedにする。
-  void completeWithResult(
-    String sttResult, {
-    String? answerLanguageCode,
-  }) {
+  void completeWithResult(String sttResult, {String? answerLanguageCode}) {
     current.sttResult = sttResult;
     current.answerLanguageCode = answerLanguageCode;
     current.status = VocabTestQuestionStatus.completed;

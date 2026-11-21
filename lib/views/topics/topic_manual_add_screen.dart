@@ -15,6 +15,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/question_prompt_editor_form.dart';
 import '../../widgets/question_prompt_editor_helpers.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// [TopicImportScreen]（AI取り込み）に対する、キーボードでの手動追加版。
 class TopicManualAddScreen extends StatefulWidget {
@@ -26,7 +27,7 @@ class TopicManualAddScreen extends StatefulWidget {
     BuildContext context, {
     required TopicCategory initialCategory,
   }) {
-    return Navigator.of(context).push(
+    return Navigator.of(sidePaneContext(context)).push(
       PageRouteBuilder<void>(
         pageBuilder: (_, _, _) =>
             TopicManualAddScreen(initialCategory: initialCategory),
@@ -229,10 +230,7 @@ class _TopicManualAddScreenState extends State<TopicManualAddScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              QuestionPromptEditorHeader(
-                titleKey: 'お題を自分で追加',
-                lang: lang,
-              ),
+              QuestionPromptEditorHeader(titleKey: 'お題を自分で追加', lang: lang),
               Expanded(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),

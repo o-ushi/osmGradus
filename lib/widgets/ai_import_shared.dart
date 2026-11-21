@@ -8,6 +8,7 @@ import '../localization/app_strings.dart';
 import '../services/background_audio_keeper.dart';
 import '../services/chrome_ai_round_trip.dart';
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// 「Chrome AIで開く → 回答をコピー → 読み込む → 取り込む」動線、および
 /// レイヤーⅤ／ダッシュボードの「送信 → 貼り付け」往復が共通で使う部品群。
@@ -30,7 +31,7 @@ Future<bool> launchImportUrl(Uri url) async {
 
 /// 語彙／発音課題／お題の取り込み画面が共有するフェード遷移。
 Future<void> pushAiImportScreen(BuildContext context, Widget screen) {
-  return Navigator.of(context).push(
+  return Navigator.of(sidePaneContext(context)).push(
     PageRouteBuilder(
       pageBuilder: (_, _, _) => screen,
       transitionDuration: const Duration(milliseconds: 180),
@@ -48,7 +49,8 @@ Future<bool> confirmAiImportClear({
   required String body,
 }) async {
   final confirmed = await showDialog<bool>(
-    context: context,
+    context: sidePaneContext(context),
+    useRootNavigator: sidePaneUsesRootNavigator(context),
     builder: (dialogContext) => AlertDialog(
       title: Text(title),
       content: Text(body),

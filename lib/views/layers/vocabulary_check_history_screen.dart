@@ -9,6 +9,7 @@ import '../../widgets/history_format_badge.dart';
 import '../../widgets/history_list_card.dart';
 import '../../widgets/history_list_scaffold.dart';
 import 'vocabulary_check_detail_screen.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// レイヤーⅠ単語テストの結果一覧（[PronunciationHistoryScreen]と同じ、
 /// 左スワイプ＋確認ダイアログでの削除パターンを流用する）。
@@ -16,7 +17,7 @@ class VocabularyCheckHistoryScreen extends StatelessWidget {
   const VocabularyCheckHistoryScreen({super.key});
 
   static Future<void> push(BuildContext context) {
-    return Navigator.of(context).push(
+    return Navigator.of(sidePaneContext(context)).push(
       MaterialPageRoute<void>(
         builder: (_) => const VocabularyCheckHistoryScreen(),
       ),

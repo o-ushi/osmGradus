@@ -76,8 +76,7 @@ abstract final class LongArticleVocabTranslationParser {
       final translation = (item['translation'] as String).trim();
       if (translation.isEmpty) return null;
       final reading = (item['reading'] as String? ?? '').trim();
-      final exampleSentence = (item['exampleSentence'] as String? ?? '')
-          .trim();
+      final exampleSentence = (item['exampleSentence'] as String? ?? '').trim();
       return LongArticleVocabTranslationEntry(
         reading: reading,
         translation: translation,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../localization/app_strings.dart';
 import '../models/pronunciation_evaluation.dart';
 import 'pronunciation_evaluation_result_view.dart';
+import 'ipad_phone_scale.dart';
 
 /// レイヤーⅤ（短・長文音読）でChrome AI評価を保存した直後に、その場で
 /// ★評価の概要を見せるプレビューダイアログ。過去分の詳細は結果ボタン
@@ -13,7 +14,8 @@ Future<void> showPronunciationResultPreviewDialog(
   required String languageCode,
 }) {
   return showDialog<void>(
-    context: context,
+    context: sidePaneContext(context),
+    useRootNavigator: sidePaneUsesRootNavigator(context),
     builder: (dialogContext) => AlertDialog(
       title: Text('評価結果プレビュー'.tr(languageCode)),
       content: SingleChildScrollView(

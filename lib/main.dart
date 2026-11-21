@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +21,7 @@ import 'services/tts_settings_service.dart';
 import 'theme/app_theme.dart';
 import 'views/app_root_shell.dart';
 import 'widgets/button_action_hint.dart';
+import 'widgets/ipad_phone_scale.dart';
 
 late final PodcastAudioHandler audioHandler;
 late final TtsSettingsService ttsSettings;
@@ -31,19 +33,35 @@ late final AppSettings appSettings;
 /// iCloud同期（iOSのみ。Androidでは作らず、設定にも出さない）。
 CloudSyncService? cloudSync;
 
-/// レイアウトをiPhone向けの縦画面に統一する。iOS版はiPhone専用ターゲットのため、
-/// iPadではOS標準のiPhone互換表示（縦向き・拡大）になる。
-Future<void> _lockPortraitOrientation() async {
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
+/// iPhone は縦だけ。iPad は横にもして、左右に画面を分けられるようにする。
+Future<void> _applyOrientations() async {
+  if (defaultTargetPlatform != TargetPlatform.iOS) {
+    await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+    return;
+  }
+  var shortest = 0.0;
+  for (final view in WidgetsBinding.instance.platformDispatcher.views) {
+    final ratio = view.devicePixelRatio;
+    if (ratio == 0) continue;
+    final side = (view.physicalSize / ratio).shortestSide;
+    if (side > shortest) shortest = side;
+  }
+  await SystemChrome.setPreferredOrientations(
+    shortest >= ipadShortestSide
+        ? const [
+            DeviceOrientation.portraitUp,
+            DeviceOrientation.landscapeLeft,
+            DeviceOrientation.landscapeRight,
+          ]
+        : const [DeviceOrientation.portraitUp],
+  );
 }
 
 void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-      await _lockPortraitOrientation();
+      await _applyOrientations();
       await AppLogger.instance.loadDeveloperMode();
 
       appPreferences = await AppPreferences.load();
@@ -152,10 +170,14 @@ class _OsmGradusAppState extends State<OsmGradusApp> {
   Widget _wrapWithChrome(BuildContext context, Widget? child) {
     // 既定のステータスバーは白文字（主要画面の背景が濃いscene色のため）。
     // 明るい背景のAppBarを持つ画面は、AppBar側の指定がこれより優先される。
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: ButtonActionHintOverlay(
-        child: _applyMinimumTextScale(context, child),
+    return IpadPhoneScale(
+      child: Builder(
+        builder: (context) => AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle.light,
+          child: ButtonActionHintOverlay(
+            child: _applyMinimumTextScale(context, child),
+          ),
+        ),
       ),
     );
   }

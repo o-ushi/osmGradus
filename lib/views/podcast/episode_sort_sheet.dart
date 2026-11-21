@@ -4,6 +4,7 @@ import '../../localization/app_strings.dart';
 import '../../main.dart' show appSettings;
 import '../../services/podcast_library_service.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// osmPodの `LibrarySortToolbarMenu`（並べ替えパネル）に相当。
 /// 「日付」「名前」の基準選択（チェックマーク）＋昇順トグルという、
@@ -29,7 +30,7 @@ class EpisodeSortSheet extends StatefulWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

@@ -111,8 +111,9 @@ mixin ChromeAiSubmitMixin<T extends StatefulWidget>
       return false;
     }
     showChromeAiMessage(
-      'クリップボードに AI の回答が見つかりませんでした。Chrome で回答を長押し→すべて選択→コピー してから再度お試しください。'
-          .tr(lang),
+      'クリップボードに AI の回答が見つかりませんでした。Chrome で回答を長押し→すべて選択→コピー してから再度お試しください。'.tr(
+        lang,
+      ),
     );
     return true;
   }

@@ -88,10 +88,7 @@ class _PronunciationExerciseImportScreenState
     if (!mounted) return;
 
     if (totalAdded == 0) {
-      setImportResult(
-        message: '新しい発音課題はありませんでした（すべて重複しています）。',
-        isError: true,
-      );
+      setImportResult(message: '新しい発音課題はありませんでした（すべて重複しています）。', isError: true);
       return;
     }
 
@@ -111,9 +108,10 @@ class _PronunciationExerciseImportScreenState
       context: context,
       lang: lang,
       title: 'カテゴリ別の発音課題を削除'.tr(lang),
-      body:
-          '「%@」カテゴリの取り込み済み発音課題を削除します。組み込みの5問は削除されません。この操作は取り消せません。'
-              .trFmt(lang, [category.label]),
+      body: '「%@」カテゴリの取り込み済み発音課題を削除します。組み込みの5問は削除されません。この操作は取り消せません。'.trFmt(
+        lang,
+        [category.label],
+      ),
     );
     if (!confirmed) return;
     await _service.clearImported(category);

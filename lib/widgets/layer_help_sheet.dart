@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../localization/app_strings.dart';
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// [LayerHelpSheet]の1行分。[text]の中の`{{icon}}`という文字列を[icon]の
 /// アイコンに差し替えて描画する（プレースホルダーは1行につき最大1つ）。
@@ -31,7 +32,7 @@ class LayerHelpSheet extends StatelessWidget {
   }) {
     final palette = AppColors.current;
     return showModalBottomSheet(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       // レイヤーⅤ等、行数が多いレイヤーでは既定の高さ制限に収まらないため、
       // isScrollControlled+内側のスクロールで画面いっぱいまで広げられるようにする。
@@ -53,9 +54,7 @@ class LayerHelpSheet extends StatelessWidget {
     return show(
       context,
       title: titleKey.tr(lang),
-      lines: [
-        for (final key in tipKeys) LayerHelpLine(text: key.tr(lang)),
-      ],
+      lines: [for (final key in tipKeys) LayerHelpLine(text: key.tr(lang))],
     );
   }
 
@@ -118,9 +117,7 @@ class _HelpLineView extends StatelessWidget {
   final LayerHelpLine line;
 
   /// 行頭の連番バッジ（1️⃣〜9️⃣、絵文字の合字）を検出する。
-  static final RegExp _leadingNumberBadge = RegExp(
-    '^[0-9]️⃣[ 　]*',
-  );
+  static final RegExp _leadingNumberBadge = RegExp('^[0-9]️⃣[ 　]*');
 
   @override
   Widget build(BuildContext context) {

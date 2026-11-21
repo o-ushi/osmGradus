@@ -458,9 +458,7 @@ class RecordingSttService {
         final onlineReason = (raw?['reason'] as String?)?.trim();
         if (onlineText != null && onlineText.isNotEmpty) {
           final started = _sessionStartedAt ?? DateTime.now();
-          _chunks.add(
-            TranscriptChunk(text: onlineText, recognizedAt: started),
-          );
+          _chunks.add(TranscriptChunk(text: onlineText, recognizedAt: started));
           _setTranscribeProgress(1, phaseAnalyzing);
           _logDebug('オンライン音声認識で完了');
           return;

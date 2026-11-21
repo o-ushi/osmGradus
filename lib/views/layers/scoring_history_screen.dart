@@ -7,6 +7,7 @@ import '../../services/scoring_result_storage.dart';
 import '../../widgets/history_list_scaffold.dart';
 import '../../widgets/scoring_result_card.dart';
 import 'scoring_result_screen.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// レイヤーⅣの採点結果一覧。osmGenkiの日記一覧（`DiaryListPage`）と同じ、
 /// 左スワイプ＋確認ダイアログで1件ずつ削除できるリストとして移植する
@@ -17,7 +18,7 @@ class ScoringHistoryScreen extends StatelessWidget {
   const ScoringHistoryScreen({super.key});
 
   static Future<void> push(BuildContext context) {
-    return Navigator.of(context).push(
+    return Navigator.of(sidePaneContext(context)).push(
       MaterialPageRoute<void>(builder: (_) => const ScoringHistoryScreen()),
     );
   }

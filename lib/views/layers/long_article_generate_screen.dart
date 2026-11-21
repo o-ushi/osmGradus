@@ -145,10 +145,9 @@ class _LongArticleGenerateScreenState extends State<LongArticleGenerateScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  (awaitingPaste
-                          ? '長文読解_文章生成説明_貼付待ち'
-                          : '長文読解_文章生成説明_送信前')
-                      .tr(lang),
+                  (awaitingPaste ? '長文読解_文章生成説明_貼付待ち' : '長文読解_文章生成説明_送信前').tr(
+                    lang,
+                  ),
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -175,9 +174,7 @@ class _LongArticleGenerateScreenState extends State<LongArticleGenerateScreen>
                           : Icons.smart_toy_outlined,
                     ),
                     label: Text(
-                      (awaitingPaste
-                              ? '長文読解_文章生成ボタン_貼付'
-                              : '長文読解_文章生成ボタン_送信')
+                      (awaitingPaste ? '長文読解_文章生成ボタン_貼付' : '長文読解_文章生成ボタン_送信')
                           .tr(lang),
                       style: const TextStyle(
                         fontSize: 16,

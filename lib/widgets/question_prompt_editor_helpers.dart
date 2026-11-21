@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../localization/app_strings.dart';
 import '../services/question_prompt_tab_registry.dart';
+import 'ipad_phone_scale.dart';
 
 /// 問題文編集フォームで「新しいタブ」を追加するときのダイアログ。
 Future<String?> showQuestionPromptNewTagDialog(
@@ -10,7 +11,8 @@ Future<String?> showQuestionPromptNewTagDialog(
 ) {
   final controller = TextEditingController();
   return showDialog<String>(
-    context: context,
+    context: sidePaneContext(context),
+    useRootNavigator: sidePaneUsesRootNavigator(context),
     builder: (dialogContext) => AlertDialog(
       title: Text('新しいタブ'.tr(lang)),
       content: TextField(

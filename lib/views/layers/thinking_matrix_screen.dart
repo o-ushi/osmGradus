@@ -21,6 +21,7 @@ import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/text_edit_sheet.dart';
 import '../../widgets/thinking_matrix_cell_sheet.dart';
 import '../../widgets/category_select_row.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 enum _ThinkingMatrixPhase { list, edit, board }
 
@@ -203,7 +204,7 @@ class _ThinkingMatrixCategorySelectSheet extends StatelessWidget {
   static Future<_ThinkingMatrixCategoryChoice?> show(BuildContext context) {
     final palette = AppColors.current;
     return showModalBottomSheet<_ThinkingMatrixCategoryChoice>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -248,9 +249,9 @@ class _ThinkingMatrixCategorySelectSheet extends StatelessWidget {
               CategorySelectRow(
                 label: category.labelKey().tr(lang),
                 selected: false,
-                onTap: () => Navigator.of(context).pop(
-                  _ThinkingMatrixCategoryChoice.preset(category),
-                ),
+                onTap: () => Navigator.of(
+                  context,
+                ).pop(_ThinkingMatrixCategoryChoice.preset(category)),
               ),
             CategorySelectRow(
               label: 'オリジナル'.tr(lang),
@@ -290,14 +291,8 @@ class _ThinkingMatrixListView extends StatelessWidget {
       context,
       title: '操作方法'.tr(lang),
       lines: [
-        LayerHelpLine(
-          text: '25マス_一覧_使い方_追加'.tr(lang),
-          icon: Icons.add_rounded,
-        ),
-        LayerHelpLine(
-          text: '25マス_一覧_使い方_標準シート'.tr(lang),
-          indent: true,
-        ),
+        LayerHelpLine(text: '25マス_一覧_使い方_追加'.tr(lang), icon: Icons.add_rounded),
+        LayerHelpLine(text: '25マス_一覧_使い方_標準シート'.tr(lang), indent: true),
         LayerHelpLine(text: '25マス_一覧_使い方_詳細'.tr(lang)),
         LayerHelpLine(text: '25マス_一覧_使い方_削除'.tr(lang)),
       ],
@@ -538,8 +533,7 @@ class _ThinkingMatrixEditViewState extends State<_ThinkingMatrixEditView> {
   void _onFieldsChanged() => setState(() {});
 
   bool get _canCreate =>
-      !_creating &&
-      _themeControllers.every((c) => c.text.trim().isNotEmpty);
+      !_creating && _themeControllers.every((c) => c.text.trim().isNotEmpty);
 
   Future<void> _create() async {
     if (!_canCreate) return;
@@ -614,10 +608,7 @@ class _ThinkingMatrixEditViewState extends State<_ThinkingMatrixEditView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildField(
-                        _titleController,
-                        '25マス_タイトル入力例'.tr(lang),
-                      ),
+                      _buildField(_titleController, '25マス_タイトル入力例'.tr(lang)),
                       const SizedBox(height: 20),
                       Text(
                         'テーマ'.tr(lang),
@@ -726,13 +717,14 @@ class _ThinkingMatrixBoardViewState extends State<_ThinkingMatrixBoardView> {
     if (set == null) return;
     final palette = AppColors.current;
     final updated = await showModalBottomSheet<ThinkingMatrixSet>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (_) => _ThinkingMatrixThemeEditSheet(service: _service, set: set),
+      builder: (_) =>
+          _ThinkingMatrixThemeEditSheet(service: _service, set: set),
     );
     if (updated == null || !mounted) return;
     setState(() => _set = updated);
@@ -756,7 +748,10 @@ class _ThinkingMatrixBoardViewState extends State<_ThinkingMatrixBoardView> {
     setState(() => _set = updated);
   }
 
-  Future<void> _openCell(ThinkingTheme theme, ThinkingMatrixColumn column) async {
+  Future<void> _openCell(
+    ThinkingTheme theme,
+    ThinkingMatrixColumn column,
+  ) async {
     final set = _set;
     if (set == null) return;
     final themeIndex = set.themes.indexWhere((t) => t.id == theme.id);
@@ -835,12 +830,11 @@ class _ThinkingMatrixBoardViewState extends State<_ThinkingMatrixBoardView> {
     final lang = appSettings.language;
     final totalCells = _set?.totalCells ?? 25;
     await showDialog<void>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (dialogContext) => AlertDialog(
         title: Text('25マスコンプリート'.tr(lang)),
-        content: Text(
-          '25マス_コンプリート_本文'.trFmt(lang, ['$totalCells']),
-        ),
+        content: Text('25マス_コンプリート_本文'.trFmt(lang, ['$totalCells'])),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
@@ -1091,11 +1085,7 @@ class _ThinkingMatrixGrid extends StatelessWidget {
                               ),
                               Flexible(
                                 child: Text(
-                                  themeDisplayName(
-                                    set,
-                                    set.themes[i],
-                                    lang,
-                                  ),
+                                  themeDisplayName(set, set.themes[i], lang),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -1126,17 +1116,14 @@ class _ThinkingMatrixGrid extends StatelessWidget {
                                     layer == ThinkingMatrixLayer.layer3;
                                 return _ThinkingMatrixCellView(
                                   cell: cell,
-                                  onTap: () =>
-                                      onCellTap(set.themes[i], column),
+                                  onTap: () => onCellTap(set.themes[i], column),
                                   highlighted: bingoKeys.contains(
                                     _cellKey(set.themes[i].id, column.id),
                                   ),
                                   prepComplete:
-                                      isLayer3 &&
-                                      set.isCellPrepComplete(cell),
+                                      isLayer3 && set.isCellPrepComplete(cell),
                                   speechDone:
-                                      isLayer3 &&
-                                      set.isCellSpeech60Done(cell),
+                                      isLayer3 && set.isCellSpeech60Done(cell),
                                 );
                               },
                             ),

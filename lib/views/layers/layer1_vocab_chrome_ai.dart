@@ -1,6 +1,5 @@
 part of 'layer1_vocab_screen.dart';
 
-
 /// 単語テストの結果（★表示・各問の正誤とフィードバック）を表示する簡易
 /// ダイアログ。貼り付け直後のその場確認用（履歴一覧・詳細画面でも同じ結果を見られる）。
 class _VocabResultDialog extends StatelessWidget {

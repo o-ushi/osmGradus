@@ -11,6 +11,7 @@ import '../models/vocabulary_level.dart';
 import '../services/vocabulary_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/japanese_text_chunks.dart';
+import 'ipad_phone_scale.dart';
 
 /// タップした単語（[splitJapaneseIntoChunks]の1チャンク。漢字・カタカナの
 /// 連続はまとめて1語）を、確認ダイアログなしで即座に単語帳へ登録する
@@ -316,7 +317,8 @@ class TappableJapaneseTextState extends State<TappableJapaneseText> {
   Future<void> _confirmDeleteSavedWord(String word) async {
     final lang = appSettings.language;
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: sidePaneContext(context),
+      useRootNavigator: sidePaneUsesRootNavigator(context),
       builder: (dialogContext) => AlertDialog(
         title: Text('削除しますか？'.tr(lang)),
         content: Text('長文読解_単語帳から削除_確認'.trFmt(lang, [word])),

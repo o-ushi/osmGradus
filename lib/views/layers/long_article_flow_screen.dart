@@ -194,9 +194,8 @@ class Layer1LongReadingScreenState extends State<Layer1LongReadingScreen> {
   /// [LongArticleVocabWord]から、現在の表示言語に対応する側を使う。
   List<VocabularyEntry> _vocabTestEntries(LongArticle article) {
     final lang = appSettings.language;
-    final translationLang = LongArticleVocabTranslationPrompt.translationLangFor(
-      lang,
-    );
+    final translationLang =
+        LongArticleVocabTranslationPrompt.translationLangFor(lang);
     final words = article.vocabTestWords;
     return [
       for (var i = 0; i < words.length; i++)

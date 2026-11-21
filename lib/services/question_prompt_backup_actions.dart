@@ -13,10 +13,13 @@ Future<void> exportQuestionPromptsData(BuildContext context) => shareJsonExport(
 );
 
 /// 起動画面「•••」のインポートで「問題のみ」を選んだときの処理。
-Future<void> importQuestionPromptsData(BuildContext context) => pickAndImportJson(
-  context,
-  importContent: (content) async {
-    final result = await QuestionPromptJsonTransfer.importFromContent(content);
-    return (added: result.added, skipped: result.skipped);
-  },
-);
+Future<void> importQuestionPromptsData(BuildContext context) =>
+    pickAndImportJson(
+      context,
+      importContent: (content) async {
+        final result = await QuestionPromptJsonTransfer.importFromContent(
+          content,
+        );
+        return (added: result.added, skipped: result.skipped);
+      },
+    );

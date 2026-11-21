@@ -12,6 +12,7 @@ import '../../services/question_prompt_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/confirm_history_delete_dialog.dart';
 import '../../widgets/history_delete_background.dart';
+import '../../widgets/ipad_phone_scale.dart';
 import '../../widgets/layer_help_sheet.dart';
 import '../../widgets/question_prompt_list_hints.dart';
 import '../../widgets/question_prompt_list_row.dart';
@@ -62,7 +63,8 @@ class QuestionPromptListScreen extends StatefulWidget {
       QuestionPromptListScreenState();
 }
 
-class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
+class QuestionPromptListScreenState extends State<QuestionPromptListScreen>
+    with IpadLeftPaneListMixin {
   final _service = QuestionPromptService();
   List<QuestionPrompt> _all = [];
   bool _loading = true;
@@ -83,10 +85,14 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
     });
   }
 
+  /// 絞り込み・追加・使い方・編集は左に出す。
+  BuildContext get _sheetContext =>
+      leftPaneListContext ?? sidePaneContext(context);
+
   Future<void> _openFilterSheet() async {
     final lang = appSettings.language;
     final picked = await QuestionPromptFilterSheet.show(
-      context,
+      _sheetContext,
       initial: _filter,
       doneAxisLabel: widget.doneAxisLabel.tr(lang),
     );
@@ -101,7 +107,7 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
   /// その他（[TopicCategory.general]）をデフォルトにする（Step 4）。
   Future<void> _addPrompt() async {
     await showTopicAddChoiceFlow(
-      context,
+      _sheetContext,
       initialCategory: TopicCategory.general,
     );
     await reload();
@@ -111,7 +117,7 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
   void _showUsageHelp() {
     final lang = appSettings.language;
     LayerHelpSheet.show(
-      context,
+      _sheetContext,
       title: '操作方法'.tr(lang),
       lines: [
         LayerHelpLine(text: '問題文一覧_使い方_追加'.tr(lang), icon: Icons.add),
@@ -125,7 +131,7 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
 
   /// 行長押し：編集画面（Step 5）。戻ったら一覧を再読み込みする。
   Future<void> _editPrompt(QuestionPrompt prompt) async {
-    await QuestionPromptEditScreen.push(context, prompt: prompt);
+    await QuestionPromptEditScreen.push(_sheetContext, prompt: prompt);
     await reload();
   }
 
@@ -152,7 +158,32 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
   }
 
   @override
+  void dispose() {
+    hideFromLeftPane();
+    super.dispose();
+  }
+
+  /// iPad横では一覧を左ペインに出し、ここ（右ペイン）は選んだ問題を待つ空き地にする。
+  @override
   Widget build(BuildContext context) {
+    final palette = AppColors.current;
+    return buildIntoLeftPane(
+      context,
+      content: _buildList,
+      placeholder: ColoredBox(
+        color: palette.scene,
+        child: Center(
+          child: Icon(
+            Icons.arrow_back_rounded,
+            size: 48,
+            color: palette.textOnSceneSecondary.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
     final lang = appSettings.language;
     final palette = AppColors.current;
     final filtered = _service
@@ -189,7 +220,8 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onDoubleTap: () => QuestionPromptListHints.showFilter(context),
+                    onDoubleTap: () =>
+                        QuestionPromptListHints.showFilter(context),
                     child: IconButton(
                       onPressed: _openFilterSheet,
                       icon: Icon(
@@ -207,7 +239,8 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
                     child: GestureDetector(
                       onTap: _addPrompt,
                       onLongPress: _showUsageHelp,
-                      onDoubleTap: () => QuestionPromptListHints.showAdd(context),
+                      onDoubleTap: () =>
+                          QuestionPromptListHints.showAdd(context),
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: Icon(
@@ -270,8 +303,13 @@ class QuestionPromptListScreenState extends State<QuestionPromptListScreen> {
                               done: widget.isDone(prompt),
                               body: prompt.body,
                               tags: prompt.tags,
-                              onTap: () =>
-                                  widget.onTap(context, prompt, filtered),
+                              // iPad横：選んだ問題は右ペインに開く。
+                              onTap: () => widget.onTap(
+                                IpadSplitScope.takeRightPane(context) ??
+                                    context,
+                                prompt,
+                                filtered,
+                              ),
                               onLongPress: () => _editPrompt(prompt),
                               trailing: widget.trailingBuilder?.call(prompt),
                             ),

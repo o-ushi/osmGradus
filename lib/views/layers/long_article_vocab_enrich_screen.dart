@@ -14,6 +14,7 @@ import '../../widgets/ai_import_shared.dart';
 import '../../widgets/ghost_pill.dart';
 import '../../widgets/google_ai_send_consent_dialog.dart';
 import '../../widgets/swipe_to_close_wrapper.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// 長文読解中に登録した単語（訳語未入力）へ、Chrome AIで読み・訳語・例文を
 /// まとめて付ける画面。osmCogitoの`VocabularyEnrichScreen`（埋め込み表示）を
@@ -187,9 +188,8 @@ class LongArticleVocabEnrichScreenState
       }
       clearChromeAiPendingState();
 
-      final translationLang = LongArticleVocabTranslationPrompt.translationLangFor(
-        lang,
-      );
+      final translationLang =
+          LongArticleVocabTranslationPrompt.translationLangFor(lang);
       var updatedCount = 0;
       final pending = _pendingWords;
       for (var i = 0; i < pending.length && i < entries.length; i++) {
@@ -210,9 +210,7 @@ class LongArticleVocabEnrichScreenState
       _pendingWords = [];
       if (!mounted) return;
       setState(() {
-        _resultMessage = '長文読解_訳を追加しました'.trFmt(lang, [
-          updatedCount.toString(),
-        ]);
+        _resultMessage = '長文読解_訳を追加しました'.trFmt(lang, [updatedCount.toString()]);
       });
       await _loadEntries();
 
@@ -221,7 +219,7 @@ class LongArticleVocabEnrichScreenState
       // 押す手間を省く）。
       await Future.delayed(autoReturnDelay);
       if (!mounted) return;
-      Navigator.of(context).maybePop();
+      Navigator.of(sidePaneContext(context)).maybePop();
     });
   }
 
@@ -290,7 +288,9 @@ class LongArticleVocabEnrichScreenState
                   ),
                 ),
               ),
-              Divider(color: palette.textOnSceneSecondary.withValues(alpha: 0.4)),
+              Divider(
+                color: palette.textOnSceneSecondary.withValues(alpha: 0.4),
+              ),
               for (final entry in _entries)
                 CheckboxListTile(
                   key: ValueKey(entry.id),
@@ -361,8 +361,9 @@ class LongArticleVocabEnrichScreenState
                                 ? Icons.content_paste_go_rounded
                                 : Icons.translate_rounded,
                             tooltip:
-                                (chromeAiAwaitingPaste ? '貼り付け' : '訳と例文を取得')
-                                    .tr(lang),
+                                (chromeAiAwaitingPaste ? '貼り付け' : '訳と例文を取得').tr(
+                                  lang,
+                                ),
                             showBorder: false,
                             horizontalPadding: 0,
                             height: 84,

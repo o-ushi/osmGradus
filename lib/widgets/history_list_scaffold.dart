@@ -36,8 +36,7 @@ class HistoryListScaffold<T> extends StatefulWidget {
   buildItem;
 
   @override
-  State<HistoryListScaffold<T>> createState() =>
-      _HistoryListScaffoldState<T>();
+  State<HistoryListScaffold<T>> createState() => _HistoryListScaffoldState<T>();
 }
 
 class _HistoryListScaffoldState<T> extends State<HistoryListScaffold<T>> {

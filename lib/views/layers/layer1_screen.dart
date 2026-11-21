@@ -18,6 +18,7 @@ import '../../widgets/podcast_toolbar.dart';
 import '../podcast/add_show_screen.dart';
 import '../podcast/episode_row.dart';
 import '../podcast/episode_sort_sheet.dart';
+import '../../widgets/ipad_phone_scale.dart';
 
 /// レイヤーⅠ：日本語を聞いても意味が分からない。
 /// - Podcast（osmPodのライブラリ画面・番組登録・再生・自動再生・ロック画面連携
@@ -35,7 +36,7 @@ class Layer1Screen extends StatefulWidget {
   State<Layer1Screen> createState() => Layer1ScreenState();
 }
 
-class Layer1ScreenState extends State<Layer1Screen> {
+class Layer1ScreenState extends State<Layer1Screen> with IpadLeftPaneListMixin {
   final _library = PodcastLibraryService();
   final _feedService = PodcastFeedService();
 
@@ -76,6 +77,7 @@ class Layer1ScreenState extends State<Layer1Screen> {
 
   @override
   void dispose() {
+    hideFromLeftPane();
     appSettings.removeListener(_onSettingsChanged);
     super.dispose();
   }
@@ -285,8 +287,28 @@ class Layer1ScreenState extends State<Layer1Screen> {
     );
   }
 
+  /// iPad横では番組一覧を左ペインに出し、右には再生中を示すアイコンだけ置く
+  /// （再生操作は下端のミニプレイヤー）。
   @override
   Widget build(BuildContext context) {
+    final palette = AppColors.current;
+    return buildIntoLeftPane(
+      context,
+      content: _buildShowList,
+      placeholder: ColoredBox(
+        color: palette.scene,
+        child: Center(
+          child: Icon(
+            Icons.headphones_rounded,
+            size: 56,
+            color: palette.textOnSceneSecondary.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShowList(BuildContext context) {
     final lang = appSettings.language;
     final palette = AppColors.current;
     return Container(

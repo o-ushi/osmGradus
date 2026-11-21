@@ -35,10 +35,7 @@ class CuratedShowCard extends StatelessWidget {
                 color: palette.subpageBackground,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(
-                Icons.hearing_outlined,
-                color: palette.accentColor,
-              ),
+              child: Icon(Icons.hearing_outlined, color: palette.accentColor),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -79,10 +76,7 @@ class CuratedShowCard extends StatelessWidget {
                 ),
               )
             else
-              Icon(
-                Icons.search,
-                color: palette.textOnCardSecondary,
-              ),
+              Icon(Icons.search, color: palette.textOnCardSecondary),
           ],
         ),
       ),

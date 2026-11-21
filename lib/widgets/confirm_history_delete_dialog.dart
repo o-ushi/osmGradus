@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../localization/app_strings.dart';
+import 'ipad_phone_scale.dart';
 
 /// 履歴一覧の左スワイプ削除で使う確認ダイアログ。
 Future<bool> confirmHistoryDelete(
@@ -8,7 +9,8 @@ Future<bool> confirmHistoryDelete(
   required String languageCode,
 }) async {
   final confirmed = await showDialog<bool>(
-    context: context,
+    context: sidePaneContext(context),
+    useRootNavigator: sidePaneUsesRootNavigator(context),
     builder: (context) => AlertDialog(
       title: Text('削除しますか？'.tr(languageCode)),
       content: Text('一度削除すると元に戻せません。'.tr(languageCode)),

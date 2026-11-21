@@ -52,9 +52,8 @@ abstract final class VocabularyAiPromptTemplate {
 
   static String _questionLine(int number, VocabTestQuestion q) {
     final learnerAnswer = _sanitizeLearnerAnswer(q.sttResult);
-    final answerLang = LearnerAnswerLanguageDetector.fromCode(
-          q.answerLanguageCode,
-        ) ??
+    final answerLang =
+        LearnerAnswerLanguageDetector.fromCode(q.answerLanguageCode) ??
         LearnerAnswerLanguageDetector.detect(q.sttResult);
     final reading = q.entry.reading.trim();
     final expectation = _expectationClause(q.entry, answerLang);

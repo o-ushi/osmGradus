@@ -4,6 +4,7 @@ import '../data/app_languages.dart';
 import '../localization/app_strings.dart';
 import '../main.dart' show appSettings;
 import '../theme/app_colors.dart';
+import 'ipad_phone_scale.dart';
 
 /// 現在の表示言語の国旗だけを見せるボタン。タップすると言語選択シートを開く。
 /// [StartupScreen]など、設定画面を経由せず素早く言語を切り替えたい場面で使う。
@@ -20,7 +21,7 @@ class LanguageFlagButton extends StatelessWidget {
   Future<void> _openPicker(BuildContext context) {
     final palette = AppColors.current;
     return showModalBottomSheet<void>(
-      context: context,
+      context: sidePaneContext(context),
       backgroundColor: palette.cardFill,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

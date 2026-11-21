@@ -30,8 +30,7 @@ class QuestionPromptDrawSelection {
       : TopicCategory.general;
 
   /// [QuestionPromptService.filter]の`tag`引数。general 全件のときは null。
-  String? get filterTag =>
-      kind == QuestionPromptDrawKind.tagged ? tag : null;
+  String? get filterTag => kind == QuestionPromptDrawKind.tagged ? tag : null;
 
   /// カテゴリ行の表示用 l10n キー（日本語ソース）。
   String get labelKey => switch (kind) {

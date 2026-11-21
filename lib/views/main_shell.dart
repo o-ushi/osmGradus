@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../widgets/ipad_phone_scale.dart';
+
 import '../main.dart' show appSettings, audioHandler;
 import '../theme/app_colors.dart';
 import '../widgets/app_header.dart';
@@ -323,7 +325,10 @@ class MainShellState extends State<MainShell> {
                 for (var i = 0; i < _layerScreens.length; i++)
                   TickerMode(
                     enabled: i == _currentIndex,
-                    child: _layerScreens[i],
+                    child: IpadPaneVisibility(
+                      visible: i == _currentIndex,
+                      child: _layerScreens[i],
+                    ),
                   ),
               ],
             );
