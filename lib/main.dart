@@ -50,6 +50,8 @@ Future<void> _applyOrientations() async {
     shortest >= ipadShortestSide
         ? const [
             DeviceOrientation.portraitUp,
+            // iPad のマルチタスク対応には4方向すべてが必要（App Store の検証）。
+            DeviceOrientation.portraitDown,
             DeviceOrientation.landscapeLeft,
             DeviceOrientation.landscapeRight,
           ]
